@@ -1,669 +1,1040 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GridPulse Lagos – Live Power Map</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <style>
-    /* ── Reset & Base ───────────────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GridPulse Lagos – Live Power Map</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0d12;--surface:#13161f;--surface2:#1a1e2b;--surface3:#222636;
+  --border:#272b3a;--border2:#31364a;
+  --text:#e4e8f1;--muted:#5a6380;--muted2:#7a859e;
+  --on:#16a34a;--on-light:#22c55e;--on-glow:rgba(34,197,94,.15);
+  --off:#dc2626;--off-light:#ef4444;--off-glow:rgba(239,68,68,.15);
+  --unk:#3b4563;--unk-light:#64748b;
+  --warn:#d97706;--warn-light:#f59e0b;
+  --accent:#4f46e5;--accent-light:#6366f1;
+  --sidebar-w:330px;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+}
+html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;overflow:hidden}
 
-    :root {
-      --bg:        #0d0f14;
-      --surface:   #161920;
-      --surface2:  #1e2130;
-      --border:    #2a2d3a;
-      --text:      #e2e8f0;
-      --muted:     #64748b;
-      --on:        #22c55e;
-      --on-glow:   rgba(34,197,94,0.18);
-      --off:       #ef4444;
-      --off-glow:  rgba(239,68,68,0.18);
-      --warn:      #f59e0b;
-      --accent:    #6366f1;
-      --sidebar-w: 340px;
-      --font:      -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-    }
+/* ══ ONBOARDING GATE ══════════════════════════════════════════ */
+#gate{
+  position:fixed;inset:0;z-index:9999;
+  background:linear-gradient(135deg,#080a10 0%,#0f1320 50%,#080a10 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:24px;
+}
+.gate-logo{font-size:42px;margin-bottom:8px;filter:drop-shadow(0 0 20px rgba(34,197,94,.5))}
+.gate-title{font-size:26px;font-weight:800;letter-spacing:-0.5px;margin-bottom:4px}
+.gate-title span{color:var(--on-light)}
+.gate-sub{font-size:13px;color:var(--muted2);margin-bottom:32px;text-align:center;max-width:300px;line-height:1.6}
+.gate-prompt{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:16px;font-weight:600}
+.gate-cards{display:flex;flex-direction:column;gap:12px;width:100%;max-width:360px;margin-bottom:28px}
+.gate-card{
+  background:var(--surface);border:2px solid var(--border2);
+  border-radius:16px;padding:18px 20px;
+  display:flex;align-items:center;gap:16px;cursor:pointer;
+  transition:border-color .2s,background .2s,transform .15s;
+  position:relative;
+}
+.gate-card:hover{background:var(--surface2);transform:translateY(-1px)}
+.gate-card.selected-on {border-color:var(--on-light);background:rgba(34,197,94,.07)}
+.gate-card.selected-off{border-color:var(--off-light);background:rgba(239,68,68,.07)}
+.gate-card.selected-unk{border-color:var(--warn-light);background:rgba(245,158,11,.07)}
+.gate-card-icon{font-size:28px;line-height:1;flex-shrink:0;width:44px;text-align:center}
+.gate-card-text h4{font-size:15px;font-weight:700;margin-bottom:2px}
+.gate-card-text p{font-size:12px;color:var(--muted2);line-height:1.4}
+.gate-checkbox{
+  width:22px;height:22px;border-radius:6px;border:2px solid var(--border2);
+  position:absolute;right:16px;top:50%;transform:translateY(-50%);
+  display:flex;align-items:center;justify-content:center;font-size:13px;
+  transition:.15s;
+}
+.gate-card.selected-on  .gate-checkbox{background:var(--on-light);border-color:var(--on-light);color:#000}
+.gate-card.selected-off .gate-checkbox{background:var(--off-light);border-color:var(--off-light);color:#fff}
+.gate-card.selected-unk .gate-checkbox{background:var(--warn-light);border-color:var(--warn-light);color:#000}
+#gate-location-row{width:100%;max-width:360px;margin-bottom:20px;display:none}
+#gate-location-row label{font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px}
+#gate-zone-sel{
+  width:100%;background:var(--surface2);border:1px solid var(--border2);
+  border-radius:10px;padding:10px 14px;color:var(--text);font-size:13px;outline:none;
+}
+#gate-btn{
+  background:var(--on-light);color:#000;font-weight:800;font-size:14px;
+  border:none;border-radius:12px;padding:14px 40px;cursor:pointer;
+  opacity:.35;pointer-events:none;transition:.2s;letter-spacing:.3px;
+}
+#gate-btn.ready{opacity:1;pointer-events:all}
+#gate-btn.ready:hover{background:#1adb6a}
+.gate-note{font-size:11px;color:var(--muted);margin-top:12px;text-align:center}
 
-    html, body { height: 100%; font-family: var(--font); background: var(--bg); color: var(--text); font-size: 14px; }
+/* ══ APP SHELL ════════════════════════════════════════════════ */
+#app{display:flex;height:100vh;overflow:hidden;opacity:0;transition:opacity .5s}
+#app.visible{opacity:1}
 
-    /* ── Layout ─────────────────────────────────────────────── */
-    #app { display: flex; height: 100vh; overflow: hidden; }
+/* ══ SIDEBAR ══════════════════════════════════════════════════ */
+#sidebar{
+  width:var(--sidebar-w);min-width:var(--sidebar-w);
+  background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;z-index:100;
+}
+#sid-header{padding:16px 16px 12px;border-bottom:1px solid var(--border);flex-shrink:0}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.brand-icon{font-size:20px}
+.brand-name{font-size:16px;font-weight:800;letter-spacing:-.3px}
+.brand-name em{color:var(--on-light);font-style:normal}
+/* stat filter pills */
+.stat-row{display:flex;gap:6px;margin-bottom:12px}
+.stat-pill{
+  flex:1;background:var(--surface2);border:1px solid var(--border2);
+  border-radius:10px;padding:9px 8px;text-align:center;cursor:pointer;
+  transition:.15s;user-select:none;
+}
+.stat-pill:hover{border-color:var(--border2);background:var(--surface3)}
+.stat-pill.active-on {border-color:var(--on-light)!important;background:var(--on-glow)!important}
+.stat-pill.active-off{border-color:var(--off-light)!important;background:var(--off-glow)!important}
+.stat-pill.active-unk{border-color:var(--unk-light)!important;background:rgba(59,69,99,.3)!important}
+.stat-pill .val{font-size:20px;font-weight:800;line-height:1.1;display:block}
+.stat-pill .lbl{font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+/* search */
+.srch-wrap{position:relative}
+.srch-wrap input{
+  width:100%;background:var(--surface2);border:1px solid var(--border2);
+  border-radius:10px;padding:9px 12px 9px 34px;color:var(--text);font-size:13px;outline:none;
+  transition:border .15s;
+}
+.srch-wrap input:focus{border-color:var(--accent-light)}
+.srch-wrap::before{content:"🔍";position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px;pointer-events:none}
+/* suggestions dropdown */
+#suggestions{
+  position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:500;
+  background:var(--surface);border:1px solid var(--border2);border-radius:10px;
+  overflow:hidden;display:none;box-shadow:0 8px 32px rgba(0,0,0,.5);max-height:220px;overflow-y:auto;
+}
+#suggestions.open{display:block}
+.sug-item{
+  padding:9px 14px;font-size:12px;cursor:pointer;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:8px;transition:.1s;
+}
+.sug-item:last-child{border-bottom:none}
+.sug-item:hover{background:var(--surface2)}
+.sug-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.sug-dot.on {background:var(--on-light)}
+.sug-dot.off{background:var(--off-light)}
+.sug-dot.unk{background:var(--unk-light)}
+.sug-name{font-weight:600;flex:1}
+.sug-area{font-size:10px;color:var(--muted2)}
+/* zone list */
+#zone-list-wrap{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:5px}
+#zone-list-wrap::-webkit-scrollbar{width:3px}
+#zone-list-wrap::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+.zone-sec-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);padding:8px 4px 2px;font-weight:700}
+.zone-card{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:9px;
+  cursor:pointer;transition:.15s;
+}
+.zone-card:hover{background:var(--surface3);border-color:var(--border2)}
+.zone-card.zc-active{border-color:var(--accent-light)}
+.zdot{width:9px;height:9px;border-radius:50%;flex-shrink:0;transition:.3s}
+.zdot.on {background:var(--on-light);box-shadow:0 0 6px var(--on-light)}
+.zdot.off{background:var(--off-light);box-shadow:0 0 6px var(--off-light)}
+.zdot.unk{background:var(--unk-light)}
+.zinfo{flex:1;min-width:0}
+.zname{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.zmeta{font-size:10px;color:var(--muted2);margin-top:1px}
+.zbadge{font-size:9px;font-weight:700;text-transform:uppercase;padding:3px 7px;border-radius:20px;letter-spacing:.3px;white-space:nowrap}
+.zb-on {background:var(--on-glow);color:var(--on-light);border:1px solid var(--on)}
+.zb-off{background:var(--off-glow);color:var(--off-light);border:1px solid var(--off)}
+.zb-unk{background:rgba(59,69,99,.25);color:var(--unk-light);border:1px solid var(--unk)}
+/* empty state */
+.empty-state{text-align:center;padding:32px 16px;color:var(--muted2);font-size:13px}
+.empty-state .ei{font-size:32px;margin-bottom:8px}
 
-    /* ── Sidebar ────────────────────────────────────────────── */
-    #sidebar {
-      width: var(--sidebar-w);
-      min-width: var(--sidebar-w);
-      background: var(--surface);
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      z-index: 100;
-    }
+/* ══ REPORT PANEL ═════════════════════════════════════════════ */
+#report-panel{border-top:1px solid var(--border);padding:12px 14px;flex-shrink:0;background:var(--surface)}
+#report-panel h3{font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;font-weight:700}
+.rp-row{display:flex;gap:7px;margin-bottom:7px;position:relative}
+.rp-sel{
+  flex:1;background:var(--surface2);border:1px solid var(--border2);
+  border-radius:8px;padding:8px 10px;color:var(--text);font-size:12px;outline:none;
+}
+.rp-btns{display:flex;gap:7px;margin-bottom:8px}
+.btn-rp{flex:1;padding:9px 12px;border:none;border-radius:9px;font-size:12px;font-weight:800;cursor:pointer;transition:.15s}
+.btn-rp:active{transform:scale(.97)}
+.btn-on {background:var(--on-light);color:#000}
+.btn-off{background:var(--off-light);color:#fff}
+.btn-on:hover{filter:brightness(1.1)}
+.btn-off:hover{filter:brightness(1.1)}
+/* telemetry */
+.tele-row{display:flex;gap:7px;margin-bottom:8px}
+.tele-btn{
+  flex:1;padding:7px 9px;border-radius:8px;border:1px solid var(--border2);
+  background:var(--surface2);color:var(--text);font-size:11px;cursor:pointer;
+  display:flex;justify-content:space-between;align-items:center;transition:.15s;
+}
+.tele-val{font-weight:800;font-size:9px;padding:2px 6px;border-radius:4px}
+.tele-btn.tok .tele-val {background:var(--on-glow);color:var(--on-light)}
+.tele-btn.tbad .tele-val{background:var(--off-glow);color:var(--off-light)}
+.tele-btn.tok {border-color:rgba(34,197,94,.3)}
+.tele-btn.tbad{border-color:rgba(239,68,68,.3)}
+/* karma */
+.karma-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:11px;color:var(--muted2);padding-top:8px;border-top:1px solid var(--border);
+}
+.karma-val{font-weight:800;color:var(--warn-light);font-size:13px}
 
-    /* header */
-    #sidebar-header {
-      padding: 18px 20px 14px;
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-    }
+/* ══ MAP ══════════════════════════════════════════════════════ */
+#map-wrap{flex:1;position:relative;overflow:hidden}
+#map{width:100%;height:100%}
 
-    .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
-    .brand-icon { font-size: 22px; line-height: 1; }
-    .brand-name { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
-    .brand-name span { color: var(--on); }
+/* ══ SEARCH RESULT OVERLAY ════════════════════════════════════ */
+#search-result-overlay{
+  position:absolute;top:16px;left:50%;transform:translateX(-50%);
+  z-index:800;display:none;
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:20px;padding:20px 28px;text-align:center;
+  box-shadow:0 16px 48px rgba(0,0,0,.7);min-width:260px;
+}
+#search-result-overlay.visible{display:block}
+.sro-icon{font-size:64px;line-height:1;margin-bottom:10px;display:block}
+.sro-name{font-size:18px;font-weight:800;margin-bottom:4px}
+.sro-status{font-size:13px;font-weight:600;margin-bottom:6px}
+.sro-meta{font-size:11px;color:var(--muted2)}
+.sro-close{
+  position:absolute;top:10px;right:14px;background:none;border:none;
+  color:var(--muted2);cursor:pointer;font-size:18px;line-height:1;
+}
 
-    /* stat pills */
-    .stat-row { display: flex; gap: 8px; margin-bottom: 14px; }
-    .stat-pill {
-      flex: 1; background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 10px; padding: 10px 12px; text-align: center;
-    }
-    .stat-pill .val { font-size: 18px; font-weight: 700; line-height: 1.2; }
-    .stat-pill .lbl { font-size: 10px; color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: .5px; }
+/* ══ USER PROFILES ════════════════════════════════════════════ */
+#profiles-btn{
+  position:absolute;top:16px;right:16px;z-index:700;
+  background:var(--surface);border:1px solid var(--border2);border-radius:12px;
+  padding:8px 14px;font-size:12px;font-weight:700;color:var(--text);
+  cursor:pointer;display:flex;align-items:center;gap:8px;transition:.15s;
+  box-shadow:0 4px 16px rgba(0,0,0,.4);
+}
+#profiles-btn:hover{background:var(--surface2)}
+#profiles-panel{
+  position:absolute;top:56px;right:16px;z-index:700;width:280px;
+  background:var(--surface);border:1px solid var(--border2);border-radius:14px;
+  overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.6);display:none;
+}
+#profiles-panel.open{display:block}
+#profiles-panel h4{
+  padding:12px 16px;font-size:11px;text-transform:uppercase;letter-spacing:.6px;
+  color:var(--muted2);font-weight:700;border-bottom:1px solid var(--border);
+}
+.profile-item{
+  padding:11px 14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+}
+.profile-item:last-child{border-bottom:none}
+.profile-avatar{
+  width:32px;height:32px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:14px;font-weight:800;flex-shrink:0;
+}
+.pa-green{background:rgba(34,197,94,.2);color:var(--on-light);border:1px solid var(--on)}
+.pa-yellow{background:rgba(245,158,11,.2);color:var(--warn-light);border:1px solid var(--warn)}
+.pa-red{background:rgba(239,68,68,.2);color:var(--off-light);border:1px solid var(--off)}
+.profile-info{flex:1;min-width:0}
+.profile-name{font-size:12px;font-weight:700}
+.profile-loc{font-size:10px;color:var(--muted2);margin-top:1px}
+.profile-score-badge{
+  font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap;
+}
+.psb-green {background:rgba(34,197,94,.15);color:var(--on-light);border:1px solid rgba(34,197,94,.3)}
+.psb-yellow{background:rgba(245,158,11,.15);color:var(--warn-light);border:1px solid rgba(245,158,11,.3)}
+.psb-red   {background:rgba(239,68,68,.15);color:var(--off-light);border:1px solid rgba(239,68,68,.3)}
 
-    /* search */
-    .search-wrap { position: relative; }
-    .search-wrap input {
-      width: 100%; background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 10px; padding: 9px 12px 9px 34px;
-      color: var(--text); font-size: 13px; outline: none; transition: border .15s;
-    }
-    .search-wrap input:focus { border-color: var(--accent); }
-    .search-wrap::before {
-      content: "🔍"; position: absolute; left: 10px; top: 50%;
-      transform: translateY(-50%); font-size: 13px; pointer-events: none;
-    }
+/* ══ LIVE FEED ════════════════════════════════════════════════ */
+#feed-panel{
+  position:absolute;bottom:16px;right:16px;width:270px;z-index:600;
+  background:var(--surface);border:1px solid var(--border2);border-radius:14px;
+  overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.5);
+}
+#feed-hdr{
+  padding:9px 14px;font-size:10px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.6px;color:var(--muted2);border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--on-light);box-shadow:0 0 6px var(--on-light);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+#feed-body{max-height:160px;overflow-y:auto}
+#feed-body::-webkit-scrollbar{width:2px}
+#feed-body::-webkit-scrollbar-thumb{background:var(--border2)}
+.feed-item{padding:7px 14px;font-size:11px;color:var(--muted2);border-bottom:1px solid rgba(39,43,58,.6);line-height:1.5}
+.feed-item:last-child{border-bottom:none}
+.feed-on {color:var(--on-light);font-weight:700}
+.feed-off{color:var(--off-light);font-weight:700}
 
-    /* zone list */
-    #zone-list-wrap {
-      flex: 1; overflow-y: auto; padding: 12px 14px;
-      display: flex; flex-direction: column; gap: 7px;
-    }
-    #zone-list-wrap::-webkit-scrollbar { width: 4px; }
-    #zone-list-wrap::-webkit-scrollbar-track { background: transparent; }
-    #zone-list-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+/* ══ TOAST ════════════════════════════════════════════════════ */
+#toast{
+  position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:12px;padding:10px 20px;font-size:13px;font-weight:700;
+  z-index:9998;transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+  white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,.5);
+}
+#toast.show{transform:translateX(-50%) translateY(0)}
+#toast.ton {border-color:var(--on-light);color:var(--on-light)}
+#toast.toff{border-color:var(--off-light);color:var(--off-light)}
 
-    .zone-section-label {
-      font-size: 10px; text-transform: uppercase; letter-spacing: .8px;
-      color: var(--muted); padding: 6px 4px 2px; font-weight: 600;
-    }
-
-    .zone-card {
-      background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 10px; padding: 11px 13px;
-      display: flex; align-items: center; gap: 10px;
-      cursor: pointer; transition: background .15s, border-color .15s;
-    }
-    .zone-card:hover { background: #252a38; border-color: #3a3f52; }
-    .zone-card.active { border-color: var(--accent); }
-
-    .zone-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-    .zone-dot.on  { background: var(--on);  box-shadow: 0 0 6px var(--on); }
-    .zone-dot.off { background: var(--off); box-shadow: 0 0 6px var(--off); }
-    .zone-dot.unk { background: var(--muted); }
-
-    .zone-info { flex: 1; min-width: 0; }
-    .zone-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .zone-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
-
-    .zone-badge {
-      font-size: 10px; font-weight: 700; text-transform: uppercase;
-      padding: 3px 8px; border-radius: 20px; letter-spacing: .4px; white-space: nowrap;
-    }
-    .badge-on  { background: var(--on-glow);  color: var(--on);  border: 1px solid var(--on); }
-    .badge-off { background: var(--off-glow); color: var(--off); border: 1px solid var(--off); }
-    .badge-unk { background: rgba(100,116,139,.15); color: var(--muted); border: 1px solid var(--muted); }
-
-    /* ── Report Panel ───────────────────────────────────────── */
-    #report-panel {
-      border-top: 1px solid var(--border);
-      padding: 14px 16px;
-      flex-shrink: 0;
-      background: var(--surface);
-    }
-    #report-panel h3 { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; }
-
-    .report-row { display: flex; gap: 8px; margin-bottom: 8px; }
-    .report-select {
-      flex: 1; background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 8px; padding: 8px 10px; color: var(--text); font-size: 12px; outline: none;
-    }
-
-    .report-btns { display: flex; gap: 8px; }
-    .btn-report {
-      flex: 1; padding: 9px 12px; border: none; border-radius: 9px;
-      font-size: 12px; font-weight: 700; cursor: pointer; transition: opacity .15s, transform .1s;
-    }
-    .btn-report:active { transform: scale(.97); }
-    .btn-on  { background: var(--on);  color: #000; }
-    .btn-off { background: var(--off); color: #fff; }
-    .btn-on:hover  { opacity: .9; }
-    .btn-off:hover { opacity: .9; }
-
-    /* telemetry toggles */
-    .tele-row { display: flex; gap: 8px; margin-top: 8px; }
-    .tele-btn {
-      flex: 1; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--border);
-      background: var(--surface2); color: var(--text); font-size: 11px; cursor: pointer;
-      display: flex; justify-content: space-between; align-items: center; transition: .15s;
-    }
-    .tele-btn .tele-val { font-weight: 700; font-size: 10px; padding: 2px 6px; border-radius: 4px; }
-    .tele-btn.ok  { border-color: rgba(34,197,94,.3); }
-    .tele-btn.ok .tele-val  { background: var(--on-glow); color: var(--on); }
-    .tele-btn.bad { border-color: rgba(239,68,68,.3); }
-    .tele-btn.bad .tele-val { background: var(--off-glow); color: var(--off); }
-
-    /* karma */
-    .karma-row {
-      display: flex; align-items: center; justify-content: space-between;
-      font-size: 11px; color: var(--muted); margin-top: 8px;
-      padding-top: 8px; border-top: 1px solid var(--border);
-    }
-    .karma-val { font-weight: 700; color: var(--warn); font-size: 13px; }
-
-    /* ── Map ────────────────────────────────────────────────── */
-    #map { flex: 1; height: 100vh; }
-
-    /* ── Toast ──────────────────────────────────────────────── */
-    #toast {
-      position: fixed; top: 18px; left: 50%; transform: translateX(-50%) translateY(-80px);
-      background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 12px; padding: 10px 18px; font-size: 13px; font-weight: 600;
-      z-index: 9999; transition: transform .35s cubic-bezier(.34,1.56,.64,1);
-      white-space: nowrap; box-shadow: 0 8px 32px rgba(0,0,0,.5);
-    }
-    #toast.show { transform: translateX(-50%) translateY(0); }
-    #toast.green { border-color: var(--on); color: var(--on); }
-    #toast.red   { border-color: var(--off); color: var(--off); }
-
-    /* ── Activity Feed ──────────────────────────────────────── */
-    #feed-panel {
-      position: fixed; bottom: 18px; right: 18px;
-      width: 280px; background: var(--surface);
-      border: 1px solid var(--border); border-radius: 14px;
-      overflow: hidden; z-index: 500;
-      box-shadow: 0 8px 32px rgba(0,0,0,.5);
-    }
-    #feed-header {
-      padding: 10px 14px; font-size: 11px; font-weight: 700;
-      text-transform: uppercase; letter-spacing: .6px; color: var(--muted);
-      border-bottom: 1px solid var(--border);
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    #feed-header .live-dot {
-      width: 7px; height: 7px; border-radius: 50%;
-      background: var(--on); box-shadow: 0 0 6px var(--on);
-      animation: pulse 1.5s infinite;
-    }
-    #feed-body { max-height: 180px; overflow-y: auto; padding: 8px 0; }
-    #feed-body::-webkit-scrollbar { width: 3px; }
-    #feed-body::-webkit-scrollbar-thumb { background: var(--border); }
-    .feed-item {
-      padding: 6px 14px; font-size: 11px; color: var(--muted);
-      border-bottom: 1px solid rgba(42,45,58,.5); line-height: 1.5;
-    }
-    .feed-item:last-child { border-bottom: none; }
-    .feed-item span { font-weight: 600; }
-    .feed-item .feed-on  { color: var(--on); }
-    .feed-item .feed-off { color: var(--off); }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: .3; }
-    }
-
-    /* ── Responsive ─────────────────────────────────────────── */
-    @media (max-width: 700px) {
-      #app { flex-direction: column; }
-      #sidebar { width: 100%; min-width: unset; height: auto; max-height: 55vh; }
-      #map { height: 45vh; }
-      #feed-panel { display: none; }
-    }
-  </style>
+/* ══ RESPONSIVE ═══════════════════════════════════════════════ */
+@media(max-width:700px){
+  #app{flex-direction:column}
+  #sidebar{width:100%;min-width:unset;max-height:50vh}
+  #feed-panel{display:none}
+  #profiles-panel{right:8px;width:260px}
+}
+</style>
 </head>
 <body>
+
+<!-- ══ ONBOARDING GATE ══════════════════════════════════════ -->
+<div id="gate">
+  <div class="gate-logo">⚡</div>
+  <div class="gate-title">Grid<span>Pulse</span> Lagos</div>
+  <div class="gate-sub">Real-time power tracking across Lagos.<br>Before you see the map, tell us your light situation right now.</div>
+  <div class="gate-prompt">What's your power status?</div>
+
+  <div class="gate-cards">
+    <div class="gate-card" id="gc-on" onclick="selectGate('on')">
+      <div class="gate-card-icon">💡</div>
+      <div class="gate-card-text">
+        <h4>NEPA Dey!</h4>
+        <p>Power is on at my location right now</p>
+      </div>
+      <div class="gate-checkbox" id="gck-on"></div>
+    </div>
+    <div class="gate-card" id="gc-off" onclick="selectGate('off')">
+      <div class="gate-card-icon">🛑</div>
+      <div class="gate-card-text">
+        <h4>No Light</h4>
+        <p>Currently having a blackout at my location</p>
+      </div>
+      <div class="gate-checkbox" id="gck-off"></div>
+    </div>
+    <div class="gate-card" id="gc-unk" onclick="selectGate('unk')">
+      <div class="gate-card-icon">🏃</div>
+      <div class="gate-card-text">
+        <h4>I'm Not Home</h4>
+        <p>I can't confirm my area's power status right now</p>
+      </div>
+      <div class="gate-checkbox" id="gck-unk"></div>
+    </div>
+  </div>
+
+  <div id="gate-location-row">
+    <label>Which area are you reporting from?</label>
+    <select id="gate-zone-sel"></select>
+  </div>
+
+  <button id="gate-btn" onclick="enterApp()">Open GridPulse →</button>
+  <div class="gate-note">Your report helps thousands of Lagosians plan their day ✊</div>
+</div>
+
+<!-- ══ APP ══════════════════════════════════════════════════ -->
 <div id="app">
-
-  <!-- ── SIDEBAR ── -->
+  <!-- SIDEBAR -->
   <div id="sidebar">
-
-    <div id="sidebar-header">
+    <div id="sid-header">
       <div class="brand">
         <span class="brand-icon">⚡</span>
-        <span class="brand-name">Grid<span>Pulse</span> Lagos</span>
+        <span class="brand-name">Grid<em>Pulse</em> Lagos</span>
       </div>
 
       <div class="stat-row">
-        <div class="stat-pill">
-          <div class="val" id="stat-on" style="color:var(--on)">—</div>
-          <div class="lbl">Areas with light</div>
+        <div class="stat-pill" id="pill-on" onclick="filterByStatus('on')" title="Click to show areas with light">
+          <span class="val" id="stat-on" style="color:var(--on-light)">—</span>
+          <div class="lbl">With Light</div>
         </div>
-        <div class="stat-pill">
-          <div class="val" id="stat-off" style="color:var(--off)">—</div>
-          <div class="lbl">Areas in blackout</div>
+        <div class="stat-pill" id="pill-off" onclick="filterByStatus('off')" title="Click to show blackout areas">
+          <span class="val" id="stat-off" style="color:var(--off-light)">—</span>
+          <div class="lbl">Blackout</div>
         </div>
-        <div class="stat-pill">
-          <div class="val" id="stat-unk" style="color:var(--muted)">—</div>
+        <div class="stat-pill" id="pill-unk" onclick="filterByStatus('unk')" title="Click to show unknown areas">
+          <span class="val" id="stat-unk" style="color:var(--unk-light)">—</span>
           <div class="lbl">Unknown</div>
         </div>
       </div>
 
-      <div class="search-wrap">
-        <input type="text" id="search-input" placeholder="Search area or estate…" />
+      <div class="srch-wrap" style="position:relative">
+        <input type="text" id="search-input" placeholder="Search estate, area, LGA…" autocomplete="off"/>
+        <div id="suggestions"></div>
       </div>
     </div>
 
-    <div id="zone-list-wrap">
-      <!-- populated by JS -->
-    </div>
+    <div id="zone-list-wrap"></div>
 
-    <!-- ── REPORT PANEL ── -->
+    <!-- REPORT PANEL -->
     <div id="report-panel">
       <h3>📣 Report Your Area</h3>
-      <div class="report-row">
-        <select id="sel-zone" class="report-select"></select>
-        <select id="sel-trust" class="report-select" style="max-width:120px">
-          <option value="1.0">Verified (1.0)</option>
-          <option value="0.4">New user (0.4)</option>
-          <option value="0.1">Low trust (0.1)</option>
+      <div class="rp-row">
+        <select id="sel-zone" class="rp-sel"></select>
+        <select id="sel-trust" class="rp-sel" style="max-width:110px">
+          <option value="1.0">Verified ✅</option>
+          <option value="0.4">New User</option>
+          <option value="0.1">Low Trust</option>
         </select>
       </div>
-      <div class="report-btns">
-        <button class="btn-report btn-on"  onclick="submitReport('light_on')">💡 NEPA Dey!</button>
-        <button class="btn-report btn-off" onclick="submitReport('light_off')">🛑 No Light</button>
+      <div class="rp-btns">
+        <button class="btn-rp btn-on"  onclick="submitReport('light_on')">💡 NEPA Dey!</button>
+        <button class="btn-rp btn-off" onclick="submitReport('light_off')">🛑 No Light</button>
       </div>
-
       <div class="tele-row">
-        <button class="tele-btn ok" id="btn-wifi" onclick="toggleTele('wifi')">
+        <button class="tele-btn tok" id="btn-wifi"   onclick="toggleTele('wifi')">
           <span>Wi-Fi</span><span class="tele-val" id="wifi-val">ON</span>
         </button>
-        <button class="tele-btn ok" id="btn-charge" onclick="toggleTele('charge')">
+        <button class="tele-btn tok" id="btn-charge" onclick="toggleTele('charge')">
           <span>Charging</span><span class="tele-val" id="charge-val">ON</span>
         </button>
       </div>
-
-      <div class="karma-row">
-        <span>Your contribution score</span>
+      <div class="karma-bar">
+        <span>Contribution score</span>
         <span class="karma-val" id="karma">140 XP</span>
       </div>
     </div>
   </div>
 
-  <!-- ── MAP ── -->
-  <div id="map"></div>
+  <!-- MAP -->
+  <div id="map-wrap">
+    <div id="map"></div>
+
+    <!-- Search result overlay -->
+    <div id="search-result-overlay">
+      <button class="sro-close" onclick="closeSearchOverlay()">×</button>
+      <span id="sro-icon" class="sro-icon">💡</span>
+      <div id="sro-name" class="sro-name"></div>
+      <div id="sro-status" class="sro-status"></div>
+      <div id="sro-meta" class="sro-meta"></div>
+    </div>
+
+    <!-- User profiles -->
+    <button id="profiles-btn" onclick="toggleProfiles()">👥 Top Reporters</button>
+    <div id="profiles-panel">
+      <h4>Community Reporters</h4>
+      <div id="profiles-list"></div>
+    </div>
+
+    <!-- Live Feed -->
+    <div id="feed-panel">
+      <div id="feed-hdr"><span>Live Reports</span><div class="live-dot"></div></div>
+      <div id="feed-body"><div class="feed-item">Waiting for first report…</div></div>
+    </div>
+  </div>
 </div>
 
-<!-- ── TOAST ── -->
+<!-- TOAST -->
 <div id="toast"></div>
-
-<!-- ── ACTIVITY FEED ── -->
-<div id="feed-panel">
-  <div id="feed-header">
-    <span>Live activity</span>
-    <div class="live-dot"></div>
-  </div>
-  <div id="feed-body">
-    <div class="feed-item">Waiting for first report…</div>
-  </div>
-</div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-// ─────────────────────────────────────────────
-//  DATA MODEL
-// ─────────────────────────────────────────────
+// ════════════════════════════════════════════════
+//  ZONE DATABASE — 80+ Lagos locations
+// ════════════════════════════════════════════════
 const ZONES = [
-  // Island
-  { id:"lekki1",    name:"Lekki Phase 1",    area:"Island",   lat:6.4446, lng:3.4736, radius:1200 },
-  { id:"lekki2",    name:"Lekki Phase 2",    area:"Island",   lat:6.4339, lng:3.5388, radius:1100 },
-  { id:"vi",        name:"Victoria Island",  area:"Island",   lat:6.4281, lng:3.4219, radius:1300 },
-  { id:"ikoyi",     name:"Ikoyi",            area:"Island",   lat:6.4530, lng:3.4317, radius:1000 },
-  { id:"ajah",      name:"Ajah",             area:"Island",   lat:6.4660, lng:3.5620, radius:1400 },
-  { id:"sangotedo", name:"Sangotedo",        area:"Island",   lat:6.4419, lng:3.6020, radius:1100 },
-  // Mainland
-  { id:"yaba",      name:"Yaba",             area:"Mainland", lat:6.5161, lng:3.3858, radius:1100 },
-  { id:"ikeja",     name:"Ikeja Allen Ave",  area:"Mainland", lat:6.5962, lng:3.3551, radius:1300 },
-  { id:"ikejaGRA",  name:"Ikeja GRA",        area:"Mainland", lat:6.5828, lng:3.3516, radius:1000 },
-  { id:"surulere",  name:"Surulere",         area:"Mainland", lat:6.4994, lng:3.3644, radius:1400 },
-  { id:"ojodu",     name:"Ojodu Berger",     area:"Mainland", lat:6.6354, lng:3.3674, radius:1200 },
-  { id:"ogba",      name:"Ogba",             area:"Mainland", lat:6.5979, lng:3.3283, radius:1200 },
-  { id:"agege",     name:"Agege",            area:"Mainland", lat:6.6184, lng:3.3197, radius:1300 },
-  { id:"maryland",  name:"Maryland",         area:"Mainland", lat:6.5663, lng:3.3519, radius:1000 },
-  { id:"gbagada",   name:"Gbagada",          area:"Mainland", lat:6.5498, lng:3.3799, radius:1100 },
-  { id:"kosofe",    name:"Kosofe",           area:"Mainland", lat:6.5748, lng:3.4006, radius:1200 },
+  // ── ETI-OSA / ISLAND EAST ────────────────────
+  {id:"lekki1",    name:"Lekki Phase 1",         lga:"Eti-Osa",      area:"Island",   lat:6.4446,lng:3.4736,r:1100},
+  {id:"lekki2",    name:"Lekki Phase 2",         lga:"Eti-Osa",      area:"Island",   lat:6.4339,lng:3.5388,r:1000},
+  {id:"ikate",     name:"Ikate Elegushi",         lga:"Eti-Osa",      area:"Island",   lat:6.4395,lng:3.4910,r:900},
+  {id:"jakande",   name:"Jakande",                lga:"Eti-Osa",      area:"Island",   lat:6.4351,lng:3.5100,r:900},
+  {id:"osapa",     name:"Osapa London",           lga:"Eti-Osa",      area:"Island",   lat:6.4400,lng:3.5200,r:850},
+  {id:"chevron",   name:"Chevron Drive",          lga:"Eti-Osa",      area:"Island",   lat:6.4380,lng:3.5280,r:900},
+  {id:"agungi",    name:"Agungi",                 lga:"Eti-Osa",      area:"Island",   lat:6.4360,lng:3.5340,r:800},
+  {id:"ikota",     name:"Ikota",                  lga:"Eti-Osa",      area:"Island",   lat:6.4370,lng:3.5450,r:850},
+  {id:"vgc",       name:"VGC (Victoria Garden City)",lga:"Eti-Osa",   area:"Island",   lat:6.4300,lng:3.5570,r:1000},
+  {id:"ajah",      name:"Ajah",                   lga:"Eti-Osa",      area:"Island",   lat:6.4660,lng:3.5620,r:1200},
+  {id:"badore",    name:"Badore",                 lga:"Eti-Osa",      area:"Island",   lat:6.4710,lng:3.5560,r:900},
+  {id:"sangotedo", name:"Sangotedo",              lga:"Eti-Osa",      area:"Island",   lat:6.4419,lng:3.6020,r:1000},
+  {id:"awoyaya",   name:"Awoyaya",                lga:"Ibeju-Lekki",  area:"Island",   lat:6.4440,lng:3.6250,r:1000},
+  {id:"abijo",     name:"Abijo",                  lga:"Ibeju-Lekki",  area:"Island",   lat:6.4500,lng:3.6550,r:1000},
+  {id:"lakowe",    name:"Lakowe",                 lga:"Ibeju-Lekki",  area:"Island",   lat:6.4420,lng:3.6800,r:900},
+  {id:"bogije",    name:"Bogije",                 lga:"Ibeju-Lekki",  area:"Island",   lat:6.4500,lng:3.7100,r:1000},
+  {id:"ibeju",     name:"Ibeju-Lekki Town",       lga:"Ibeju-Lekki",  area:"Island",   lat:6.4480,lng:3.7800,r:1100},
+  // ── ETI-OSA / ISLAND WEST ───────────────────
+  {id:"vi",        name:"Victoria Island (VI)",   lga:"Eti-Osa",      area:"Island",   lat:6.4281,lng:3.4219,r:1100},
+  {id:"ikoyi",     name:"Ikoyi",                  lga:"Eti-Osa",      area:"Island",   lat:6.4530,lng:3.4317,r:1000},
+  {id:"banana",    name:"Banana Island",          lga:"Eti-Osa",      area:"Island",   lat:6.4598,lng:3.4411,r:600},
+  {id:"parkview",  name:"Parkview Estate",        lga:"Eti-Osa",      area:"Island",   lat:6.4560,lng:3.4380,r:600},
+  {id:"oniru",     name:"Oniru Estate",           lga:"Eti-Osa",      area:"Island",   lat:6.4320,lng:3.4350,r:700},
+  // ── LAGOS ISLAND / LAGOS MAINLAND LGA ────────
+  {id:"lagosisland",name:"Lagos Island",          lga:"Lagos Island", area:"Island",   lat:6.4541,lng:3.3947,r:1000},
+  {id:"apapa",     name:"Apapa",                  lga:"Apapa",        area:"Mainland", lat:6.4474,lng:3.3607,r:1200},
+  {id:"tincan",    name:"Tin Can Island",         lga:"Apapa",        area:"Mainland", lat:6.4350,lng:3.3400,r:900},
+  // ── IKEJA AXIS ───────────────────────────────
+  {id:"ikeja",     name:"Ikeja (Allen Ave)",      lga:"Ikeja",        area:"Mainland", lat:6.5962,lng:3.3551,r:1100},
+  {id:"ikejaGRA",  name:"Ikeja GRA",              lga:"Ikeja",        area:"Mainland", lat:6.5828,lng:3.3516,r:900},
+  {id:"oregun",    name:"Oregun",                 lga:"Ikeja",        area:"Mainland", lat:6.5760,lng:3.3600,r:900},
+  {id:"opebi",     name:"Opebi",                  lga:"Ikeja",        area:"Mainland", lat:6.5820,lng:3.3640,r:800},
+  {id:"toyin",     name:"Toyin Street Area",      lga:"Ikeja",        area:"Mainland", lat:6.5871,lng:3.3598,r:700},
+  {id:"airport",   name:"Airport Road",           lga:"Ikeja",        area:"Mainland", lat:6.5774,lng:3.3227,r:1000},
+  // ── MAINLAND NORTH ───────────────────────────
+  {id:"ojodu",     name:"Ojodu Berger",           lga:"Ojodu",        area:"Mainland", lat:6.6354,lng:3.3674,r:1100},
+  {id:"ogba",      name:"Ogba",                   lga:"Ifako-Ijaiye", area:"Mainland", lat:6.5979,lng:3.3283,r:1100},
+  {id:"agege",     name:"Agege",                  lga:"Agege",        area:"Mainland", lat:6.6184,lng:3.3197,r:1200},
+  {id:"ifako",     name:"Ifako-Ijaye",            lga:"Ifako-Ijaiye", area:"Mainland", lat:6.6340,lng:3.3100,r:1100},
+  {id:"ojota",     name:"Ojota",                  lga:"Kosofe",       area:"Mainland", lat:6.5748,lng:3.3906,r:900},
+  {id:"kosofe",    name:"Kosofe",                 lga:"Kosofe",       area:"Mainland", lat:6.5640,lng:3.4100,r:1000},
+  {id:"ketu",      name:"Ketu",                   lga:"Kosofe",       area:"Mainland", lat:6.5820,lng:3.3930,r:900},
+  {id:"mile12",    name:"Mile 12",                lga:"Kosofe",       area:"Mainland", lat:6.6000,lng:3.3840,r:1000},
+  {id:"oworo",     name:"Oworo",                  lga:"Kosofe",       area:"Mainland", lat:6.5500,lng:3.3960,r:900},
+  // ── MAINLAND CENTRAL ─────────────────────────
+  {id:"yaba",      name:"Yaba",                   lga:"Lagos Mainland",area:"Mainland",lat:6.5161,lng:3.3858,r:1000},
+  {id:"ebute",     name:"Ebute-Metta",            lga:"Lagos Mainland",area:"Mainland",lat:6.4870,lng:3.3670,r:1000},
+  {id:"gbagada",   name:"Gbagada",                lga:"Lagos Mainland",area:"Mainland",lat:6.5498,lng:3.3799,r:1000},
+  {id:"maryland",  name:"Maryland",               lga:"Ikeja",        area:"Mainland", lat:6.5663,lng:3.3519,r:900},
+  {id:"palmgrove", name:"Palm Grove",             lga:"Mushin",       area:"Mainland", lat:6.5360,lng:3.3580,r:900},
+  {id:"fadeyi",    name:"Fadeyi",                 lga:"Mushin",       area:"Mainland", lat:6.5240,lng:3.3700,r:800},
+  // ── SURULERE / MUSHIN ─────────────────────────
+  {id:"surulere",  name:"Surulere",               lga:"Surulere",     area:"Mainland", lat:6.4994,lng:3.3644,r:1200},
+  {id:"mushin",    name:"Mushin",                 lga:"Mushin",       area:"Mainland", lat:6.5218,lng:3.3520,r:1100},
+  {id:"oshodi",    name:"Oshodi",                 lga:"Oshodi-Isolo", area:"Mainland", lat:6.5558,lng:3.3286,r:1100},
+  {id:"isolo",     name:"Isolo",                  lga:"Oshodi-Isolo", area:"Mainland", lat:6.5120,lng:3.3200,r:1100},
+  {id:"ejigbo",    name:"Ejigbo",                 lga:"Oshodi-Isolo", area:"Mainland", lat:6.5054,lng:3.2980,r:1000},
+  // ── ALIMOSHO (LARGEST LGA) ───────────────────
+  {id:"alimosho",  name:"Alimosho",               lga:"Alimosho",     area:"Mainland", lat:6.5880,lng:3.2700,r:1400},
+  {id:"ikotun",    name:"Ikotun",                 lga:"Alimosho",     area:"Mainland", lat:6.5110,lng:3.2710,r:1200},
+  {id:"idimu",     name:"Idimu",                  lga:"Alimosho",     area:"Mainland", lat:6.5290,lng:3.2810,r:1100},
+  {id:"isheri",    name:"Isheri-Oshun",           lga:"Alimosho",     area:"Mainland", lat:6.5740,lng:3.2800,r:1000},
+  {id:"shasha",    name:"Shasha",                 lga:"Alimosho",     area:"Mainland", lat:6.5600,lng:3.2900,r:1000},
+  {id:"dopemu",    name:"Dopemu",                 lga:"Agege",        area:"Mainland", lat:6.6000,lng:3.2960,r:1000},
+  // ── AMUWO-ODOFIN ─────────────────────────────
+  {id:"amuwo",     name:"Amuwo Odofin",           lga:"Amuwo-Odofin", area:"Mainland", lat:6.4680,lng:3.3060,r:1300},
+  {id:"festac",    name:"FESTAC Town",            lga:"Amuwo-Odofin", area:"Mainland", lat:6.4670,lng:3.2930,r:1100},
+  {id:"volks",     name:"Volkswagen / Mile 2",    lga:"Amuwo-Odofin", area:"Mainland", lat:6.4780,lng:3.3200,r:1000},
+  // ── IKORODU ──────────────────────────────────
+  {id:"ikorodu",   name:"Ikorodu Town",           lga:"Ikorodu",      area:"Mainland", lat:6.6190,lng:3.5052,r:1800},
+  {id:"benson",    name:"Benson / Odogunyan",     lga:"Ikorodu",      area:"Mainland", lat:6.6050,lng:3.5100,r:1200},
+  {id:"majidun",   name:"Majidun",                lga:"Ikorodu",      area:"Mainland", lat:6.6380,lng:3.5280,r:1100},
+  // ── EPE ──────────────────────────────────────
+  {id:"epe",       name:"Epe",                    lga:"Epe",          area:"Outskirts",lat:6.5872,lng:3.9800,r:2000},
+  // ── BADAGRY ──────────────────────────────────
+  {id:"badagry",   name:"Badagry",                lga:"Badagry",      area:"Outskirts",lat:6.4140,lng:2.8820,r:2000},
+  // ── IBEJU-LEKKI (FTZ belt) ───────────────────
+  {id:"dangote",   name:"Dangote Refinery Belt",  lga:"Ibeju-Lekki",  area:"Island",   lat:6.4100,lng:3.8500,r:2000},
 ];
 
-// State per zone
+// ════════════════════════════════════════════════
+//  COMMUNITY REPORTER PROFILES
+// ════════════════════════════════════════════════
+const REPORTERS = [
+  {name:"Chidi_Lekki",  loc:"Lekki Phase 1",  score:96, tier:"green",  reports:412, avatar:"C"},
+  {name:"AbiodunVI",    loc:"Victoria Island", score:88, tier:"green",  reports:310, avatar:"A"},
+  {name:"SurulereKing", loc:"Surulere",        score:74, tier:"yellow", reports:198, avatar:"S"},
+  {name:"IkejaGuy01",   loc:"Ikeja Allen",     score:71, tier:"yellow", reports:155, avatar:"I"},
+  {name:"VGC_Reporter", loc:"VGC",             score:61, tier:"yellow", reports:89,  avatar:"V"},
+  {name:"MarylandBoy",  loc:"Maryland",        score:38, tier:"red",    reports:42,  avatar:"M"},
+];
+
+// ════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════
 const state = {};
-ZONES.forEach(z => {
-  state[z.id] = { netScore: 0, status: "unk", circle: null, lastReport: null };
-});
+ZONES.forEach(z => { state[z.id] = {netScore:0, status:"unk", circle:null, lastReport:null} });
+const THRESHOLD = 2.0;
+let karma = 140;
+let telemetry = {wifi:true, charge:true};
+let activeFilter = null;
+let toastTimer;
+let gateChoice = null;
 
-const THRESHOLD   = 2.0;   // votes needed to flip status
-const DECAY_MS    = 30 * 60 * 1000; // reports decay after 30 min (simulated as 30s for demo)
-const DECAY_DEMO  = 30 * 1000;      // 30 seconds demo decay
+// ════════════════════════════════════════════════
+//  ONBOARDING GATE
+// ════════════════════════════════════════════════
+function populateGateSelect(){
+  const sel = document.getElementById('gate-zone-sel');
+  const sorted = [...ZONES].sort((a,b)=>a.name.localeCompare(b.name));
+  sorted.forEach(z=>{
+    const o = document.createElement('option');
+    o.value = z.id; o.textContent = z.name + ' ('+z.lga+')';
+    sel.appendChild(o);
+  });
+}
+populateGateSelect();
 
-let karma     = 140;
-let telemetry = { wifi: true, charge: true };
+function selectGate(choice){
+  gateChoice = choice;
+  ['on','off','unk'].forEach(c=>{
+    const card = document.getElementById('gc-'+c);
+    const chk  = document.getElementById('gck-'+c);
+    card.className = 'gate-card' + (c===choice ? (' selected-'+c) : '');
+    chk.textContent = (c===choice ? '✓' : '');
+  });
+  const loc = document.getElementById('gate-location-row');
+  loc.style.display = (choice !== 'unk') ? 'block' : 'none';
+  const btn = document.getElementById('gate-btn');
+  btn.classList.add('ready');
+}
 
-// ─────────────────────────────────────────────
+function enterApp(){
+  if(!gateChoice) return;
+  // Submit gate report
+  const zoneId = document.getElementById('gate-zone-sel').value;
+  if(gateChoice !== 'unk' && zoneId){
+    const vote = gateChoice === 'on' ? 'light_on' : 'light_off';
+    processVote(zoneId, vote, 0.8, true);
+  }
+  document.getElementById('gate').style.display = 'none';
+  const app = document.getElementById('app');
+  app.classList.add('visible');
+  setTimeout(()=>map.invalidateSize(), 300);
+}
+
+// ════════════════════════════════════════════════
 //  MAP SETUP
-// ─────────────────────────────────────────────
-const map = L.map('map').setView([6.5, 3.42], 12);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-  attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-  maxZoom: 18
+// ════════════════════════════════════════════════
+const map = L.map('map').setView([6.52,3.40],12);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+  attribution:'&copy; OpenStreetMap contributors &copy; CARTO', maxZoom:18
 }).addTo(map);
 
-// Colors
 const C = {
-  on:  { stroke:'#22c55e', fill:'#22c55e' },
-  off: { stroke:'#ef4444', fill:'#ef4444' },
-  unk: { stroke:'#64748b', fill:'#475569' },
+  on: {stroke:'#22c55e',fill:'#22c55e'},
+  off:{stroke:'#ef4444',fill:'#ef4444'},
+  unk:{stroke:'#475569',fill:'#334155'},
 };
 
-function zoneColor(status) { return C[status] || C.unk; }
-
-// Draw circles
-ZONES.forEach(z => {
-  const c = zoneColor('unk');
-  const circle = L.circle([z.lat, z.lng], {
-    color: c.stroke, fillColor: c.fill, fillOpacity: 0.25, radius: z.radius, weight: 1.5
+ZONES.forEach(z=>{
+  const c = C.unk;
+  const circle = L.circle([z.lat,z.lng],{
+    color:c.stroke, fillColor:c.fill, fillOpacity:0.22, radius:z.r, weight:1.5
   }).addTo(map);
-  circle.bindPopup(''); // filled on click
-  circle.on('click', () => openZonePopup(z.id));
+  circle.bindPopup('');
+  circle.on('click',()=>showZoneOnMap(z.id));
   state[z.id].circle = circle;
 });
 
-function openZonePopup(id) {
-  const z    = ZONES.find(x => x.id === id);
-  const s    = state[id];
-  const lbl  = s.status === 'on' ? '💡 Light is ON'
-             : s.status === 'off' ? '🛑 No light (blackout)'
-             : '❓ Status unknown';
-  const ago  = s.lastReport ? timeAgo(s.lastReport) : 'No reports yet';
-  const html = `
-    <div style="font-family:-apple-system,sans-serif;font-size:13px;min-width:160px;">
-      <b style="font-size:14px;">${z.name}</b><br>
-      <span style="display:block;margin:6px 0 4px;">${lbl}</span>
-      <span style="color:#888;font-size:11px;">Score: ${s.netScore.toFixed(1)} &nbsp;·&nbsp; ${ago}</span>
-    </div>`;
-  state[id].circle.setPopupContent(html).openPopup();
+function showZoneOnMap(id){
+  const z = ZONES.find(x=>x.id===id);
+  const s = state[id];
+  const lbl = s.status==='on' ? '💡 Light is ON' : s.status==='off' ? '🛑 Blackout' : '❓ Status unknown';
+  const ago = s.lastReport ? timeAgo(s.lastReport) : 'No reports yet';
+  state[id].circle.setPopupContent(`
+    <div style="font-family:-apple-system,sans-serif;font-size:13px;min-width:170px">
+      <b style="font-size:14px">${z.name}</b>
+      <span style="display:block;font-size:11px;color:#888;margin:2px 0 6px">${z.lga} LGA</span>
+      <span style="display:block;margin-bottom:4px">${lbl}</span>
+      <span style="color:#888;font-size:11px">Score: ${s.netScore.toFixed(1)} · ${ago}</span>
+    </div>`).openPopup();
 }
 
-// ─────────────────────────────────────────────
+// ════════════════════════════════════════════════
 //  SIDEBAR ZONE LIST
-// ─────────────────────────────────────────────
-function buildSidebar(filter = '') {
-  const wrap    = document.getElementById('zone-list-wrap');
-  const selZone = document.getElementById('sel-zone');
+// ════════════════════════════════════════════════
+function buildSidebar(filter='', statusFilter=null){
+  const wrap  = document.getElementById('zone-list-wrap');
+  const selZ  = document.getElementById('sel-zone');
+  const gSel  = document.getElementById('gate-zone-sel');
   wrap.innerHTML = '';
-  selZone.innerHTML = '';
+  selZ.innerHTML = '';
 
-  const areas = [...new Set(ZONES.map(z => z.area))];
-  areas.forEach(area => {
-    const filtered = ZONES.filter(z =>
-      z.area === area && z.name.toLowerCase().includes(filter.toLowerCase())
+  const areas = [...new Set(ZONES.map(z=>z.area))];
+  let totalShown = 0;
+
+  areas.forEach(area=>{
+    let filtered = ZONES.filter(z=>
+      z.area===area &&
+      (z.name.toLowerCase().includes(filter.toLowerCase()) ||
+       z.lga.toLowerCase().includes(filter.toLowerCase()))
     );
-    if (!filtered.length) return;
+    if(statusFilter) filtered = filtered.filter(z=>state[z.id].status===statusFilter);
+    if(!filtered.length) return;
 
     const lbl = document.createElement('div');
-    lbl.className = 'zone-section-label';
-    lbl.textContent = area;
+    lbl.className='zone-sec-lbl';
+    lbl.textContent=area;
     wrap.appendChild(lbl);
 
-    filtered.forEach(z => {
-      const s      = state[z.id];
-      const dotCls = s.status === 'on' ? 'on' : s.status === 'off' ? 'off' : 'unk';
-      const badge  = s.status === 'on'  ? '<span class="zone-badge badge-on">Light On</span>'
-                   : s.status === 'off' ? '<span class="zone-badge badge-off">Blackout</span>'
-                   :                      '<span class="zone-badge badge-unk">Unknown</span>';
-      const ago    = s.lastReport ? timeAgo(s.lastReport) : 'No reports';
-
+    filtered.forEach(z=>{
+      const s    = state[z.id];
+      const dot  = s.status==='on'?'on':s.status==='off'?'off':'unk';
+      const badge= s.status==='on' ?'<span class="zbadge zb-on">Light On</span>'
+                 : s.status==='off'?'<span class="zbadge zb-off">Blackout</span>'
+                 :                   '<span class="zbadge zb-unk">Unknown</span>';
+      const ago  = s.lastReport ? timeAgo(s.lastReport) : 'No reports';
       const card = document.createElement('div');
-      card.className = 'zone-card';
-      card.id = `card-${z.id}`;
-      card.innerHTML = `
-        <div class="zone-dot ${dotCls}"></div>
-        <div class="zone-info">
-          <div class="zone-name">${z.name}</div>
-          <div class="zone-meta">${ago}</div>
-        </div>
-        ${badge}`;
-      card.addEventListener('click', () => {
-        map.setView([z.lat, z.lng], 14);
-        openZonePopup(z.id);
+      card.className='zone-card'; card.id='zcard-'+z.id;
+      card.innerHTML=`
+        <div class="zdot ${dot}"></div>
+        <div class="zinfo">
+          <div class="zname">${z.name}</div>
+          <div class="zmeta">${z.lga} · ${ago}</div>
+        </div>${badge}`;
+      card.addEventListener('click',()=>{
+        map.setView([z.lat,z.lng],14);
+        showZoneOnMap(z.id);
+        showSearchOverlay(z.id);
       });
       wrap.appendChild(card);
+      totalShown++;
 
-      // Populate report dropdown
-      const opt = document.createElement('option');
-      opt.value = z.id;
-      opt.textContent = z.name;
-      selZone.appendChild(opt);
+      const opt=document.createElement('option');
+      opt.value=z.id; opt.textContent=z.name;
+      selZ.appendChild(opt);
     });
   });
+
+  if(totalShown===0){
+    wrap.innerHTML=`<div class="empty-state"><div class="ei">🔍</div>No areas match "<strong>${filter}</strong>"<br><small>Try a different name or LGA</small></div>`;
+  }
 }
 
-// Update a single card without rebuilding list
-function refreshCard(id) {
-  const card = document.getElementById(`card-${id}`);
-  if (!card) return buildSidebar(document.getElementById('search-input').value);
-  const s      = state[id];
-  const dotCls = s.status === 'on' ? 'on' : s.status === 'off' ? 'off' : 'unk';
-  const badge  = s.status === 'on'  ? '<span class="zone-badge badge-on">Light On</span>'
-               : s.status === 'off' ? '<span class="zone-badge badge-off">Blackout</span>'
-               :                      '<span class="zone-badge badge-unk">Unknown</span>';
-  const ago    = s.lastReport ? timeAgo(s.lastReport) : 'No reports';
-  card.querySelector('.zone-dot').className = `zone-dot ${dotCls}`;
-  card.querySelector('.zone-meta').textContent = ago;
-  card.querySelector('.zone-badge') && (card.querySelector('.zone-badge').outerHTML = badge);
-  card.innerHTML = `
-    <div class="zone-dot ${dotCls}"></div>
-    <div class="zone-info">
-      <div class="zone-name">${ZONES.find(z=>z.id===id).name}</div>
-      <div class="zone-meta">${ago}</div>
-    </div>
-    ${badge}`;
-  card.addEventListener('click', () => {
-    const z = ZONES.find(x => x.id === id);
-    map.setView([z.lat, z.lng], 14);
-    openZonePopup(id);
+function refreshCard(id){
+  const card=document.getElementById('zcard-'+id);
+  if(!card) return;
+  const z=ZONES.find(x=>x.id===id);
+  const s=state[id];
+  const dot=s.status==='on'?'on':s.status==='off'?'off':'unk';
+  const badge=s.status==='on'?'<span class="zbadge zb-on">Light On</span>'
+    :s.status==='off'?'<span class="zbadge zb-off">Blackout</span>'
+    :'<span class="zbadge zb-unk">Unknown</span>';
+  const ago=s.lastReport?timeAgo(s.lastReport):'No reports';
+  card.innerHTML=`
+    <div class="zdot ${dot}"></div>
+    <div class="zinfo">
+      <div class="zname">${z.name}</div>
+      <div class="zmeta">${z.lga} · ${ago}</div>
+    </div>${badge}`;
+  card.addEventListener('click',()=>{
+    map.setView([z.lat,z.lng],14);
+    showZoneOnMap(z.id);
+    showSearchOverlay(z.id);
   });
 }
 
-// ─────────────────────────────────────────────
-//  STATS BAR
-// ─────────────────────────────────────────────
-function updateStats() {
-  const vals = Object.values(state);
-  document.getElementById('stat-on').textContent  = vals.filter(s=>s.status==='on').length;
-  document.getElementById('stat-off').textContent = vals.filter(s=>s.status==='off').length;
-  document.getElementById('stat-unk').textContent = vals.filter(s=>s.status==='unk').length;
-}
-
-// ─────────────────────────────────────────────
-//  CONSENSUS ENGINE
-// ─────────────────────────────────────────────
-function processVote(zoneId, vote, weight) {
-  const s    = state[zoneId];
-  const zone = ZONES.find(z => z.id === zoneId);
-  const dir  = vote === 'light_on' ? 1 : -1;
-  s.netScore += dir * weight;
-  s.lastReport = new Date();
-
-  const prev = s.status;
-  if      (s.netScore >=  THRESHOLD) s.status = 'on';
-  else if (s.netScore <= -THRESHOLD) s.status = 'off';
-  else                               s.status = 'unk';
-
-  // Update map circle
-  const c = zoneColor(s.status);
-  s.circle.setStyle({ color: c.stroke, fillColor: c.fill, fillOpacity: 0.3 });
-
-  refreshCard(zoneId);
-  updateStats();
-
-  if (s.status !== prev && s.status !== 'unk') {
-    const msg = s.status === 'on'
-      ? `💡 Light confirmed in ${zone.name}!`
-      : `🛑 Blackout reported in ${zone.name}`;
-    showToast(msg, s.status === 'on' ? 'green' : 'red');
-  }
-
-  addFeedItem(zone.name, vote, weight);
-}
-
-// Schedule score decay (in demo: 30 s)
-function scheduleDecay(zoneId, weight, direction) {
-  setTimeout(() => {
-    const s = state[zoneId];
-    s.netScore -= direction * weight * 0.5; // partial decay
-    const prev = s.status;
-    if      (s.netScore >=  THRESHOLD) s.status = 'on';
-    else if (s.netScore <= -THRESHOLD) s.status = 'off';
-    else                               s.status = 'unk';
-    if (s.status !== prev) {
-      const c = zoneColor(s.status);
-      s.circle.setStyle({ color: c.stroke, fillColor: c.fill, fillOpacity: 0.25 });
-      refreshCard(zoneId);
-      updateStats();
-    }
-  }, DECAY_DEMO);
-}
-
-// ─────────────────────────────────────────────
-//  REPORT BUTTON
-// ─────────────────────────────────────────────
-function submitReport(vote) {
-  const zoneId = document.getElementById('sel-zone').value;
-  const weight = parseFloat(document.getElementById('sel-trust').value);
-  if (!zoneId) return;
-
-  processVote(zoneId, vote, weight);
-  scheduleDecay(zoneId, weight, vote === 'light_on' ? 1 : -1);
-
-  karma += weight >= 0.9 ? 10 : weight >= 0.3 ? 5 : 2;
-  document.getElementById('karma').textContent = `${Math.round(karma)} XP`;
-}
-
-// ─────────────────────────────────────────────
-//  TELEMETRY TOGGLES
-// ─────────────────────────────────────────────
-function toggleTele(type) {
-  telemetry[type] = !telemetry[type];
-  const btn = document.getElementById(`btn-${type}`);
-  const val = document.getElementById(`${type}-val`);
-
-  if (type === 'wifi') {
-    val.textContent = telemetry.wifi ? 'ON' : 'OFF';
-    btn.className = `tele-btn ${telemetry.wifi ? 'ok' : 'bad'}`;
+// ════════════════════════════════════════════════
+//  STAT FILTER PILLS
+// ════════════════════════════════════════════════
+function filterByStatus(status){
+  if(activeFilter===status){
+    activeFilter=null;
+    ['on','off','unk'].forEach(s=>document.getElementById('pill-'+s).className='stat-pill');
+    buildSidebar('');
+    document.getElementById('search-input').value='';
   } else {
-    val.textContent = telemetry.charge ? 'ON' : 'OFF';
-    btn.className = `tele-btn ${telemetry.charge ? 'ok' : 'bad'}`;
-  }
-
-  // If both signals drop → implicit blackout signal
-  if (!telemetry.wifi && !telemetry.charge) {
-    const zoneId = document.getElementById('sel-zone').value;
-    if (zoneId) {
-      addFeedItem(ZONES.find(z=>z.id===zoneId).name, 'light_off', 0.4, true);
-      processVote(zoneId, 'light_off', 0.4);
-    }
+    activeFilter=status;
+    ['on','off','unk'].forEach(s=>{
+      const p=document.getElementById('pill-'+s);
+      p.className='stat-pill'+(s===status?' active-'+s:'');
+    });
+    buildSidebar('',status);
+    document.getElementById('search-input').value='';
   }
 }
 
-// ─────────────────────────────────────────────
-//  TOAST
-// ─────────────────────────────────────────────
-let toastTimer;
-function showToast(msg, cls = '') {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = `show ${cls}`;
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.className = '', 4000);
+// ════════════════════════════════════════════════
+//  STATS BAR
+// ════════════════════════════════════════════════
+function updateStats(){
+  const vals=Object.values(state);
+  document.getElementById('stat-on').textContent =vals.filter(s=>s.status==='on').length;
+  document.getElementById('stat-off').textContent=vals.filter(s=>s.status==='off').length;
+  document.getElementById('stat-unk').textContent=vals.filter(s=>s.status==='unk').length;
 }
 
-// ─────────────────────────────────────────────
-//  ACTIVITY FEED
-// ─────────────────────────────────────────────
-function addFeedItem(zoneName, vote, weight, implicit = false) {
-  const body  = document.getElementById('feed-body');
-  const isOn  = vote === 'light_on';
-  const icon  = isOn ? '💡' : '🛑';
-  const cls   = isOn ? 'feed-on' : 'feed-off';
-  const label = isOn ? 'Light On' : 'Blackout';
-  const src   = implicit ? 'auto-detect' : `w=${weight}`;
-  const now   = new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+// ════════════════════════════════════════════════
+//  LIVE SEARCH + SUGGESTIONS
+// ════════════════════════════════════════════════
+const searchInput  = document.getElementById('search-input');
+const suggestionsEl= document.getElementById('suggestions');
 
-  // Remove placeholder
-  const placeholder = body.querySelector('.feed-item:only-child');
-  if (placeholder && placeholder.textContent.includes('Waiting')) placeholder.remove();
+searchInput.addEventListener('input', e=>{
+  const q=e.target.value.trim();
+  activeFilter=null;
+  ['on','off','unk'].forEach(s=>document.getElementById('pill-'+s).className='stat-pill');
 
-  const item = document.createElement('div');
-  item.className = 'feed-item';
-  item.innerHTML = `${icon} <span class="${cls}">${label}</span> · ${zoneName} <span style="color:#888;float:right">${now}</span>`;
-  body.insertBefore(item, body.firstChild);
+  if(q.length===0){
+    suggestionsEl.className=''; suggestionsEl.innerHTML='';
+    buildSidebar(''); closeSearchOverlay(); return;
+  }
 
-  // keep max 20 items
-  while (body.children.length > 20) body.removeChild(body.lastChild);
-}
+  // Build suggestions
+  const matches=ZONES.filter(z=>
+    z.name.toLowerCase().includes(q.toLowerCase())||
+    z.lga.toLowerCase().includes(q.toLowerCase())||
+    z.area.toLowerCase().includes(q.toLowerCase())
+  ).slice(0,8);
 
-// ─────────────────────────────────────────────
-//  SEARCH
-// ─────────────────────────────────────────────
-document.getElementById('search-input').addEventListener('input', e => {
-  buildSidebar(e.target.value);
+  if(matches.length){
+    suggestionsEl.innerHTML='';
+    matches.forEach(z=>{
+      const s=state[z.id];
+      const dot=s.status==='on'?'on':s.status==='off'?'off':'unk';
+      const statusTxt=s.status==='on'?'Light On':s.status==='off'?'Blackout':'Unknown';
+      const item=document.createElement('div');
+      item.className='sug-item';
+      item.innerHTML=`<div class="sug-dot ${dot}"></div><span class="sug-name">${z.name}</span><span class="sug-area">${z.lga} · ${statusTxt}</span>`;
+      item.addEventListener('click',()=>{
+        searchInput.value=z.name;
+        suggestionsEl.className=''; suggestionsEl.innerHTML='';
+        map.setView([z.lat,z.lng],14);
+        showZoneOnMap(z.id);
+        showSearchOverlay(z.id);
+        buildSidebar(z.name);
+      });
+      suggestionsEl.appendChild(item);
+    });
+    suggestionsEl.className='open';
+  } else {
+    suggestionsEl.innerHTML='<div class="sug-item" style="color:var(--muted2);cursor:default">No results for "'+q+'"</div>';
+    suggestionsEl.className='open';
+  }
+  buildSidebar(q);
 });
 
-// ─────────────────────────────────────────────
+// Close suggestions on outside click
+document.addEventListener('click', e=>{
+  if(!e.target.closest('.srch-wrap')) suggestionsEl.className='';
+});
+
+// ════════════════════════════════════════════════
+//  SEARCH RESULT OVERLAY (bulb / cut cable)
+// ════════════════════════════════════════════════
+function showSearchOverlay(id){
+  const z=ZONES.find(x=>x.id===id);
+  const s=state[id];
+  const el=document.getElementById('search-result-overlay');
+  const icon=document.getElementById('sro-icon');
+  const name=document.getElementById('sro-name');
+  const stat=document.getElementById('sro-status');
+  const meta=document.getElementById('sro-meta');
+
+  name.textContent=z.name;
+
+  if(s.status==='on'){
+    // Glowing bulb SVG inline
+    icon.innerHTML=`<svg width="70" height="70" viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="35" cy="35" r="34" fill="rgba(34,197,94,0.12)" stroke="#22c55e" stroke-width="1.5"/>
+      <text x="35" y="47" text-anchor="middle" font-size="32">💡</text>
+    </svg>`;
+    stat.innerHTML='<span style="color:#22c55e;font-size:22px;font-weight:900">UpNEPA! 🎉</span>';
+    stat.style.color='#22c55e';
+    meta.textContent='Light is currently ON in '+z.name;
+    el.style.borderColor='#22c55e';
+  } else if(s.status==='off'){
+    // Cut cable + mosquito illustration
+    icon.innerHTML=`<svg width="70" height="70" viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="35" cy="35" r="34" fill="rgba(239,68,68,0.12)" stroke="#ef4444" stroke-width="1.5"/>
+      <text x="35" y="30" text-anchor="middle" font-size="18">🔌✂️</text>
+      <text x="35" y="52" text-anchor="middle" font-size="18">🦟</text>
+    </svg>`;
+    stat.innerHTML='<span style="color:#ef4444;font-size:20px;font-weight:900">No Light 😩</span>';
+    meta.textContent='Blackout reported in '+z.name+'. Generator on!';
+    el.style.borderColor='#ef4444';
+  } else {
+    icon.innerHTML=`<svg width="70" height="70" viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="35" cy="35" r="34" fill="rgba(100,116,139,0.12)" stroke="#64748b" stroke-width="1.5"/>
+      <text x="35" y="47" text-anchor="middle" font-size="32">❓</text>
+    </svg>`;
+    stat.innerHTML='<span style="color:#64748b;font-size:18px;font-weight:700">Status Unknown</span>';
+    meta.textContent='No recent reports for '+z.name+'. Be the first to report!';
+    el.style.borderColor='#334155';
+  }
+  el.className='visible';
+}
+
+function closeSearchOverlay(){
+  document.getElementById('search-result-overlay').className='';
+}
+
+// ════════════════════════════════════════════════
+//  REPORT SUBMISSION
+// ════════════════════════════════════════════════
+function submitReport(vote){
+  const zoneId=document.getElementById('sel-zone').value;
+  const weight=parseFloat(document.getElementById('sel-trust').value);
+  if(!zoneId) return;
+  processVote(zoneId, vote, weight);
+  karma += weight>=0.9?10:weight>=0.3?5:2;
+  document.getElementById('karma').textContent=Math.round(karma)+' XP';
+}
+
+// ════════════════════════════════════════════════
+//  CORE CONSENSUS ENGINE
+// ════════════════════════════════════════════════
+function processVote(zoneId, vote, weight, silent=false){
+  const s=state[zoneId];
+  const z=ZONES.find(x=>x.id===zoneId);
+  const dir=vote==='light_on'?1:-1;
+  s.netScore += dir*weight;
+  s.lastReport=new Date();
+
+  const prev=s.status;
+  if     (s.netScore>= THRESHOLD) s.status='on';
+  else if(s.netScore<=-THRESHOLD) s.status='off';
+  else                             s.status='unk';
+
+  const c=C[s.status];
+  s.circle.setStyle({color:c.stroke,fillColor:c.fill,fillOpacity:0.28});
+
+  if(!silent){
+    refreshCard(zoneId);
+    updateStats();
+    if(s.status!==prev && s.status!=='unk'){
+      const msg=s.status==='on'?`💡 Light confirmed in ${z.name}!`:`🛑 Blackout in ${z.name}`;
+      showToast(msg, s.status==='on'?'ton':'toff');
+    }
+    addFeedItem(z.name, vote, weight);
+    // Update overlay if visible for this zone
+    const overlay=document.getElementById('search-result-overlay');
+    if(overlay.classList.contains('visible') && document.getElementById('sro-name').textContent===z.name){
+      showSearchOverlay(zoneId);
+    }
+  } else {
+    refreshCard(zoneId);
+    updateStats();
+  }
+
+  // Schedule partial decay after 30s (demo; prod = 30min)
+  setTimeout(()=>{
+    s.netScore -= dir*weight*0.5;
+    const pr=s.status;
+    if     (s.netScore>= THRESHOLD) s.status='on';
+    else if(s.netScore<=-THRESHOLD) s.status='off';
+    else                             s.status='unk';
+    if(s.status!==pr){
+      const c2=C[s.status];
+      s.circle.setStyle({color:c2.stroke,fillColor:c2.fill,fillOpacity:0.22});
+      refreshCard(zoneId); updateStats();
+    }
+  }, 30000);
+}
+
+// ════════════════════════════════════════════════
+//  TELEMETRY TOGGLES
+// ════════════════════════════════════════════════
+function toggleTele(type){
+  telemetry[type]=!telemetry[type];
+  const btn=document.getElementById('btn-'+type);
+  const val=document.getElementById(type+'-val');
+  if(type==='wifi'){
+    val.textContent=telemetry.wifi?'ON':'OFF';
+    btn.className='tele-btn '+(telemetry.wifi?'tok':'tbad');
+  } else {
+    val.textContent=telemetry.charge?'ON':'OFF';
+    btn.className='tele-btn '+(telemetry.charge?'tok':'tbad');
+  }
+  if(!telemetry.wifi && !telemetry.charge){
+    const zId=document.getElementById('sel-zone').value;
+    if(zId) processVote(zId,'light_off',0.35);
+  }
+}
+
+// ════════════════════════════════════════════════
+//  USER PROFILES PANEL
+// ════════════════════════════════════════════════
+function buildProfiles(){
+  const list=document.getElementById('profiles-list');
+  list.innerHTML='';
+  REPORTERS.forEach(r=>{
+    const tierClass={green:'pa-green',yellow:'pa-yellow',red:'pa-red'}[r.tier];
+    const badgeClass={green:'psb-green',yellow:'psb-yellow',red:'psb-red'}[r.tier];
+    const tierLabel={green:'🟢 High Accuracy',yellow:'🟡 Good',red:'🔴 Low'}[r.tier];
+    const item=document.createElement('div');
+    item.className='profile-item';
+    item.innerHTML=`
+      <div class="profile-avatar ${tierClass}">${r.avatar}</div>
+      <div class="profile-info">
+        <div class="profile-name">${r.name}</div>
+        <div class="profile-loc">📍 ${r.loc} · ${r.reports} reports</div>
+      </div>
+      <span class="profile-score-badge ${badgeClass}">${r.score}%</span>`;
+    list.appendChild(item);
+  });
+}
+buildProfiles();
+
+function toggleProfiles(){
+  const p=document.getElementById('profiles-panel');
+  p.className=p.classList.contains('open')?'':'open';
+}
+
+// Close profiles on outside click
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#profiles-panel') && !e.target.closest('#profiles-btn')){
+    document.getElementById('profiles-panel').className='';
+  }
+});
+
+// ════════════════════════════════════════════════
+//  ACTIVITY FEED
+// ════════════════════════════════════════════════
+function addFeedItem(zoneName, vote, weight){
+  const body=document.getElementById('feed-body');
+  const isOn=vote==='light_on';
+  const now=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  const placeholder=body.querySelector('.feed-item');
+  if(placeholder && placeholder.textContent.includes('Waiting')) placeholder.remove();
+  const item=document.createElement('div');
+  item.className='feed-item';
+  item.innerHTML=`${isOn?'💡':'🛑'} <span class="${isOn?'feed-on':'feed-off'}">${isOn?'Light On':'Blackout'}</span> · ${zoneName} <span style="color:var(--muted);float:right">${now}</span>`;
+  body.insertBefore(item, body.firstChild);
+  while(body.children.length>20) body.removeChild(body.lastChild);
+}
+
+// ════════════════════════════════════════════════
+//  TOAST
+// ════════════════════════════════════════════════
+function showToast(msg, cls=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='show '+cls;
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.className='',4500);
+}
+
+// ════════════════════════════════════════════════
 //  HELPERS
-// ─────────────────────────────────────────────
-function timeAgo(date) {
-  const s = Math.floor((Date.now() - date) / 1000);
-  if (s < 60)  return `${s}s ago`;
-  if (s < 3600) return `${Math.floor(s/60)}m ago`;
-  return `${Math.floor(s/3600)}h ago`;
+// ════════════════════════════════════════════════
+function timeAgo(date){
+  const s=Math.floor((Date.now()-date)/1000);
+  if(s<60) return s+'s ago';
+  if(s<3600) return Math.floor(s/60)+'m ago';
+  return Math.floor(s/3600)+'h ago';
 }
 
-// Refresh "X min ago" labels every 30s
-setInterval(() => {
-  ZONES.forEach(z => {
-    if (state[z.id].lastReport) refreshCard(z.id);
-  });
-}, 30000);
+setInterval(()=>{ ZONES.forEach(z=>{ if(state[z.id].lastReport) refreshCard(z.id) }); }, 30000);
 
-// ─────────────────────────────────────────────
-//  SEED a few demo reports on load
-// ─────────────────────────────────────────────
-function seedDemo() {
-  const seeds = [
-    { id:'lekki1',   vote:'light_on',  w:1.0 },
-    { id:'vi',       vote:'light_on',  w:1.0 },
-    { id:'ikoyi',    vote:'light_on',  w:1.0 },
-    { id:'lekki1',   vote:'light_on',  w:1.0 },
-    { id:'vi',       vote:'light_on',  w:1.0 },
-    { id:'surulere', vote:'light_off', w:1.0 },
-    { id:'yaba',     vote:'light_off', w:1.0 },
-    { id:'surulere', vote:'light_off', w:1.0 },
-    { id:'yaba',     vote:'light_off', w:1.0 },
-    { id:'agege',    vote:'light_off', w:0.4 },
-    { id:'ikeja',    vote:'light_on',  w:1.0 },
-    { id:'ikeja',    vote:'light_on',  w:1.0 },
-    { id:'gbagada',  vote:'light_on',  w:0.4 },
+// ════════════════════════════════════════════════
+//  SEED DEMO DATA
+// ════════════════════════════════════════════════
+function seedDemo(){
+  const seeds=[
+    {id:'lekki1',vote:'light_on',w:1.0},{id:'lekki1',vote:'light_on',w:1.0},
+    {id:'vi',vote:'light_on',w:1.0},{id:'vi',vote:'light_on',w:1.0},
+    {id:'ikoyi',vote:'light_on',w:1.0},{id:'ikoyi',vote:'light_on',w:1.0},
+    {id:'banana',vote:'light_on',w:1.0},{id:'banana',vote:'light_on',w:1.0},
+    {id:'vgc',vote:'light_on',w:1.0},{id:'vgc',vote:'light_on',w:1.0},
+    {id:'osapa',vote:'light_on',w:1.0},{id:'osapa',vote:'light_on',w:1.0},
+    {id:'chevron',vote:'light_on',w:1.0},{id:'chevron',vote:'light_on',w:1.0},
+    {id:'ikeja',vote:'light_on',w:1.0},{id:'ikeja',vote:'light_on',w:1.0},
+    {id:'ikejaGRA',vote:'light_on',w:1.0},{id:'ikejaGRA',vote:'light_on',w:1.0},
+    {id:'parkview',vote:'light_on',w:1.0},{id:'parkview',vote:'light_on',w:1.0},
+    {id:'festac',vote:'light_on',w:0.4},{id:'festac',vote:'light_on',w:1.0},
+    {id:'surulere',vote:'light_off',w:1.0},{id:'surulere',vote:'light_off',w:1.0},
+    {id:'yaba',vote:'light_off',w:1.0},{id:'yaba',vote:'light_off',w:1.0},
+    {id:'agege',vote:'light_off',w:1.0},{id:'agege',vote:'light_off',w:1.0},
+    {id:'mushin',vote:'light_off',w:1.0},{id:'mushin',vote:'light_off',w:1.0},
+    {id:'oshodi',vote:'light_off',w:1.0},{id:'oshodi',vote:'light_off',w:1.0},
+    {id:'isolo',vote:'light_off',w:1.0},{id:'isolo',vote:'light_off',w:1.0},
+    {id:'mile12',vote:'light_off',w:0.4},{id:'mile12',vote:'light_off',w:1.0},
+    {id:'gbagada',vote:'light_on',w:0.4},{id:'gbagada',vote:'light_on',w:0.4},
+    {id:'ajah',vote:'light_on',w:0.4},
+    {id:'ikotun',vote:'light_off',w:0.4},
+    {id:'amuwo',vote:'light_on',w:0.4},
   ];
-  seeds.forEach((s, i) => {
-    setTimeout(() => processVote(s.id, s.vote, s.w), i * 60);
-  });
+  seeds.forEach((s,i)=>setTimeout(()=>processVote(s.id,s.vote,s.w,true), i*50));
+  setTimeout(()=>{buildSidebar();updateStats();},seeds.length*50+100);
 }
 
-// ─────────────────────────────────────────────
+// ════════════════════════════════════════════════
 //  INIT
-// ─────────────────────────────────────────────
+// ════════════════════════════════════════════════
 buildSidebar();
 updateStats();
 seedDemo();
