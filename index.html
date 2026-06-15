@@ -8,746 +8,945 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0b0d12;--surface:#13161f;--surface2:#1a1e2b;--surface3:#222636;
-  --border:#272b3a;--border2:#31364a;
-  --text:#e4e8f1;--muted:#5a6380;--muted2:#7a859e;
-  --on:#16a34a;--on-light:#22c55e;--on-glow:rgba(34,197,94,.15);
-  --off:#dc2626;--off-light:#ef4444;--off-glow:rgba(239,68,68,.15);
-  --unk:#3b4563;--unk-light:#64748b;
-  --warn:#d97706;--warn-light:#f59e0b;
-  --accent:#4f46e5;--accent-light:#6366f1;
-  --sidebar-w:330px;
-  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+ --bg:#0b0d12;--sf:#13161f;--sf2:#1a1e2b;--sf3:#222636;
+ --bd:#272b3a;--bd2:#31364a;
+ --tx:#e4e8f1;--mu:#5a6380;--mu2:#7a859e;
+ --on:#16a34a;--onl:#22c55e;--ong:rgba(34,197,94,.15);
+ --of:#dc2626;--ofl:#ef4444;--ofg:rgba(239,68,68,.15);
+ --uk:#3b4563;--ukl:#64748b;
+ --wa:#d97706;--wal:#f59e0b;
+ --ac:#4f46e5;--acl:#6366f1;
+ --sw:320px;
+ --fn:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
 }
-html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;overflow:hidden}
+html,body{height:100%;font-family:var(--fn);background:var(--bg);color:var(--tx);font-size:14px;overflow:hidden}
 
-/* GATE */
-#gate{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#080a10 0%,#0f1320 50%,#080a10 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
-.gate-logo{font-size:42px;margin-bottom:8px;filter:drop-shadow(0 0 20px rgba(34,197,94,.5))}
-.gate-title{font-size:26px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px}
-.gate-title span{color:var(--on-light)}
-.gate-sub{font-size:13px;color:var(--muted2);margin-bottom:28px;text-align:center;max-width:300px;line-height:1.6}
-.gate-prompt{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:14px;font-weight:600}
-.gate-cards{display:flex;flex-direction:column;gap:10px;width:100%;max-width:360px;margin-bottom:20px}
-.gate-card{background:var(--surface);border:2px solid var(--border2);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:border-color .2s,background .2s,transform .15s;position:relative}
-.gate-card:hover{background:var(--surface2);transform:translateY(-1px)}
-.gate-card.sel-on {border-color:var(--on-light);background:rgba(34,197,94,.07)}
-.gate-card.sel-off{border-color:var(--off-light);background:rgba(239,68,68,.07)}
-.gate-card.sel-unk{border-color:var(--warn-light);background:rgba(245,158,11,.07)}
-.gate-card-icon{font-size:26px;width:40px;text-align:center;flex-shrink:0}
-.gate-card h4{font-size:14px;font-weight:700;margin-bottom:2px}
-.gate-card p{font-size:11px;color:var(--muted2);line-height:1.4}
-.gate-chk{width:20px;height:20px;border-radius:5px;border:2px solid var(--border2);position:absolute;right:14px;top:50%;transform:translateY(-50%);display:flex;align-items:center;justify-content:center;font-size:12px;transition:.15s}
-.gate-card.sel-on  .gate-chk{background:var(--on-light);border-color:var(--on-light);color:#000}
-.gate-card.sel-off .gate-chk{background:var(--off-light);border-color:var(--off-light);color:#fff}
-.gate-card.sel-unk .gate-chk{background:var(--warn-light);border-color:var(--warn-light);color:#000}
-#gate-loc{width:100%;max-width:360px;margin-bottom:16px;display:none}
-#gate-loc label{font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px}
-#gate-sel{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:10px 14px;color:var(--text);font-size:13px;outline:none}
-#gate-btn{background:var(--on-light);color:#000;font-weight:800;font-size:14px;border:none;border-radius:12px;padding:13px 40px;cursor:pointer;opacity:.35;pointer-events:none;transition:.2s;letter-spacing:.3px}
-#gate-btn.ready{opacity:1;pointer-events:all}
-#gate-btn.ready:hover{background:#1adb6a}
-.gate-note{font-size:11px;color:var(--muted);margin-top:10px;text-align:center}
+/* ── GATE ─────────────────────────────── */
+#gate{position:fixed;inset:0;z-index:9999;background:linear-gradient(145deg,#07090e 0%,#0d1120 60%,#07090e 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
+.g-logo{font-size:40px;margin-bottom:6px;filter:drop-shadow(0 0 18px rgba(34,197,94,.55))}
+.g-title{font-size:24px;font-weight:800;letter-spacing:-.5px;margin-bottom:3px}
+.g-title span{color:var(--onl)}
+.g-sub{font-size:12px;color:var(--mu2);margin-bottom:24px;text-align:center;max-width:290px;line-height:1.6}
+.g-prompt{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--mu);margin-bottom:12px;font-weight:700}
+.g-cards{display:flex;flex-direction:column;gap:9px;width:100%;max-width:360px;margin-bottom:18px}
+.g-card{background:var(--sf);border:2px solid var(--bd2);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:13px;cursor:pointer;transition:.2s;position:relative}
+.g-card:hover{background:var(--sf2);transform:translateY(-1px)}
+.g-card.son {border-color:var(--onl);background:rgba(34,197,94,.07)}
+.g-card.sof {border-color:var(--ofl);background:rgba(239,68,68,.07)}
+.g-card.suk {border-color:var(--wal);background:rgba(245,158,11,.07)}
+.g-icon{font-size:24px;width:38px;text-align:center;flex-shrink:0}
+.g-card h4{font-size:14px;font-weight:700;margin-bottom:1px}
+.g-card p{font-size:11px;color:var(--mu2);line-height:1.4}
+.g-chk{width:20px;height:20px;border-radius:5px;border:2px solid var(--bd2);position:absolute;right:14px;top:50%;transform:translateY(-50%);display:flex;align-items:center;justify-content:center;font-size:11px;transition:.15s}
+.g-card.son .g-chk{background:var(--onl);border-color:var(--onl);color:#000}
+.g-card.sof .g-chk{background:var(--ofl);border-color:var(--ofl);color:#fff}
+.g-card.suk .g-chk{background:var(--wal);border-color:var(--wal);color:#000}
+/* gate location search */
+#g-loc{width:100%;max-width:360px;margin-bottom:14px;display:none}
+#g-loc label{font-size:10px;color:var(--mu2);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:5px;font-weight:600}
+.g-loc-wrap{position:relative}
+.g-loc-wrap input{width:100%;background:var(--sf2);border:1px solid var(--bd2);border-radius:9px;padding:9px 12px 9px 32px;color:var(--tx);font-size:13px;outline:none;transition:border .15s}
+.g-loc-wrap input:focus{border-color:var(--acl)}
+.g-loc-wrap::before{content:" ";position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px;pointer-events:none}
+#g-loc-sugg{position:absolute;top:calc(100% + 3px);left:0;right:0;z-index:10000;background:var(--sf);border:1px solid var(--bd2);border-radius:9px;display:none;max-height:200px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.6)}
+#g-loc-sugg.open{display:block}
+#g-loc-sugg::-webkit-scrollbar{width:3px}
+#g-loc-sugg::-webkit-scrollbar-thumb{background:var(--bd2)}
+.g-sugg-item{padding:9px 13px;font-size:12px;cursor:pointer;border-bottom:1px solid var(--bd);transition:.1s}
+.g-sugg-item:last-child{border-bottom:none}
+.g-sugg-item:hover{background:var(--sf2)}
+.g-sugg-item strong{display:block;font-weight:600}
+.g-sugg-item span{font-size:10px;color:var(--mu2)}
+#g-btn{background:var(--onl);color:#000;font-weight:800;font-size:14px;border:none;border-radius:11px;padding:13px 38px;cursor:pointer;opacity:.35;pointer-events:none;transition:.2s;letter-spacing:.3px;width:100%;max-width:360px}
+#g-btn.ready{opacity:1;pointer-events:all}
+#g-btn.ready:hover{background:#18d966}
+.g-note{font-size:11px;color:var(--mu);margin-top:10px;text-align:center}
 
-/* APP */
+/* ── APP ──────────────────────────────── */
 #app{display:flex;height:100vh;overflow:hidden;opacity:0;transition:opacity .5s}
-#app.visible{opacity:1}
+#app.vis{opacity:1}
 
-/* SIDEBAR */
-#sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;z-index:100}
-#sid-hdr{padding:14px 14px 10px;border-bottom:1px solid var(--border);flex-shrink:0}
-.brand{display:flex;align-items:center;gap:9px;margin-bottom:12px}
-.brand-name{font-size:16px;font-weight:800;letter-spacing:-.3px}
-.brand-name em{color:var(--on-light);font-style:normal}
-.stat-row{display:flex;gap:5px;margin-bottom:10px}
-.stat-pill{flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:9px;padding:8px 6px;text-align:center;cursor:pointer;transition:.15s;user-select:none}
-.stat-pill:hover{background:var(--surface3)}
-.stat-pill.fon {border-color:var(--on-light)!important;background:var(--on-glow)!important}
-.stat-pill.foff{border-color:var(--off-light)!important;background:var(--off-glow)!important}
-.stat-pill.funk{border-color:var(--unk-light)!important;background:rgba(59,69,99,.3)!important}
-.stat-pill .val{font-size:18px;font-weight:800;line-height:1.1;display:block}
-.stat-pill .lbl{font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.5px;margin-top:1px}
-.srch-wrap{position:relative}
-.srch-wrap input{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:9px;padding:8px 10px 8px 32px;color:var(--text);font-size:13px;outline:none;transition:border .15s}
-.srch-wrap input:focus{border-color:var(--accent-light)}
-.srch-wrap::before{content:"🔍";position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:12px;pointer-events:none}
-#sugg{position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:500;background:var(--surface);border:1px solid var(--border2);border-radius:10px;overflow:hidden;display:none;box-shadow:0 8px 32px rgba(0,0,0,.5);max-height:240px;overflow-y:auto}
-#sugg.open{display:block}
-#sugg::-webkit-scrollbar{width:3px}
-#sugg::-webkit-scrollbar-thumb{background:var(--border2)}
-.si{padding:8px 12px;font-size:12px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;transition:.1s}
+/* ── SIDEBAR ──────────────────────────── */
+#sb{width:var(--sw);min-width:var(--sw);background:var(--sf);border-right:1px solid var(--bd);display:flex;flex-direction:column;overflow:hidden;z-index:100}
+#sb-hdr{padding:13px 13px 10px;border-bottom:1px solid var(--bd);flex-shrink:0}
+.brand{display:flex;align-items:center;gap:8px;margin-bottom:11px}
+.brand-name{font-size:15px;font-weight:800;letter-spacing:-.3px}
+.brand-name em{color:var(--onl);font-style:normal}
+/* My zone banner */
+#my-zone-bar{background:linear-gradient(90deg,rgba(34,197,94,.12),rgba(34,197,94,.05));border:1px solid rgba(34,197,94,.25);border-radius:8px;padding:7px 10px;margin-bottom:10px;display:none;align-items:center;gap:7px;font-size:11px}
+#my-zone-bar .mzb-dot{width:7px;height:7px;border-radius:50%;background:var(--onl);box-shadow:0 0 5px var(--onl);flex-shrink:0}
+#my-zone-bar .mzb-lbl{color:var(--mu2)}
+#my-zone-bar .mzb-name{font-weight:700;color:var(--tx);margin-left:2px}
+/* stat pills */
+.sp-row{display:flex;gap:5px;margin-bottom:10px}
+.sp{flex:1;background:var(--sf2);border:1px solid var(--bd2);border-radius:9px;padding:7px 5px;text-align:center;cursor:pointer;transition:.15s;user-select:none}
+.sp:hover{background:var(--sf3)}
+.sp.fon{border-color:var(--onl)!important;background:var(--ong)!important}
+.sp.fof{border-color:var(--ofl)!important;background:var(--ofg)!important}
+.sp.fuk{border-color:var(--ukl)!important;background:rgba(59,69,99,.3)!important}
+.sp .sv{font-size:17px;font-weight:800;line-height:1.1;display:block}
+.sp .sl{font-size:9px;color:var(--mu2);text-transform:uppercase;letter-spacing:.4px;margin-top:1px}
+/* search */
+.sw{position:relative}
+.sw input{width:100%;background:var(--sf2);border:1px solid var(--bd2);border-radius:9px;padding:8px 10px 8px 30px;color:var(--tx);font-size:12px;outline:none;transition:border .15s}
+.sw input:focus{border-color:var(--acl)}
+.sw::before{content:" ";position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:11px;pointer-events:none}
+#sg{position:absolute;top:calc(100% + 3px);left:0;right:0;z-index:500;background:var(--sf);border:1px solid var(--bd2);border-radius:9px;overflow:hidden;display:none;box-shadow:0 8px 28px rgba(0,0,0,.5);max-height:220px;overflow-y:auto}
+#sg.open{display:block}
+#sg::-webkit-scrollbar{width:3px}
+#sg::-webkit-scrollbar-thumb{background:var(--bd2)}
+.si{padding:8px 11px;font-size:12px;cursor:pointer;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:7px;transition:.1s}
 .si:last-child{border-bottom:none}
-.si:hover{background:var(--surface2)}
-.si-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.si-dot.on{background:var(--on-light)}.si-dot.off{background:var(--off-light)}.si-dot.unk{background:var(--unk-light)}
-.si-name{font-weight:600;flex:1}
-.si-area{font-size:10px;color:var(--muted2)}
-
-/* ZONE LIST */
-#zone-list{flex:1;overflow-y:auto;padding:8px 10px;display:flex;flex-direction:column;gap:4px}
-#zone-list::-webkit-scrollbar{width:3px}
-#zone-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
-.zsec{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);padding:6px 4px 2px;font-weight:700}
-.zcard{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:9px 11px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:.15s}
-.zcard:hover{background:var(--surface3);border-color:var(--border2)}
-.zdot{width:8px;height:8px;border-radius:50%;flex-shrink:0;transition:.3s}
-.zdot.on{background:var(--on-light);box-shadow:0 0 5px var(--on-light)}
-.zdot.off{background:var(--off-light);box-shadow:0 0 5px var(--off-light)}
-.zdot.unk{background:var(--unk-light)}
+.si:hover{background:var(--sf2)}
+.si-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.si-dot.on{background:var(--onl)}.si-dot.off{background:var(--ofl)}.si-dot.unk{background:var(--ukl)}
+.si-name{font-weight:600;flex:1;font-size:12px}
+.si-lga{font-size:10px;color:var(--mu2)}
+/* zone list */
+#zl{flex:1;overflow-y:auto;padding:7px 9px;display:flex;flex-direction:column;gap:3px}
+#zl::-webkit-scrollbar{width:3px}
+#zl::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px}
+.zsec{font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:var(--mu);padding:6px 3px 2px;font-weight:700}
+.zc{background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:7px;cursor:pointer;transition:.15s}
+.zc:hover{background:var(--sf3);border-color:var(--bd2)}
+.zd{width:8px;height:8px;border-radius:50%;flex-shrink:0;transition:.3s}
+.zd.on{background:var(--onl);box-shadow:0 0 5px var(--onl)}
+.zd.off{background:var(--ofl);box-shadow:0 0 5px var(--ofl)}
+.zd.unk{background:var(--ukl)}
 .zi{flex:1;min-width:0}
-.zn{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.zm{font-size:10px;color:var(--muted2);margin-top:1px}
-.zb{font-size:9px;font-weight:700;text-transform:uppercase;padding:2px 6px;border-radius:20px;letter-spacing:.3px;white-space:nowrap}
-.zb-on{background:var(--on-glow);color:var(--on-light);border:1px solid var(--on)}
-.zb-off{background:var(--off-glow);color:var(--off-light);border:1px solid var(--off)}
-.zb-unk{background:rgba(59,69,99,.25);color:var(--unk-light);border:1px solid var(--unk)}
-.empty{text-align:center;padding:28px 14px;color:var(--muted2);font-size:13px}
-.empty .ei{font-size:30px;margin-bottom:8px}
+.zn{font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.zm{font-size:10px;color:var(--mu2);margin-top:1px}
+.zb{font-size:9px;font-weight:700;text-transform:uppercase;padding:2px 6px;border-radius:20px;white-space:nowrap}
+.zb.on{background:var(--ong);color:var(--onl);border:1px solid var(--on)}
+.zb.off{background:var(--ofg);color:var(--ofl);border:1px solid var(--of)}
+.zb.unk{background:rgba(59,69,99,.2);color:var(--ukl);border:1px solid var(--uk)}
+.empty{text-align:center;padding:24px 12px;color:var(--mu2);font-size:12px}
+.empty .ei{font-size:28px;margin-bottom:7px}
 
-/* REPORT PANEL */
-#rp{border-top:1px solid var(--border);padding:11px 13px;flex-shrink:0;background:var(--surface)}
-#rp h3{font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:9px;font-weight:700}
-.rrow{display:flex;gap:6px;margin-bottom:6px}
-.rsel{flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:7px 9px;color:var(--text);font-size:12px;outline:none}
+/* ── REPORT PANEL ─────────────────────── */
+#rp{border-top:1px solid var(--bd);padding:10px 12px;flex-shrink:0;background:var(--sf)}
+#rp h3{font-size:9px;color:var(--mu2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;font-weight:700}
+/* locked zone display */
+#rp-locked{background:var(--sf2);border:1px solid var(--bd2);border-radius:8px;padding:8px 10px;margin-bottom:7px;font-size:12px;color:var(--tx);display:flex;align-items:center;gap:6px}
+#rp-locked .rl-badge{font-size:9px;background:rgba(34,197,94,.15);color:var(--onl);border:1px solid rgba(34,197,94,.3);border-radius:12px;padding:1px 6px;font-weight:700;margin-left:auto}
 .rbtns{display:flex;gap:6px;margin-bottom:7px}
 .rbtn{flex:1;padding:9px;border:none;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;transition:.15s}
 .rbtn:active{transform:scale(.97)}
-.btn-on{background:var(--on-light);color:#000}
-.btn-off{background:var(--off-light);color:#fff}
-.btn-on:hover,.btn-off:hover{filter:brightness(1.1)}
-.trow{display:flex;gap:6px;margin-bottom:7px}
-.tbtn{flex:1;padding:6px 8px;border-radius:7px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:11px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:.15s}
+.rbtn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.btn-on{background:var(--onl);color:#000}
+.btn-off{background:var(--ofl);color:#fff}
+.btn-on:hover:not(:disabled),.btn-off:hover:not(:disabled){filter:brightness(1.1)}
+.tr{display:flex;gap:6px;margin-bottom:7px}
+.tb{flex:1;padding:6px 8px;border-radius:7px;border:1px solid var(--bd2);background:var(--sf2);color:var(--tx);font-size:11px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:.15s}
 .tv{font-weight:800;font-size:9px;padding:2px 5px;border-radius:4px}
-.tbtn.tok{border-color:rgba(34,197,94,.3)}.tbtn.tok .tv{background:var(--on-glow);color:var(--on-light)}
-.tbtn.tbad{border-color:rgba(239,68,68,.3)}.tbtn.tbad .tv{background:var(--off-glow);color:var(--off-light)}
-.kbar{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--muted2);padding-top:7px;border-top:1px solid var(--border)}
-.kval{font-weight:800;color:var(--warn-light);font-size:13px}
+.tb.tok{border-color:rgba(34,197,94,.3)}.tb.tok .tv{background:var(--ong);color:var(--onl)}
+.tb.tbad{border-color:rgba(239,68,68,.3)}.tb.tbad .tv{background:var(--ofg);color:var(--ofl)}
+.kb{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--mu2);padding-top:6px;border-top:1px solid var(--bd)}
+.kv{font-weight:800;color:var(--wal);font-size:13px}
 
-/* MAP */
-#map-wrap{flex:1;position:relative;overflow:hidden}
+/* ── MAP ──────────────────────────────── */
+#mw{flex:1;position:relative;overflow:hidden}
 #map{width:100%;height:100%}
 
-/* SEARCH RESULT OVERLAY */
-#sro{position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:800;display:none;background:var(--surface);border:1px solid var(--border2);border-radius:18px;padding:18px 24px;text-align:center;box-shadow:0 16px 48px rgba(0,0,0,.7);min-width:240px}
+/* ── SEARCH RESULT OVERLAY ────────────── */
+#sro{position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:800;display:none;background:var(--sf);border:1px solid var(--bd2);border-radius:16px;padding:16px 22px;text-align:center;box-shadow:0 16px 48px rgba(0,0,0,.7);min-width:230px;max-width:290px}
 #sro.vis{display:block}
-.sro-icon{font-size:58px;line-height:1;margin-bottom:8px;display:block}
-.sro-name{font-size:17px;font-weight:800;margin-bottom:3px}
-.sro-status{font-size:13px;font-weight:700;margin-bottom:5px}
-.sro-meta{font-size:11px;color:var(--muted2)}
-.sro-close{position:absolute;top:10px;right:13px;background:none;border:none;color:var(--muted2);cursor:pointer;font-size:18px}
+.sro-icon{font-size:52px;line-height:1;margin-bottom:7px;display:block}
+.sro-nm{font-size:16px;font-weight:800;margin-bottom:2px}
+.sro-st{font-size:13px;font-weight:700;margin-bottom:4px}
+.sro-mt{font-size:11px;color:var(--mu2);margin-bottom:8px}
+.sro-close{position:absolute;top:9px;right:12px;background:none;border:none;color:var(--mu2);cursor:pointer;font-size:17px}
+/* watch btn */
+.watch-btn{width:100%;padding:7px;border-radius:8px;border:1px solid var(--bd2);background:var(--sf2);color:var(--tx);font-size:11px;cursor:pointer;font-weight:600;transition:.15s;display:flex;align-items:center;justify-content:center;gap:5px}
+.watch-btn:hover{background:var(--sf3)}
+.watch-btn.watching{border-color:var(--wal);color:var(--wal);background:rgba(245,158,11,.08)}
 
-/* PROFILES */
-#prof-btn{position:absolute;top:14px;right:14px;z-index:700;background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:7px 12px;font-size:12px;font-weight:700;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:7px;transition:.15s;box-shadow:0 4px 16px rgba(0,0,0,.4)}
-#prof-btn:hover{background:var(--surface2)}
-#prof-panel{position:absolute;top:50px;right:14px;z-index:700;width:272px;background:var(--surface);border:1px solid var(--border2);border-radius:13px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.6);display:none}
-#prof-panel.open{display:block}
-#prof-panel h4{padding:11px 14px;font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted2);font-weight:700;border-bottom:1px solid var(--border)}
-.pi{padding:10px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px}
+/* ── PROFILES ─────────────────────────── */
+#pb{position:absolute;top:14px;right:14px;z-index:700;background:var(--sf);border:1px solid var(--bd2);border-radius:9px;padding:6px 11px;font-size:12px;font-weight:700;color:var(--tx);cursor:pointer;display:flex;align-items:center;gap:6px;transition:.15s;box-shadow:0 4px 14px rgba(0,0,0,.4)}
+#pb:hover{background:var(--sf2)}
+#pp{position:absolute;top:48px;right:14px;z-index:700;width:275px;background:var(--sf);border:1px solid var(--bd2);border-radius:12px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.6);display:none}
+#pp.open{display:block}
+#pp h4{padding:10px 13px;font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--mu2);font-weight:700;border-bottom:1px solid var(--bd)}
+.pi{padding:9px 12px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:8px}
 .pi:last-child{border-bottom:none}
-.pav{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0}
-.pav-g{background:rgba(34,197,94,.2);color:var(--on-light);border:1px solid var(--on)}
-.pav-y{background:rgba(245,158,11,.2);color:var(--warn-light);border:1px solid var(--warn)}
-.pav-r{background:rgba(239,68,68,.2);color:var(--off-light);border:1px solid var(--off)}
-.pinfo{flex:1;min-width:0}
-.pname{font-size:12px;font-weight:700}
-.ploc{font-size:10px;color:var(--muted2);margin-top:1px}
-.psb{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;white-space:nowrap}
-.psb-g{background:rgba(34,197,94,.15);color:var(--on-light);border:1px solid rgba(34,197,94,.3)}
-.psb-y{background:rgba(245,158,11,.15);color:var(--warn-light);border:1px solid rgba(245,158,11,.3)}
-.psb-r{background:rgba(239,68,68,.15);color:var(--off-light);border:1px solid rgba(239,68,68,.3)}
+.pav{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0}
+.pg{background:rgba(34,197,94,.2);color:var(--onl);border:1px solid var(--on)}
+.py{background:rgba(245,158,11,.2);color:var(--wal);border:1px solid var(--wa)}
+.pr{background:rgba(239,68,68,.2);color:var(--ofl);border:1px solid var(--of)}
+.pinf{flex:1;min-width:0}
+.pnm{font-size:11px;font-weight:700}
+.plc{font-size:10px;color:var(--mu2);margin-top:1px}
+.psb{font-size:9px;font-weight:700;padding:2px 6px;border-radius:20px;white-space:nowrap}
+.sbg{background:rgba(34,197,94,.15);color:var(--onl);border:1px solid rgba(34,197,94,.3)}
+.sby{background:rgba(245,158,11,.15);color:var(--wal);border:1px solid rgba(245,158,11,.3)}
+.sbr{background:rgba(239,68,68,.15);color:var(--ofl);border:1px solid rgba(239,68,68,.3)}
 
-/* FEED */
-#feed{position:absolute;bottom:14px;right:14px;width:262px;z-index:600;background:var(--surface);border:1px solid var(--border2);border-radius:13px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.5)}
-#feed-hdr{padding:8px 13px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted2);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
-.ldot{width:7px;height:7px;border-radius:50%;background:var(--on-light);box-shadow:0 0 5px var(--on-light);animation:pulse 1.5s infinite}
+/* ── WATCHLIST PANEL ─────────────────── */
+#wp{position:absolute;top:48px;right:14px;z-index:699;width:260px;background:var(--sf);border:1px solid var(--bd2);border-radius:12px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.6);display:none}
+#wp.open{display:block}
+#wp h4{padding:10px 13px;font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--mu2);font-weight:700;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center}
+#wp h4 span{font-size:9px;color:var(--mu);text-transform:none;letter-spacing:0}
+#wl-body{max-height:200px;overflow-y:auto;padding:6px 0}
+.wl-item{padding:8px 13px;font-size:11px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:7px}
+.wl-item:last-child{border-bottom:none}
+.wl-nm{flex:1;font-weight:600}
+.wl-rm{background:none;border:none;color:var(--mu);cursor:pointer;font-size:14px;padding:0}
+.wl-rm:hover{color:var(--ofl)}
+.wl-empty{padding:18px;text-align:center;font-size:12px;color:var(--mu2)}
+#wbtn{position:absolute;top:48px;right:160px;z-index:700;background:var(--sf);border:1px solid var(--bd2);border-radius:9px;padding:6px 11px;font-size:11px;font-weight:700;color:var(--tx);cursor:pointer;display:flex;align-items:center;gap:5px;transition:.15s;box-shadow:0 4px 14px rgba(0,0,0,.4)}
+#wbtn:hover{background:var(--sf2)}
+.wbtn-cnt{background:var(--wal);color:#000;font-size:9px;font-weight:800;min-width:16px;height:16px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;padding:0 4px}
+
+/* ── FEED ─────────────────────────────── */
+#fd{position:absolute;bottom:14px;right:14px;width:255px;z-index:600;background:var(--sf);border:1px solid var(--bd2);border-radius:12px;overflow:hidden;box-shadow:0 8px 28px rgba(0,0,0,.5)}
+#fd-hdr{padding:7px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--mu2);border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center}
+.ldot{width:6px;height:6px;border-radius:50%;background:var(--onl);box-shadow:0 0 5px var(--onl);animation:pulse 1.5s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-#feed-body{max-height:150px;overflow-y:auto}
-#feed-body::-webkit-scrollbar{width:2px}
-#feed-body::-webkit-scrollbar-thumb{background:var(--border2)}
-.fi{padding:6px 13px;font-size:11px;color:var(--muted2);border-bottom:1px solid rgba(39,43,58,.5);line-height:1.5}
+#fd-body{max-height:140px;overflow-y:auto}
+#fd-body::-webkit-scrollbar{width:2px}
+#fd-body::-webkit-scrollbar-thumb{background:var(--bd2)}
+.fi{padding:6px 12px;font-size:11px;color:var(--mu2);border-bottom:1px solid rgba(39,43,58,.5);line-height:1.5}
 .fi:last-child{border-bottom:none}
-.fi .fon{color:var(--on-light);font-weight:700}
-.fi .foff{color:var(--off-light);font-weight:700}
+.fon{color:var(--onl);font-weight:700}.foff{color:var(--ofl);font-weight:700}
 
-/* TOAST */
-#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface2);border:1px solid var(--border2);border-radius:11px;padding:9px 18px;font-size:13px;font-weight:700;z-index:9998;transition:transform .35s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+/* ── TOAST ────────────────────────────── */
+#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--sf2);border:1px solid var(--bd2);border-radius:10px;padding:8px 17px;font-size:13px;font-weight:700;z-index:9998;transition:transform .35s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;box-shadow:0 8px 28px rgba(0,0,0,.5)}
 #toast.show{transform:translateX(-50%) translateY(0)}
-#toast.ton{border-color:var(--on-light);color:var(--on-light)}
-#toast.toff{border-color:var(--off-light);color:var(--off-light)}
+#toast.ton{border-color:var(--onl);color:var(--onl)}
+#toast.toff{border-color:var(--ofl);color:var(--ofl)}
+#toast.twa{border-color:var(--wal);color:var(--wal)}
 
-@media(max-width:700px){#app{flex-direction:column}#sidebar{width:100%;min-width:unset;max-height:52vh}#feed{display:none}#prof-panel{right:6px;width:255px}}
+/* ── NOTIFICATION POPUP ───────────────── */
+#notif{position:fixed;top:20px;right:20px;z-index:9997;background:var(--sf);border:1px solid var(--bd2);border-radius:12px;padding:12px 16px;max-width:260px;box-shadow:0 8px 28px rgba(0,0,0,.5);display:none;animation:slidein .3s ease}
+@keyframes slidein{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+#notif.show{display:block}
+#notif .nt{font-size:9px;text-transform:uppercase;letter-spacing:.6px;color:var(--wal);font-weight:700;margin-bottom:4px}
+#notif .nm{font-size:13px;font-weight:700;margin-bottom:2px}
+#notif .ns{font-size:11px;color:var(--mu2)}
+#notif .nc{position:absolute;top:8px;right:10px;background:none;border:none;color:var(--mu);cursor:pointer;font-size:16px}
+
+@media(max-width:700px){#app{flex-direction:column}#sb{width:100%;min-width:unset;max-height:50vh}#fd{display:none}#pp{right:6px}#wp{right:6px}}
 </style>
 </head>
 <body>
 
-<!-- GATE -->
+<!-- ══ GATE ══════════════════════════════════ -->
 <div id="gate">
-  <div class="gate-logo">⚡</div>
-  <div class="gate-title">Grid<span>Pulse</span> Lagos</div>
-  <div class="gate-sub">Real-time light tracking across Lagos.<br>Tell us your situation before you enter.</div>
-  <div class="gate-prompt">What's your power status right now?</div>
-  <div class="gate-cards">
-    <div class="gate-card" id="gc-on" onclick="selGate('on')">
-      <div class="gate-card-icon">💡</div>
-      <div><h4>NEPA Dey!</h4><p>Power is currently on at my location</p></div>
-      <div class="gate-chk" id="gck-on"></div>
-    </div>
-    <div class="gate-card" id="gc-off" onclick="selGate('off')">
-      <div class="gate-card-icon">🛑</div>
-      <div><h4>No Light</h4><p>Currently experiencing a blackout</p></div>
-      <div class="gate-chk" id="gck-off"></div>
-    </div>
-    <div class="gate-card" id="gc-unk" onclick="selGate('unk')">
-      <div class="gate-card-icon">🏃</div>
-      <div><h4>I'm Not Home</h4><p>Can't confirm my area's power status</p></div>
-      <div class="gate-chk" id="gck-unk"></div>
-    </div>
-  </div>
-  <div id="gate-loc">
-    <label>Which area are you reporting from?</label>
-    <select id="gate-sel"></select>
-  </div>
-  <button id="gate-btn" onclick="enterApp()">Open GridPulse →</button>
-  <div class="gate-note">Your report helps thousands of Lagosians plan their day ✊</div>
+ <div class="g-logo"> </div>
+ <div class="g-title">Grid<span>Pulse</span> Lagos</div>
+ <div class="g-sub">Real-time light tracking across Lagos.<br>Tell us your situation before you enter.</div>
+ <div class="g-prompt">What's your power status right now?</div>
+ <div class="g-cards">
+ <div class="g-card" id="gc-on" onclick="selGate('on')">
+ <div class="g-icon"> </div>
+ <div><h4>NEPA Dey!</h4><p>Power is currently on at my location</p></div>
+ <div class="g-chk" id="gck-on"></div>
+ </div>
+ <div class="g-card" id="gc-off" onclick="selGate('off')">
+ <div class="g-icon"> </div>
+ <div><h4>No Light</h4><p>Currently experiencing a blackout</p></div>
+ <div class="g-chk" id="gck-off"></div>
+ </div>
+ <div class="g-card" id="gc-unk" onclick="selGate('unk')">
+ <div class="g-icon"> </div>
+ <div><h4>I'm Not Home</h4><p>Can't confirm my area's power status</p></div>
+ <div class="g-chk" id="gck-unk"></div>
+ </div>
+ </div>
+ <div id="g-loc">
+ <label>Which area are you reporting from?</label>
+ <div class="g-loc-wrap">
+ <input type="text" id="g-loc-input" placeholder="Type your estate or area…" autocomplete="off"/>
+ <div id="g-loc-sugg"></div>
+ </div>
+ </div>
+ <button id="g-btn" onclick="enterApp()">Open GridPulse →</button>
+ <div class="g-note">Your report helps thousands of Lagosians plan their day </div>
 </div>
 
-<!-- APP -->
+<!-- ══ APP ════════════════════════════════════ -->
 <div id="app">
-  <div id="sidebar">
-    <div id="sid-hdr">
-      <div class="brand"><span style="font-size:18px">⚡</span><span class="brand-name">Grid<em>Pulse</em> Lagos</span></div>
-      <div class="stat-row">
-        <div class="stat-pill" id="pill-on"  onclick="filterSt('on')"  title="Show areas with light">
-          <span class="val" id="stat-on"  style="color:var(--on-light)">—</span><div class="lbl">With Light</div>
-        </div>
-        <div class="stat-pill" id="pill-off" onclick="filterSt('off')" title="Show blackout areas">
-          <span class="val" id="stat-off" style="color:var(--off-light)">—</span><div class="lbl">Blackout</div>
-        </div>
-        <div class="stat-pill" id="pill-unk" onclick="filterSt('unk')" title="Show unknown areas">
-          <span class="val" id="stat-unk" style="color:var(--unk-light)">—</span><div class="lbl">Unknown</div>
-        </div>
-      </div>
-      <div class="srch-wrap" style="position:relative">
-        <input type="text" id="srch" placeholder="Search estate, area, LGA…" autocomplete="off"/>
-        <div id="sugg"></div>
-      </div>
-    </div>
-    <div id="zone-list"></div>
-    <div id="rp">
-      <h3>📣 Report Your Area</h3>
-      <div class="rrow">
-        <select id="sel-z" class="rsel"></select>
-        <select id="sel-t" class="rsel" style="max-width:108px">
-          <option value="1.0">Verified ✅</option>
-          <option value="0.4">New User</option>
-          <option value="0.1">Low Trust</option>
-        </select>
-      </div>
-      <div class="rbtns">
-        <button class="rbtn btn-on"  onclick="submitR('light_on')">💡 NEPA Dey!</button>
-        <button class="rbtn btn-off" onclick="submitR('light_off')">🛑 No Light</button>
-      </div>
-      <div class="trow">
-        <button class="tbtn tok" id="btn-wifi"   onclick="toggleT('wifi')"><span>Wi-Fi</span><span class="tv" id="wv">ON</span></button>
-        <button class="tbtn tok" id="btn-charge" onclick="toggleT('charge')"><span>Charging</span><span class="tv" id="cv">ON</span></button>
-      </div>
-      <div class="kbar"><span>Contribution score</span><span class="kval" id="karma">140 XP</span></div>
-    </div>
-  </div>
+ <div id="sb">
+ <div id="sb-hdr">
+ <div class="brand"><span style="font-size:17px"> </span><span class="brand-name">Grid<em>Pulse</em> Lagos</span></div>
+ <div id="my-zone-bar"><div class="mzb-dot"></div><span class="mzb-lbl">Reporting from:</span><span id="mzb-name" class="mzb-name"></span></div>
+ <div class="sp-row">
+ <div class="sp" id="sp-on" onclick="filt('on')" title="Show areas with light"><span class="sv" id="st-on" style="color:var(--onl)">—</span><div class="sl">With Light</div></div>
+ <div class="sp" id="sp-off" onclick="filt('off')" title="Show blackout areas"><span class="sv" id="st-off" style="color:var(--ofl)">—</span><div class="sl">Blackout</div></div>
+ <div class="sp" id="sp-unk" onclick="filt('unk')" title="Show unknown areas"><span class="sv" id="st-unk" style="color:var(--ukl)">—</span><div class="sl">Unknown</div></div>
+ </div>
+ <div class="sw" style="position:relative">
+ <input type="text" id="srch" placeholder="Search estate, area, bus stop…" autocomplete="off"/>
+ <div id="sg"></div>
+ </div>
+ </div>
+ <div id="zl"></div>
+ <div id="rp">
+ <h3> Report Your Area</h3>
+ <div id="rp-locked"><span> </span><span id="rp-zone-name">Select your area at gate</span><span class="rl-badge">YOUR ZONE</span></div>
+ <div class="rbtns">
+ <button class="rbtn btn-on" id="rbtn-on" onclick="submitR('light_on')" disabled> NEPA Dey!</button>
+ <button class="rbtn btn-off" id="rbtn-off" onclick="submitR('light_off')" disabled> No Light</button>
+ </div>
+ <div class="tr">
+ <button class="tb tok" id="btn-wifi" onclick="togT('wifi')"><span>Wi-Fi</span><span class="tv" id="wv">ON</span></button>
+ <button class="tb tok" id="btn-chg" onclick="togT('charge')"><span>Charging</span><span class="tv" id="cv">ON</span></button>
+ </div>
+ <div class="kb"><span>Contribution score</span><span class="kv" id="karma">140 XP</span></div>
+ </div>
+ </div>
 
-  <div id="map-wrap">
-    <div id="map"></div>
-    <div id="sro">
-      <button class="sro-close" onclick="closeSro()">×</button>
-      <span id="sro-icon" class="sro-icon">💡</span>
-      <div id="sro-name" class="sro-name"></div>
-      <div id="sro-status" class="sro-status"></div>
-      <div id="sro-meta" class="sro-meta"></div>
-    </div>
-    <button id="prof-btn" onclick="toggleProf()">👥 Top Reporters</button>
-    <div id="prof-panel"><h4>Community Reporters</h4><div id="prof-list"></div></div>
-    <div id="feed">
-      <div id="feed-hdr"><span>Live Reports</span><div class="ldot"></div></div>
-      <div id="feed-body"><div class="fi">Waiting for first report…</div></div>
-    </div>
-  </div>
+ <div id="mw">
+ <div id="map"></div>
+ <div id="sro">
+ <button class="sro-close" onclick="closeSro()">×</button>
+ <span id="sro-icon" class="sro-icon"></span>
+ <div id="sro-nm" class="sro-nm"></div>
+ <div id="sro-st" class="sro-st"></div>
+ <div id="sro-mt" class="sro-mt"></div>
+ <button class="watch-btn" id="sro-watch" onclick="toggleWatch()"> Notify me when light returns</button>
+ </div>
+ <button id="pb" onclick="togProf()"> Reporters</button>
+ <button id="wbtn" onclick="togWatch()"> Watchlist <span class="wbtn-cnt" id="wl-cnt">0</span></button>
+ <div id="pp"><h4>Community Reporters</h4><div id="pp-list"></div></div>
+ <div id="wp">
+ <h4>My Light Watchlist <span>Get notified when light returns</span></h4>
+ <div id="wl-body"><div class="wl-empty">No areas watched yet.<br>Search an area and tap </div></div>
+ </div>
+ <div id="fd">
+ <div id="fd-hdr"><span>Live Reports</span><div class="ldot"></div></div>
+ <div id="fd-body"><div class="fi">Waiting for first report…</div></div>
+ </div>
+ </div>
 </div>
 <div id="toast"></div>
+<div id="notif">
+ <button class="nc" onclick="closeNotif()">×</button>
+ <div class="nt"> Light Alert</div>
+ <div id="notif-nm" class="nm"></div>
+ <div id="notif-st" class="ns"></div>
+</div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-// ═══════════════════════════════════════════════
-// 176 ZONES — ALL LAGOS ESTATES & AREAS
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
+// 300+ LOCATION DATABASE
+// Covers: Estates · Streets · Bus Stops · Landmarks · Areas
+// All 20 LGAs of Lagos State
+// ══════════════════════════════════════════════════════════
 const ZONES=[
-  // LEKKI PHASE 1 & SURROUNDINGS
-  {id:"lekki1",name:"Lekki Phase 1",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4446,lng:3.4736,r:900},
-  {id:"lekki1_1st",name:"Lekki – 1st Avenue",lga:"Eti-Osa",area:"Island / Lekki",lat:6.448,lng:3.472,r:500},
-  {id:"admiralty",name:"Admiralty Way (Lekki)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.446,lng:3.476,r:500},
-  {id:"nicon",name:"Nicon Town Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4393,lng:3.49,r:700},
-  {id:"cowrie",name:"Cowrie Creek Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.438,lng:3.488,r:600},
-  {id:"hamptbay",name:"Hampton Bay Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.44,lng:3.492,r:550},
-  {id:"vintagepark",name:"Vintage Park Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4388,lng:3.494,r:550},
-  {id:"pinnock",name:"Pinnock Beach Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.435,lng:3.482,r:600},
-  {id:"victorypark",name:"Victory Park Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.437,lng:3.486,r:550},
-  {id:"arcadia",name:"Arcadia Grove Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.436,lng:3.521,r:550},
-  {id:"periwinkle",name:"Periwinkle Lifestyle Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.447,lng:3.48,r:500},
-  {id:"victbay",name:"Victoria Bay Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4478,lng:3.481,r:500},
-  {id:"meadowhall",name:"Meadow Hall Area",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4488,lng:3.483,r:500},
-  {id:"seagate",name:"Seagate Estate (Ikate)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4395,lng:3.496,r:550},
-  {id:"ilasan",name:"Ilasan",lga:"Eti-Osa",area:"Island / Lekki",lat:6.442,lng:3.499,r:600},
-  {id:"kusenla",name:"Kusenla Road Area",lga:"Eti-Osa",area:"Island / Lekki",lat:6.441,lng:3.496,r:500},
-  {id:"oniru",name:"Oniru Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.432,lng:3.435,r:700},
-  {id:"freedom",name:"Freedom Way (Lekki)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4408,lng:3.4696,r:500},
-  {id:"lekki1_2nd",name:"Lekki – 2nd / 3rd Avenue",lga:"Eti-Osa",area:"Island / Lekki",lat:6.45,lng:3.47,r:450},
-  {id:"lekki_LCC",name:"Lekki Conservation Centre",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4333,lng:3.4736,r:600},
-  // CHEVRON / OSAPA / AGUNGI
-  {id:"chevron",name:"Chevron Drive",lga:"Eti-Osa",area:"Island / Lekki",lat:6.438,lng:3.528,r:900},
-  {id:"chevyview",name:"Chevy View Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.437,lng:3.53,r:700},
-  {id:"northforeshore",name:"Northern Foreshore Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4355,lng:3.526,r:600},
-  {id:"northbera",name:"Northern Bera Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4365,lng:3.532,r:600},
-  {id:"osapa",name:"Osapa London",lga:"Eti-Osa",area:"Island / Lekki",lat:6.44,lng:3.52,r:850},
-  {id:"agungi",name:"Agungi",lga:"Eti-Osa",area:"Island / Lekki",lat:6.436,lng:3.534,r:800},
-  {id:"bakare",name:"Bakare Estate (Agungi)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.435,lng:3.535,r:550},
-  {id:"ologolo",name:"Ologolo",lga:"Eti-Osa",area:"Island / Lekki",lat:6.443,lng:3.514,r:750},
-  {id:"whiteoak",name:"White Oak Estate (Ologolo)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.444,lng:3.513,r:550},
-  {id:"jakande",name:"Jakande Estate (Lekki)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4351,lng:3.51,r:900},
-  {id:"orchidroad",name:"Orchid Road (Lekki)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.433,lng:3.538,r:700},
-  {id:"ikate",name:"Ikate Elegushi",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4395,lng:3.491,r:900},
-  {id:"carltongate",name:"Carlton Gate Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4345,lng:3.529,r:500},
-  // IKOTA / VGC / AJAH
-  {id:"ikota",name:"Ikota",lga:"Eti-Osa",area:"Island / Lekki",lat:6.437,lng:3.545,r:850},
-  {id:"ikotavilla",name:"Ikota Villa Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4365,lng:3.547,r:600},
-  {id:"lekki2",name:"Lekki Phase 2",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4339,lng:3.5388,r:900},
-  {id:"megamound",name:"Megamound Estate (Ikota)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.435,lng:3.549,r:600},
-  {id:"lakeview1",name:"Lakeview Park 1",lga:"Eti-Osa",area:"Island / Lekki",lat:6.434,lng:3.55,r:550},
-  {id:"lakeview2",name:"Lakeview Park 2",lga:"Eti-Osa",area:"Island / Lekki",lat:6.433,lng:3.552,r:550},
-  {id:"westend",name:"West End Estate (Lekki)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.432,lng:3.554,r:550},
-  {id:"vgc",name:"VGC (Victoria Garden City)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.43,lng:3.557,r:1000},
-  {id:"oral",name:"Oral Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.436,lng:3.541,r:550},
-  {id:"royalgarden",name:"Royal Garden Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.431,lng:3.556,r:600},
-  {id:"ajah",name:"Ajah",lga:"Eti-Osa",area:"Island / Lekki",lat:6.466,lng:3.562,r:1200},
-  {id:"badore",name:"Badore",lga:"Eti-Osa",area:"Island / Lekki",lat:6.471,lng:3.556,r:900},
-  {id:"addo",name:"Addo Road (Ajah)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.468,lng:3.558,r:700},
-  {id:"palmsres",name:"Palms Residences (Ajah)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.47,lng:3.559,r:550},
-  {id:"lekki_gardens",name:"Lekki Gardens Estate (Ajah)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.469,lng:3.564,r:650},
-  // SANGOTEDO / AWOYAYA / ABIJO / IBEJU-LEKKI
-  {id:"sangotedo",name:"Sangotedo",lga:"Eti-Osa",area:"Island / Ibeju-Lekki",lat:6.4419,lng:3.602,r:1000},
-  {id:"shoprite_sang",name:"Novare Mall / Shoprite (Sangotedo)",lga:"Eti-Osa",area:"Island / Ibeju-Lekki",lat:6.443,lng:3.608,r:400},
-  {id:"awoyaya",name:"Awoyaya",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.444,lng:3.625,r:1000},
-  {id:"mayfairgardens",name:"Mayfair Gardens Estate",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.445,lng:3.627,r:650},
-  {id:"meridianpark",name:"Meridian Park Estate",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.446,lng:3.629,r:600},
-  {id:"abijo",name:"Abijo",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.45,lng:3.655,r:1000},
-  {id:"amenest",name:"Amen Estate (Ibeju-Lekki)",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.438,lng:3.69,r:700},
-  {id:"lakowe",name:"Lakowe",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.442,lng:3.68,r:900},
-  {id:"bogije",name:"Bogije",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.45,lng:3.71,r:1000},
-  {id:"ibeju",name:"Ibeju-Lekki Town",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.448,lng:3.78,r:1100},
-  {id:"dangote",name:"Dangote Refinery Belt / FTZ",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.41,lng:3.85,r:2000},
-  {id:"adivaplain",name:"Adiva Plainfield Estate",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.447,lng:3.631,r:550},
-  {id:"eleko",name:"Eleko Beach Area",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.422,lng:3.72,r:800},
-  // VICTORIA ISLAND
-  {id:"vi",name:"Victoria Island (VI)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.4281,lng:3.4219,r:1100},
-  {id:"vi_adeola",name:"Adeola Odeku Street (VI)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.4292,lng:3.4227,r:400},
-  {id:"vi_akin",name:"Akin Adesola Street (VI)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.43,lng:3.424,r:400},
-  {id:"vi_1004",name:"1004 Housing Estate (VI)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.426,lng:3.42,r:500},
-  {id:"vi_ajose",name:"Ajose Adeogun Street (VI)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.4285,lng:3.4215,r:400},
-  {id:"vi_ahmadu",name:"Ahmadu Bello Way (VI)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.427,lng:3.4205,r:400},
-  // IKOYI & BANANA ISLAND
-  {id:"ikoyi",name:"Ikoyi",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.453,lng:3.4317,r:1000},
-  {id:"parkview",name:"Parkview Estate (Ikoyi)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.456,lng:3.438,r:700},
-  {id:"banana",name:"Banana Island",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.4598,lng:3.4411,r:600},
-  {id:"mojisolaonik",name:"Mojisola Onikoyi Estate",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.462,lng:3.443,r:550},
-  {id:"awolowo",name:"Awolowo Road (Ikoyi)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.449,lng:3.434,r:500},
-  {id:"bourdillon",name:"Bourdillon Road (Ikoyi)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.452,lng:3.436,r:500},
-  {id:"dolphin",name:"Dolphin Estate (Ikoyi)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.4552,lng:3.429,r:550},
-  {id:"gerrardsrd",name:"Gerard Road (Ikoyi)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.458,lng:3.442,r:450},
-  // LAGOS ISLAND / APAPA
-  {id:"lagosisland",name:"Lagos Island",lga:"Lagos Island",area:"Island / Lagos Island",lat:6.4541,lng:3.3947,r:1000},
-  {id:"marina",name:"Marina (Lagos Island)",lga:"Lagos Island",area:"Island / Lagos Island",lat:6.4531,lng:3.3924,r:500},
-  {id:"balogun",name:"Balogun Market Area",lga:"Lagos Island",area:"Island / Lagos Island",lat:6.455,lng:3.39,r:500},
-  {id:"apapa",name:"Apapa",lga:"Apapa",area:"Mainland / South",lat:6.4474,lng:3.3607,r:1200},
-  {id:"tincan",name:"Tin Can Island",lga:"Apapa",area:"Mainland / South",lat:6.435,lng:3.34,r:900},
-  {id:"ajegunle",name:"Ajegunle",lga:"Ajeromi-Ifelodun",area:"Mainland / South",lat:6.4583,lng:3.3397,r:1100},
-  // IKEJA AXIS
-  {id:"ikeja",name:"Ikeja (Allen / Computer Village)",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.5962,lng:3.3551,r:1000},
-  {id:"allen",name:"Allen Avenue (Ikeja)",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.589,lng:3.357,r:600},
-  {id:"ikejaGRA",name:"Ikeja GRA",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.5828,lng:3.3516,r:900},
-  {id:"oregun",name:"Oregun",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.576,lng:3.36,r:900},
-  {id:"opebi",name:"Opebi",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.582,lng:3.364,r:800},
-  {id:"toyin",name:"Toyin Street / Oba Akran",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.5871,lng:3.3598,r:700},
-  {id:"maryland",name:"Maryland",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.5663,lng:3.3519,r:900},
-  {id:"shonibare",name:"Shonibare Estate (Maryland)",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.567,lng:3.349,r:500},
-  {id:"mende",name:"Mende (Maryland)",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.57,lng:3.351,r:600},
-  {id:"arowojobe",name:"Arowojobe Estate (Maryland)",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.565,lng:3.35,r:500},
-  {id:"alausa",name:"Alausa Secretariat",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.576,lng:3.344,r:700},
-  {id:"orchidcourt",name:"Orchid Court Estate (GRA Ikeja)",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.583,lng:3.35,r:500},
-  {id:"emeka_any",name:"Emeka Anyaoku Estate (GRA)",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.582,lng:3.352,r:500},
-  {id:"county_court",name:"County Court Estate (Ikeja GRA)",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.584,lng:3.351,r:500},
-  {id:"ilupeju",name:"Ilupeju",lga:"Mushin",area:"Mainland / Ikeja",lat:6.558,lng:3.359,r:900},
-  {id:"palmgrove",name:"Palm Grove",lga:"Mushin",area:"Mainland / Ikeja",lat:6.536,lng:3.358,r:900},
-  {id:"airport",name:"Airport Road Area",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.5774,lng:3.3227,r:1000},
-  // MAGODO / OMOLE / OJODU
-  {id:"magodo1",name:"Magodo Phase 1",lga:"Kosofe",area:"Mainland / Magodo",lat:6.61,lng:3.375,r:900},
-  {id:"magodo2",name:"Magodo Phase 2",lga:"Kosofe",area:"Mainland / Magodo",lat:6.615,lng:3.38,r:900},
-  {id:"omole1",name:"Omole Phase 1",lga:"Ojodu",area:"Mainland / Magodo",lat:6.625,lng:3.342,r:1000},
-  {id:"omole2",name:"Omole Phase 2 (Olowora)",lga:"Ojodu",area:"Mainland / Magodo",lat:6.63,lng:3.35,r:900},
-  {id:"ojodu",name:"Ojodu Berger",lga:"Ojodu",area:"Mainland / Magodo",lat:6.6354,lng:3.3674,r:1100},
-  {id:"isheri_north",name:"Isheri North",lga:"Ojodu",area:"Mainland / Magodo",lat:6.64,lng:3.36,r:1000},
-  {id:"olowora",name:"Olowora",lga:"Ojodu",area:"Mainland / Magodo",lat:6.631,lng:3.354,r:800},
-  {id:"dankaro",name:"Dankaro Estate (Ojodu)",lga:"Ojodu",area:"Mainland / Magodo",lat:6.636,lng:3.37,r:500},
-  {id:"pine_est",name:"Pine Estate (Ojodu)",lga:"Ojodu",area:"Mainland / Magodo",lat:6.638,lng:3.368,r:500},
-  {id:"alagbole",name:"Alagbole / Yakoyo",lga:"Ojodu",area:"Mainland / Magodo",lat:6.65,lng:3.39,r:1000},
-  {id:"akute",name:"Akute",lga:"Ojodu",area:"Mainland / Magodo",lat:6.66,lng:3.33,r:1200},
-  // OGBA / AGEGE / IFAKO
-  {id:"ogba",name:"Ogba",lga:"Ifako-Ijaiye",area:"Mainland / Ogba",lat:6.5979,lng:3.3283,r:1100},
-  {id:"agege",name:"Agege",lga:"Agege",area:"Mainland / Agege",lat:6.6184,lng:3.3197,r:1200},
-  {id:"dopemu",name:"Dopemu",lga:"Agege",area:"Mainland / Agege",lat:6.6,lng:3.296,r:1000},
-  {id:"ifako",name:"Ifako-Ijaye",lga:"Ifako-Ijaiye",area:"Mainland / Ogba",lat:6.634,lng:3.31,r:1100},
-  {id:"ipaja",name:"Ipaja",lga:"Alimosho",area:"Mainland / Agege",lat:6.598,lng:3.268,r:1100},
-  {id:"iyana_ipaja",name:"Iyana Ipaja",lga:"Alimosho",area:"Mainland / Agege",lat:6.594,lng:3.274,r:1000},
-  // KOSOFE / OGUDU / KETU
-  {id:"kosofe",name:"Kosofe",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.564,lng:3.41,r:1000},
-  {id:"ketu",name:"Ketu",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.582,lng:3.393,r:900},
-  {id:"ojota",name:"Ojota",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.5748,lng:3.3906,r:900},
-  {id:"mile12",name:"Mile 12",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.6,lng:3.384,r:1000},
-  {id:"oworo",name:"Oworonshoki",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.55,lng:3.396,r:900},
-  {id:"ogudu",name:"Ogudu",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.5748,lng:3.4006,r:900},
-  {id:"oguduGRA",name:"Ogudu GRA",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.577,lng:3.406,r:700},
-  {id:"anthony",name:"Anthony Village",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.56,lng:3.362,r:700},
-  {id:"agboyi",name:"Agboyi Estate (Mile 12)",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.602,lng:3.386,r:700},
-  {id:"apollo",name:"Apollo Estate (Mile 12)",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.601,lng:3.382,r:500},
-  {id:"akerele_oworo",name:"Akerele Estate (Oworonshoki)",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.551,lng:3.398,r:500},
-  {id:"ramatcres",name:"Ramat Crescent (Ogudu)",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.576,lng:3.405,r:500},
-  // GBAGADA / YABA / SHOMOLU
-  {id:"gbagada",name:"Gbagada",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.5498,lng:3.3799,r:1000},
-  {id:"gbagada2",name:"Gbagada Phase 2",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.554,lng:3.384,r:700},
-  {id:"atunrase",name:"Atunrase Medina (Gbagada)",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.552,lng:3.377,r:600},
-  {id:"yaba",name:"Yaba",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.5161,lng:3.3858,r:1000},
-  {id:"sabo",name:"Sabo (Yaba)",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.518,lng:3.379,r:500},
-  {id:"adekunle",name:"Adekunle (Yaba)",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.514,lng:3.387,r:500},
-  {id:"pearlview",name:"Pearl View Estate (Yaba)",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.5155,lng:3.386,r:450},
-  {id:"fadeyi",name:"Fadeyi",lga:"Mushin",area:"Mainland / Central",lat:6.524,lng:3.37,r:800},
-  {id:"shomolu",name:"Shomolu",lga:"Shomolu",area:"Mainland / Central",lat:6.535,lng:3.378,r:900},
-  {id:"bariga",name:"Bariga",lga:"Shomolu",area:"Mainland / Central",lat:6.53,lng:3.395,r:900},
-  {id:"ebute",name:"Ebute-Metta",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.487,lng:3.367,r:1000},
-  // SURULERE / MUSHIN
-  {id:"surulere",name:"Surulere",lga:"Surulere",area:"Mainland / Surulere",lat:6.4994,lng:3.3644,r:1200},
-  {id:"aguda",name:"Aguda (Surulere)",lga:"Surulere",area:"Mainland / Surulere",lat:6.501,lng:3.36,r:600},
-  {id:"akerele",name:"Akerele Estate (Surulere)",lga:"Surulere",area:"Mainland / Surulere",lat:6.503,lng:3.366,r:600},
-  {id:"itire",name:"Itire",lga:"Surulere",area:"Mainland / Surulere",lat:6.506,lng:3.353,r:700},
-  {id:"eric_moore",name:"Eric Moore / Iponri",lga:"Surulere",area:"Mainland / Surulere",lat:6.494,lng:3.358,r:700},
-  {id:"mushin",name:"Mushin",lga:"Mushin",area:"Mainland / Surulere",lat:6.5218,lng:3.352,r:1100},
-  {id:"orile",name:"Orile Iganmu",lga:"Surulere",area:"Mainland / Surulere",lat:6.48,lng:3.35,r:900},
-  // OSHODI / ISOLO / EJIGBO
-  {id:"oshodi",name:"Oshodi",lga:"Oshodi-Isolo",area:"Mainland / Oshodi",lat:6.5558,lng:3.3286,r:1100},
-  {id:"isolo",name:"Isolo",lga:"Oshodi-Isolo",area:"Mainland / Oshodi",lat:6.512,lng:3.32,r:1100},
-  {id:"ejigbo",name:"Ejigbo",lga:"Oshodi-Isolo",area:"Mainland / Oshodi",lat:6.5054,lng:3.298,r:1000},
-  // ALIMOSHO
-  {id:"alimosho",name:"Alimosho",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.588,lng:3.27,r:1400},
-  {id:"ikotun",name:"Ikotun",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.511,lng:3.271,r:1200},
-  {id:"idimu",name:"Idimu",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.529,lng:3.281,r:1100},
-  {id:"isheri",name:"Isheri-Oshun",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.574,lng:3.28,r:1000},
-  {id:"shasha",name:"Shasha",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.56,lng:3.29,r:1000},
-  {id:"egbe",name:"Egbe",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.538,lng:3.282,r:1000},
-  {id:"igando",name:"Igando",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.524,lng:3.265,r:1000},
-  // AMUWO-ODOFIN / FESTAC / OJO
-  {id:"amuwo",name:"Amuwo Odofin",lga:"Amuwo-Odofin",area:"Mainland / South",lat:6.468,lng:3.306,r:1300},
-  {id:"festac",name:"FESTAC Town",lga:"Amuwo-Odofin",area:"Mainland / South",lat:6.467,lng:3.293,r:1100},
-  {id:"mile2",name:"Mile 2",lga:"Amuwo-Odofin",area:"Mainland / South",lat:6.478,lng:3.32,r:1000},
-  {id:"satellite",name:"Satellite Town",lga:"Ojo",area:"Mainland / South",lat:6.45,lng:3.28,r:1000},
-  {id:"ojo",name:"Ojo",lga:"Ojo",area:"Mainland / South",lat:6.464,lng:3.229,r:1300},
-  {id:"ajangbadi",name:"Ajangbadi",lga:"Ojo",area:"Mainland / South",lat:6.44,lng:3.175,r:1200},
-  // IKORODU
-  {id:"ikorodu",name:"Ikorodu Town",lga:"Ikorodu",area:"Mainland / Ikorodu",lat:6.619,lng:3.5052,r:1800},
-  {id:"benson",name:"Benson / Odogunyan (Ikorodu)",lga:"Ikorodu",area:"Mainland / Ikorodu",lat:6.605,lng:3.51,r:1200},
-  {id:"majidun",name:"Majidun",lga:"Ikorodu",area:"Mainland / Ikorodu",lat:6.638,lng:3.528,r:1100},
-  {id:"ijede",name:"Ijede",lga:"Ikorodu",area:"Mainland / Ikorodu",lat:6.66,lng:3.55,r:1200},
-  // EPE / BADAGRY
-  {id:"epe",name:"Epe",lga:"Epe",area:"Outskirts",lat:6.5872,lng:3.98,r:2000},
-  {id:"badagry",name:"Badagry",lga:"Badagry",area:"Outskirts",lat:6.414,lng:2.882,r:2000},
+// ─── LEKKI PHASE 1 & IMMEDIATE SURROUNDINGS ───────────────
+{id:"lekki1",name:"Lekki Phase 1",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4446,lng:3.4736,r:900,type:"area"},
+{id:"admiralty",name:"Admiralty Way (Lekki Ph1)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.446,lng:3.476,r:450,type:"street"},
+{id:"fola_osibo",name:"Fola Osibo Street",lga:"Eti-Osa",area:"Island / Lekki",lat:6.448,lng:3.4748,r:400,type:"street"},
+{id:"lekki1_2nd",name:"2nd Avenue (Lekki Ph1)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.45,lng:3.47,r:400,type:"street"},
+{id:"lekki1_3rd",name:"3rd / 4th Avenue (Lekki Ph1)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.452,lng:3.468,r:400,type:"street"},
+{id:"lekki_bus",name:"Lekki Phase 1 Bus Stop",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4444,lng:3.474,r:350,type:"busstop"},
+{id:"nicon",name:"Nicon Town Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4393,lng:3.49,r:700,type:"estate"},
+{id:"cowrie",name:"Cowrie Creek Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.438,lng:3.488,r:600,type:"estate"},
+{id:"hamptbay",name:"Hampton Bay Estate (Ikate)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.44,lng:3.492,r:550,type:"estate"},
+{id:"vintagepark",name:"Vintage Park Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4388,lng:3.494,r:500,type:"estate"},
+{id:"pinnock",name:"Pinnock Beach Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.435,lng:3.482,r:600,type:"estate"},
+{id:"victorypark",name:"Victory Park Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.437,lng:3.486,r:500,type:"estate"},
+{id:"periwinkle",name:"Periwinkle Lifestyle Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.447,lng:3.48,r:500,type:"estate"},
+{id:"victbay",name:"Victoria Bay Estate (Lekki)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4478,lng:3.481,r:450,type:"estate"},
+{id:"meadowhall",name:"Meadow Hall Road Area",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4488,lng:3.483,r:450,type:"landmark"},
+{id:"seagate",name:"Seagate Estate (Ikate)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4395,lng:3.496,r:500,type:"estate"},
+{id:"ilasan",name:"Ilasan",lga:"Eti-Osa",area:"Island / Lekki",lat:6.442,lng:3.499,r:600,type:"area"},
+{id:"kusenla",name:"Kusenla Road",lga:"Eti-Osa",area:"Island / Lekki",lat:6.441,lng:3.496,r:450,type:"street"},
+{id:"ikate",name:"Ikate Elegushi",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4395,lng:3.491,r:800,type:"area"},
+{id:"oniru",name:"Oniru Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.432,lng:3.435,r:700,type:"estate"},
+{id:"freedom",name:"Freedom Way (Lekki)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4408,lng:3.4696,r:450,type:"street"},
+{id:"lekki_toll",name:"Lekki Toll Gate / 1st Roundabout",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4388,lng:3.466,r:400,type:"landmark"},
+{id:"lekki_3rd_rbt",name:"3rd Roundabout (Lekki)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.445,lng:3.481,r:400,type:"landmark"},
+{id:"lekki_LCC",name:"Lekki Conservation Centre Area",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4333,lng:3.4736,r:500,type:"landmark"},
+// ─── CHEVRON / AGUNGI / OSAPA / OLOGOLO ───────────────────
+{id:"chevron",name:"Chevron Drive",lga:"Eti-Osa",area:"Island / Lekki",lat:6.438,lng:3.528,r:900,type:"street"},
+{id:"chevyview",name:"Chevy View Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.437,lng:3.53,r:700,type:"estate"},
+{id:"northforeshore",name:"Northern Foreshore Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4355,lng:3.526,r:600,type:"estate"},
+{id:"northbera",name:"Northern Bera Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4365,lng:3.532,r:550,type:"estate"},
+{id:"osapa",name:"Osapa London",lga:"Eti-Osa",area:"Island / Lekki",lat:6.44,lng:3.52,r:850,type:"estate"},
+{id:"agungi",name:"Agungi",lga:"Eti-Osa",area:"Island / Lekki",lat:6.436,lng:3.534,r:800,type:"area"},
+{id:"bakare",name:"Bakare Estate (Agungi)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.435,lng:3.535,r:500,type:"estate"},
+{id:"ologolo",name:"Ologolo",lga:"Eti-Osa",area:"Island / Lekki",lat:6.443,lng:3.514,r:750,type:"area"},
+{id:"whiteoak",name:"White Oak Estate (Ologolo)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.444,lng:3.513,r:500,type:"estate"},
+{id:"jakande",name:"Jakande Estate (Lekki)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4351,lng:3.51,r:900,type:"estate"},
+{id:"orchidroad",name:"Orchid Road",lga:"Eti-Osa",area:"Island / Lekki",lat:6.433,lng:3.538,r:650,type:"street"},
+{id:"carltongate",name:"Carlton Gate Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4345,lng:3.529,r:500,type:"estate"},
+{id:"chevron_rbt",name:"Chevron Roundabout (7th)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.436,lng:3.528,r:380,type:"landmark"},
+{id:"arcadia",name:"Arcadia Grove Estate (Osapa)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.436,lng:3.521,r:500,type:"estate"},
+// ─── IKOTA / VGC / AJAH ───────────────────────────────────
+{id:"ikota",name:"Ikota",lga:"Eti-Osa",area:"Island / Lekki",lat:6.437,lng:3.545,r:850,type:"area"},
+{id:"ikotavilla",name:"Ikota Villa Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4365,lng:3.547,r:600,type:"estate"},
+{id:"lekki2",name:"Lekki Phase 2",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4339,lng:3.5388,r:900,type:"area"},
+{id:"megamound",name:"Megamound Estate (Ikota)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.435,lng:3.549,r:550,type:"estate"},
+{id:"lakeview1",name:"Lakeview Park 1 Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.434,lng:3.55,r:500,type:"estate"},
+{id:"lakeview2",name:"Lakeview Park 2 Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.433,lng:3.552,r:500,type:"estate"},
+{id:"westend",name:"West End Estate (Lekki)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.432,lng:3.554,r:500,type:"estate"},
+{id:"vgc",name:"VGC (Victoria Garden City)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.43,lng:3.557,r:1000,type:"estate"},
+{id:"oral",name:"Oral Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.436,lng:3.541,r:500,type:"estate"},
+{id:"royalgarden",name:"Royal Garden Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.431,lng:3.556,r:600,type:"estate"},
+{id:"ajah",name:"Ajah",lga:"Eti-Osa",area:"Island / Lekki",lat:6.466,lng:3.562,r:1200,type:"area"},
+{id:"ajah_busstop",name:"Ajah Bus Stop / Round About",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4658,lng:3.5617,r:350,type:"busstop"},
+{id:"badore",name:"Badore",lga:"Eti-Osa",area:"Island / Lekki",lat:6.471,lng:3.556,r:900,type:"area"},
+{id:"addo",name:"Addo Road",lga:"Eti-Osa",area:"Island / Lekki",lat:6.468,lng:3.558,r:650,type:"street"},
+{id:"palmsres",name:"Palms Residences (Ajah)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.47,lng:3.559,r:500,type:"estate"},
+{id:"lekki_gardens",name:"Lekki Gardens Estate (Ajah)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.469,lng:3.564,r:600,type:"estate"},
+{id:"abraham",name:"Abraham Adesanya Roundabout",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4690,lng:3.5588,r:350,type:"landmark"},
+// ─── SANGOTEDO / AWOYAYA / ABIJO / IBEJU-LEKKI ───────────
+{id:"sangotedo",name:"Sangotedo",lga:"Eti-Osa",area:"Island / Ibeju-Lekki",lat:6.4419,lng:3.602,r:1000,type:"area"},
+{id:"shoprite_sang",name:"Novare Mall / Sangotedo",lga:"Eti-Osa",area:"Island / Ibeju-Lekki",lat:6.443,lng:3.608,r:400,type:"landmark"},
+{id:"awoyaya",name:"Awoyaya",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.444,lng:3.625,r:1000,type:"area"},
+{id:"mayfairgardens",name:"Mayfair Gardens Estate",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.445,lng:3.627,r:600,type:"estate"},
+{id:"meridianpark",name:"Meridian Park Estate",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.446,lng:3.629,r:550,type:"estate"},
+{id:"abijo",name:"Abijo",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.45,lng:3.655,r:1000,type:"area"},
+{id:"amenest",name:"Amen Estate (Ibeju-Lekki)",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.438,lng:3.69,r:700,type:"estate"},
+{id:"lakowe",name:"Lakowe",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.442,lng:3.68,r:900,type:"area"},
+{id:"bogije",name:"Bogije",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.45,lng:3.71,r:1000,type:"area"},
+{id:"ibeju",name:"Ibeju-Lekki Town",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.448,lng:3.78,r:1100,type:"area"},
+{id:"dangote",name:"Dangote Refinery Belt / FTZ",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.41,lng:3.85,r:2000,type:"landmark"},
+{id:"adivaplain",name:"Adiva Plainfield Estate",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.447,lng:3.631,r:500,type:"estate"},
+{id:"eleko",name:"Eleko Junction",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.422,lng:3.72,r:750,type:"landmark"},
+{id:"akodo",name:"Akodo",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.433,lng:3.74,r:900,type:"area"},
+// ─── VICTORIA ISLAND ──────────────────────────────────────
+{id:"vi",name:"Victoria Island (VI)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.4281,lng:3.4219,r:1100,type:"area"},
+{id:"vi_adeola",name:"Adeola Odeku Street (VI)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.4292,lng:3.4227,r:380,type:"street"},
+{id:"vi_akin",name:"Akin Adesola Street (VI)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.43,lng:3.424,r:380,type:"street"},
+{id:"vi_1004",name:"1004 Housing Estate (VI)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.426,lng:3.42,r:500,type:"estate"},
+{id:"vi_ajose",name:"Ajose Adeogun Street (VI)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.4285,lng:3.4215,r:380,type:"street"},
+{id:"vi_ahmadu",name:"Ahmadu Bello Way (VI)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.427,lng:3.4205,r:380,type:"street"},
+{id:"vi_ozumba",name:"Ozumba Mbadiwe Avenue (VI)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.431,lng:3.43,r:450,type:"street"},
+{id:"vi_walter",name:"Walter Carrington Crescent (VI)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.432,lng:3.419,r:380,type:"street"},
+{id:"eko_atlantic",name:"Eko Atlantic City",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.415,lng:3.408,r:900,type:"landmark"},
+// ─── IKOYI & BANANA ISLAND ────────────────────────────────
+{id:"ikoyi",name:"Ikoyi",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.453,lng:3.4317,r:1000,type:"area"},
+{id:"parkview",name:"Parkview Estate (Ikoyi)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.456,lng:3.438,r:700,type:"estate"},
+{id:"banana",name:"Banana Island",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.4598,lng:3.4411,r:600,type:"estate"},
+{id:"mojisolaonik",name:"Mojisola Onikoyi Estate",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.462,lng:3.443,r:500,type:"estate"},
+{id:"awolowo",name:"Awolowo Road (Ikoyi)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.449,lng:3.434,r:450,type:"street"},
+{id:"bourdillon",name:"Bourdillon Road (Ikoyi)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.452,lng:3.436,r:450,type:"street"},
+{id:"dolphin",name:"Dolphin Estate (Ikoyi)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.4552,lng:3.429,r:500,type:"estate"},
+{id:"gerrard",name:"Gerard Road (Ikoyi)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.458,lng:3.442,r:420,type:"street"},
+{id:"ikoyi_club",name:"Ikoyi Club Area",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.454,lng:3.435,r:400,type:"landmark"},
+{id:"obalende",name:"Obalende",lga:"Lagos Island",area:"Island / VI & Ikoyi",lat:6.451,lng:3.411,r:800,type:"area"},
+{id:"obalende_bus",name:"Obalende Bus Stop / Terminal",lga:"Lagos Island",area:"Island / VI & Ikoyi",lat:6.4508,lng:3.411,r:350,type:"busstop"},
+// ─── LAGOS ISLAND ─────────────────────────────────────────
+{id:"lagosisland",name:"Lagos Island",lga:"Lagos Island",area:"Island / Lagos Island",lat:6.4541,lng:3.3947,r:1000,type:"area"},
+{id:"marina",name:"Marina",lga:"Lagos Island",area:"Island / Lagos Island",lat:6.4531,lng:3.3924,r:500,type:"street"},
+{id:"cms",name:"CMS (Marina Bus Stop)",lga:"Lagos Island",area:"Island / Lagos Island",lat:6.4519,lng:3.393,r:350,type:"busstop"},
+{id:"tbs",name:"TBS (Tafawa Balewa Square)",lga:"Lagos Island",area:"Island / Lagos Island",lat:6.455,lng:3.388,r:500,type:"landmark"},
+{id:"balogun",name:"Balogun Market Area",lga:"Lagos Island",area:"Island / Lagos Island",lat:6.455,lng:3.39,r:500,type:"landmark"},
+{id:"idumota",name:"Idumota",lga:"Lagos Island",area:"Island / Lagos Island",lat:6.458,lng:3.385,r:600,type:"area"},
+{id:"broad_street",name:"Broad Street (Lagos Island)",lga:"Lagos Island",area:"Island / Lagos Island",lat:6.455,lng:3.391,r:400,type:"street"},
+{id:"carter_bridge",name:"Carter Bridge Area",lga:"Lagos Island",area:"Island / Lagos Island",lat:6.458,lng:3.376,r:500,type:"landmark"},
+// ─── APAPA / AJEGUNLE ─────────────────────────────────────
+{id:"apapa",name:"Apapa",lga:"Apapa",area:"Mainland / South",lat:6.4474,lng:3.3607,r:1200,type:"area"},
+{id:"tincan",name:"Tin Can Island",lga:"Apapa",area:"Mainland / South",lat:6.435,lng:3.34,r:900,type:"area"},
+{id:"wharf_apapa",name:"Apapa Wharf / Port Area",lga:"Apapa",area:"Mainland / South",lat:6.44,lng:3.355,r:700,type:"landmark"},
+{id:"ajegunle",name:"Ajegunle",lga:"Ajeromi-Ifelodun",area:"Mainland / South",lat:6.4583,lng:3.3397,r:1100,type:"area"},
+{id:"orile",name:"Orile Iganmu",lga:"Surulere",area:"Mainland / South",lat:6.48,lng:3.35,r:900,type:"area"},
+{id:"mile2",name:"Mile 2",lga:"Amuwo-Odofin",area:"Mainland / South",lat:6.478,lng:3.32,r:1000,type:"area"},
+{id:"mile2_bus",name:"Mile 2 Bus Stop",lga:"Amuwo-Odofin",area:"Mainland / South",lat:6.477,lng:3.321,r:350,type:"busstop"},
+// ─── IKEJA ────────────────────────────────────────────────
+{id:"ikeja",name:"Ikeja (Allen / Computer Village)",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.5962,lng:3.3551,r:1000,type:"area"},
+{id:"allen",name:"Allen Avenue",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.589,lng:3.357,r:600,type:"street"},
+{id:"computervillage",name:"Computer Village (Ikeja)",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.597,lng:3.349,r:450,type:"landmark"},
+{id:"ikejaGRA",name:"Ikeja GRA",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.5828,lng:3.3516,r:900,type:"estate"},
+{id:"oregun",name:"Oregun",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.576,lng:3.36,r:900,type:"area"},
+{id:"opebi",name:"Opebi",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.582,lng:3.364,r:750,type:"area"},
+{id:"toyin",name:"Toyin Street / Oba Akran",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.5871,lng:3.3598,r:650,type:"street"},
+{id:"alausa",name:"Alausa Secretariat",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.576,lng:3.344,r:700,type:"landmark"},
+{id:"ikeja_along",name:"Ikeja Along Bus Stop",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.576,lng:3.337,r:350,type:"busstop"},
+{id:"orchidcourt",name:"Orchid Court Estate (GRA)",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.583,lng:3.35,r:450,type:"estate"},
+{id:"emeka_any",name:"Emeka Anyaoku Estate (Millennium)",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.582,lng:3.352,r:450,type:"estate"},
+{id:"county_court",name:"County Court Estate (GRA Ikeja)",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.584,lng:3.351,r:450,type:"estate"},
+{id:"maryland",name:"Maryland",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.5663,lng:3.3519,r:900,type:"area"},
+{id:"shonibare",name:"Shonibare Estate (Maryland)",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.567,lng:3.349,r:500,type:"estate"},
+{id:"mende",name:"Mende (Maryland)",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.57,lng:3.351,r:600,type:"area"},
+{id:"arowojobe",name:"Arowojobe Estate (Maryland)",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.565,lng:3.35,r:450,type:"estate"},
+{id:"anthony",name:"Anthony Village",lga:"Kosofe",area:"Mainland / Ikeja",lat:6.56,lng:3.362,r:700,type:"area"},
+{id:"ilupeju",name:"Ilupeju",lga:"Mushin",area:"Mainland / Ikeja",lat:6.558,lng:3.359,r:900,type:"area"},
+{id:"palmgrove",name:"Palm Grove",lga:"Mushin",area:"Mainland / Ikeja",lat:6.536,lng:3.358,r:900,type:"area"},
+{id:"airport",name:"Murtala Muhammed Airport Road",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.5774,lng:3.3227,r:1000,type:"landmark"},
+// ─── MAGODO / OMOLE / OJODU ───────────────────────────────
+{id:"magodo1",name:"Magodo Phase 1",lga:"Kosofe",area:"Mainland / Magodo",lat:6.61,lng:3.375,r:900,type:"estate"},
+{id:"magodo2",name:"Magodo Phase 2",lga:"Kosofe",area:"Mainland / Magodo",lat:6.615,lng:3.38,r:900,type:"estate"},
+{id:"omole1",name:"Omole Phase 1",lga:"Ojodu",area:"Mainland / Magodo",lat:6.625,lng:3.342,r:1000,type:"estate"},
+{id:"omole2",name:"Omole Phase 2 (Olowora)",lga:"Ojodu",area:"Mainland / Magodo",lat:6.63,lng:3.35,r:900,type:"estate"},
+{id:"ojodu",name:"Ojodu Berger",lga:"Ojodu",area:"Mainland / Magodo",lat:6.6354,lng:3.3674,r:1100,type:"area"},
+{id:"berger_bus",name:"Berger Bus Stop",lga:"Ojodu",area:"Mainland / Magodo",lat:6.635,lng:3.368,r:350,type:"busstop"},
+{id:"isheri_north",name:"Isheri North",lga:"Ojodu",area:"Mainland / Magodo",lat:6.64,lng:3.36,r:1000,type:"area"},
+{id:"olowora",name:"Olowora",lga:"Ojodu",area:"Mainland / Magodo",lat:6.631,lng:3.354,r:800,type:"area"},
+{id:"dankaro",name:"Dankaro Estate (Ojodu)",lga:"Ojodu",area:"Mainland / Magodo",lat:6.636,lng:3.37,r:450,type:"estate"},
+{id:"pine_est",name:"Pine Estate (Ojodu)",lga:"Ojodu",area:"Mainland / Magodo",lat:6.638,lng:3.368,r:450,type:"estate"},
+{id:"alagbole",name:"Alagbole / Yakoyo",lga:"Ojodu",area:"Mainland / Magodo",lat:6.65,lng:3.39,r:1000,type:"area"},
+{id:"akute",name:"Akute",lga:"Ojodu",area:"Mainland / Magodo",lat:6.66,lng:3.33,r:1200,type:"area"},
+{id:"river_valley",name:"River Valley Estate (Ojodu)",lga:"Ojodu",area:"Mainland / Magodo",lat:6.629,lng:3.345,r:500,type:"estate"},
+{id:"morgan_est",name:"Morgan Estate (Ojodu)",lga:"Ojodu",area:"Mainland / Magodo",lat:6.627,lng:3.348,r:450,type:"estate"},
+{id:"unity_est",name:"Unity Estate (Ojodu)",lga:"Ojodu",area:"Mainland / Magodo",lat:6.633,lng:3.352,r:450,type:"estate"},
+// ─── OGBA / AGEGE / IFAKO ─────────────────────────────────
+{id:"ogba",name:"Ogba",lga:"Ifako-Ijaiye",area:"Mainland / Ogba",lat:6.5979,lng:3.3283,r:1100,type:"area"},
+{id:"agege",name:"Agege",lga:"Agege",area:"Mainland / Agege",lat:6.6184,lng:3.3197,r:1200,type:"area"},
+{id:"agege_bus",name:"Agege Bus Stop / Pen Cinema",lga:"Agege",area:"Mainland / Agege",lat:6.617,lng:3.318,r:380,type:"busstop"},
+{id:"dopemu",name:"Dopemu",lga:"Agege",area:"Mainland / Agege",lat:6.6,lng:3.296,r:1000,type:"area"},
+{id:"ifako",name:"Ifako-Ijaye",lga:"Ifako-Ijaiye",area:"Mainland / Ogba",lat:6.634,lng:3.31,r:1100,type:"area"},
+{id:"ipaja",name:"Ipaja",lga:"Alimosho",area:"Mainland / Agege",lat:6.598,lng:3.268,r:1100,type:"area"},
+{id:"iyana_ipaja",name:"Iyana Ipaja",lga:"Alimosho",area:"Mainland / Agege",lat:6.594,lng:3.274,r:1000,type:"area"},
+{id:"iyana_ipaja_bus",name:"Iyana Ipaja Bus Stop",lga:"Alimosho",area:"Mainland / Agege",lat:6.5935,lng:3.274,r:350,type:"busstop"},
+{id:"abule_egba",name:"Abule Egba",lga:"Ifako-Ijaiye",area:"Mainland / Ogba",lat:6.64,lng:3.289,r:1000,type:"area"},
+// ─── KOSOFE / OGUDU / KETU ────────────────────────────────
+{id:"kosofe",name:"Kosofe",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.564,lng:3.41,r:1000,type:"area"},
+{id:"ketu",name:"Ketu",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.582,lng:3.393,r:900,type:"area"},
+{id:"ketu_bus",name:"Ketu Bus Stop",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.581,lng:3.392,r:350,type:"busstop"},
+{id:"ojota",name:"Ojota",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.5748,lng:3.3906,r:900,type:"area"},
+{id:"ojota_bus",name:"Ojota Bus Stop / New Garage",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.574,lng:3.39,r:380,type:"busstop"},
+{id:"mile12",name:"Mile 12",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.6,lng:3.384,r:1000,type:"area"},
+{id:"mile12_bus",name:"Mile 12 Bus Stop / Market",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.599,lng:3.383,r:380,type:"busstop"},
+{id:"oworo",name:"Oworonshoki",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.55,lng:3.396,r:900,type:"area"},
+{id:"ogudu",name:"Ogudu",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.5748,lng:3.4006,r:900,type:"area"},
+{id:"oguduGRA",name:"Ogudu GRA",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.577,lng:3.406,r:700,type:"estate"},
+{id:"agboyi",name:"Agboyi Estate (Mile 12)",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.602,lng:3.386,r:650,type:"estate"},
+{id:"apollo",name:"Apollo Estate (Mile 12)",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.601,lng:3.382,r:450,type:"estate"},
+{id:"akerele_oworo",name:"Akerele Estate (Oworonshoki)",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.551,lng:3.398,r:450,type:"estate"},
+{id:"ramatcres",name:"Ramat Crescent (Ogudu)",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.576,lng:3.405,r:450,type:"estate"},
+// ─── GBAGADA / YABA / SHOMOLU ─────────────────────────────
+{id:"gbagada",name:"Gbagada",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.5498,lng:3.3799,r:1000,type:"area"},
+{id:"gbagada2",name:"Gbagada Phase 2",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.554,lng:3.384,r:700,type:"estate"},
+{id:"atunrase",name:"Atunrase Medina Estate",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.552,lng:3.377,r:550,type:"estate"},
+{id:"gbagada_express",name:"Gbagada Express Bus Stop",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.548,lng:3.378,r:350,type:"busstop"},
+{id:"yaba",name:"Yaba",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.5161,lng:3.3858,r:1000,type:"area"},
+{id:"yaba_bus",name:"Yaba Bus Stop",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.515,lng:3.386,r:350,type:"busstop"},
+{id:"sabo",name:"Sabo (Yaba)",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.518,lng:3.379,r:500,type:"area"},
+{id:"adekunle",name:"Adekunle (Yaba)",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.514,lng:3.387,r:500,type:"area"},
+{id:"pearlview",name:"Pearl View Estate (Yaba)",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.5155,lng:3.386,r:400,type:"estate"},
+{id:"fadeyi",name:"Fadeyi",lga:"Mushin",area:"Mainland / Central",lat:6.524,lng:3.37,r:800,type:"area"},
+{id:"fadeyi_bus",name:"Fadeyi Bus Stop",lga:"Mushin",area:"Mainland / Central",lat:6.523,lng:3.369,r:350,type:"busstop"},
+{id:"shomolu",name:"Shomolu",lga:"Shomolu",area:"Mainland / Central",lat:6.535,lng:3.378,r:900,type:"area"},
+{id:"bariga",name:"Bariga",lga:"Shomolu",area:"Mainland / Central",lat:6.53,lng:3.395,r:900,type:"area"},
+{id:"ebute",name:"Ebute-Metta",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.487,lng:3.367,r:1000,type:"area"},
+{id:"makoko",name:"Makoko",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.497,lng:3.389,r:700,type:"area"},
+{id:"akoka",name:"Akoka (Yaba)",lga:"Shomolu",area:"Mainland / Central",lat:6.522,lng:3.388,r:600,type:"area"},
+// ─── SURULERE ─────────────────────────────────────────────
+{id:"surulere",name:"Surulere",lga:"Surulere",area:"Mainland / Surulere",lat:6.4994,lng:3.3644,r:1200,type:"area"},
+{id:"aguda",name:"Aguda (Surulere)",lga:"Surulere",area:"Mainland / Surulere",lat:6.501,lng:3.36,r:600,type:"area"},
+{id:"bode_thomas",name:"Bode Thomas Street",lga:"Surulere",area:"Mainland / Surulere",lat:6.502,lng:3.363,r:450,type:"street"},
+{id:"adeniran",name:"Adeniran Ogunsanya Street",lga:"Surulere",area:"Mainland / Surulere",lat:6.501,lng:3.358,r:450,type:"street"},
+{id:"akerele",name:"Akerele Estate (Surulere)",lga:"Surulere",area:"Mainland / Surulere",lat:6.503,lng:3.366,r:550,type:"estate"},
+{id:"itire",name:"Itire",lga:"Surulere",area:"Mainland / Surulere",lat:6.506,lng:3.353,r:700,type:"area"},
+{id:"eric_moore",name:"Eric Moore / Iponri",lga:"Surulere",area:"Mainland / Surulere",lat:6.494,lng:3.358,r:700,type:"area"},
+{id:"lawanson",name:"Lawanson (Surulere)",lga:"Surulere",area:"Mainland / Surulere",lat:6.505,lng:3.356,r:600,type:"area"},
+{id:"ojuelegba",name:"Ojuelegba",lga:"Surulere",area:"Mainland / Surulere",lat:6.511,lng:3.368,r:600,type:"area"},
+{id:"ojuelegba_bus",name:"Ojuelegba Bus Stop",lga:"Surulere",area:"Mainland / Surulere",lat:6.511,lng:3.367,r:350,type:"busstop"},
+{id:"surulere_bus",name:"Surulere Bus Stop",lga:"Surulere",area:"Mainland / Surulere",lat:6.499,lng:3.364,r:350,type:"busstop"},
+{id:"stadium",name:"National Stadium Area",lga:"Surulere",area:"Mainland / Surulere",lat:6.497,lng:3.373,r:600,type:"landmark"},
+{id:"mushin",name:"Mushin",lga:"Mushin",area:"Mainland / Surulere",lat:6.5218,lng:3.352,r:1100,type:"area"},
+// ─── OSHODI / ISOLO ───────────────────────────────────────
+{id:"oshodi",name:"Oshodi",lga:"Oshodi-Isolo",area:"Mainland / Oshodi",lat:6.5558,lng:3.3286,r:1100,type:"area"},
+{id:"oshodi_bus",name:"Oshodi Bus Stop / Terminal",lga:"Oshodi-Isolo",area:"Mainland / Oshodi",lat:6.555,lng:3.328,r:380,type:"busstop"},
+{id:"isolo",name:"Isolo",lga:"Oshodi-Isolo",area:"Mainland / Oshodi",lat:6.512,lng:3.32,r:1100,type:"area"},
+{id:"ejigbo",name:"Ejigbo",lga:"Oshodi-Isolo",area:"Mainland / Oshodi",lat:6.5054,lng:3.298,r:1000,type:"area"},
+{id:"powerline",name:"Powerline (Oshodi)",lga:"Oshodi-Isolo",area:"Mainland / Oshodi",lat:6.562,lng:3.327,r:600,type:"area"},
+// ─── ALIMOSHO ─────────────────────────────────────────────
+{id:"ikotun",name:"Ikotun",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.511,lng:3.271,r:1200,type:"area"},
+{id:"idimu",name:"Idimu",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.529,lng:3.281,r:1100,type:"area"},
+{id:"isheri",name:"Isheri-Oshun",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.574,lng:3.28,r:1000,type:"area"},
+{id:"shasha",name:"Shasha",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.56,lng:3.29,r:1000,type:"area"},
+{id:"egbe",name:"Egbe",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.538,lng:3.282,r:1000,type:"area"},
+{id:"igando",name:"Igando",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.524,lng:3.265,r:1000,type:"area"},
+{id:"ikotun_egbe_bus",name:"Ikotun / Egbe Bus Stop",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.512,lng:3.272,r:380,type:"busstop"},
+{id:"alimosho",name:"Alimosho",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.588,lng:3.27,r:1400,type:"area"},
+// ─── AMUWO-ODOFIN / FESTAC ────────────────────────────────
+{id:"amuwo",name:"Amuwo Odofin",lga:"Amuwo-Odofin",area:"Mainland / South",lat:6.468,lng:3.306,r:1300,type:"area"},
+{id:"festac",name:"FESTAC Town",lga:"Amuwo-Odofin",area:"Mainland / South",lat:6.467,lng:3.293,r:1100,type:"estate"},
+{id:"satellite",name:"Satellite Town",lga:"Ojo",area:"Mainland / South",lat:6.45,lng:3.28,r:1000,type:"area"},
+{id:"ojo",name:"Ojo",lga:"Ojo",area:"Mainland / South",lat:6.464,lng:3.229,r:1300,type:"area"},
+{id:"ajangbadi",name:"Ajangbadi",lga:"Ojo",area:"Mainland / South",lat:6.44,lng:3.175,r:1200,type:"area"},
+// ─── IKORODU ──────────────────────────────────────────────
+{id:"ikorodu",name:"Ikorodu Town",lga:"Ikorodu",area:"Mainland / Ikorodu",lat:6.619,lng:3.5052,r:1800,type:"area"},
+{id:"ikorodu_bus",name:"Ikorodu Bus Terminus",lga:"Ikorodu",area:"Mainland / Ikorodu",lat:6.617,lng:3.504,r:380,type:"busstop"},
+{id:"benson",name:"Benson / Odogunyan (Ikorodu)",lga:"Ikorodu",area:"Mainland / Ikorodu",lat:6.605,lng:3.51,r:1200,type:"area"},
+{id:"majidun",name:"Majidun",lga:"Ikorodu",area:"Mainland / Ikorodu",lat:6.638,lng:3.528,r:1100,type:"area"},
+{id:"ijede",name:"Ijede",lga:"Ikorodu",area:"Mainland / Ikorodu",lat:6.66,lng:3.55,r:1200,type:"area"},
+{id:"imota",name:"Imota",lga:"Ikorodu",area:"Mainland / Ikorodu",lat:6.64,lng:3.57,r:1000,type:"area"},
+// ─── EPE / BADAGRY ────────────────────────────────────────
+{id:"epe",name:"Epe",lga:"Epe",area:"Outskirts",lat:6.5872,lng:3.98,r:2000,type:"area"},
+{id:"badagry",name:"Badagry",lga:"Badagry",area:"Outskirts",lat:6.414,lng:2.882,r:2000,type:"area"},
 ];
 
-// ═══════════════════════════════════════════════
-// STATE & CONSTANTS
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
+// APP STATE
+// ══════════════════════════════════════════════════════════
 const S={};
 ZONES.forEach(z=>{S[z.id]={score:0,status:"unk",circle:null,lastReport:null}});
 const THR=2.0;
-let karma=140, telemetry={wifi:true,charge:true}, activeFilter=null, toastTmr, gateChoice=null;
+let karma=140,tele={wifi:true,charge:true},activeFilter=null,toastTmr,notifTmr;
+let myZoneId=null; // locked user zone
+let watchlist=new Set(); // watched zone ids
+let currentSroId=null; // zone shown in overlay
 
 const REPORTERS=[
-  {name:"Chidi_Lekki",loc:"Lekki Phase 1",score:96,tier:"g",reports:412,av:"C"},
-  {name:"AbiodunVI",loc:"Victoria Island",score:88,tier:"g",reports:310,av:"A"},
-  {name:"SurulereKing",loc:"Surulere",score:74,tier:"y",reports:198,av:"S"},
-  {name:"IkejaGuy01",loc:"Ikeja Allen",score:71,tier:"y",reports:155,av:"I"},
-  {name:"VGC_Reporter",loc:"VGC",score:61,tier:"y",reports:89,av:"V"},
-  {name:"MarylandBoy",loc:"Maryland",score:38,tier:"r",reports:42,av:"M"},
+ {name:"Chidi_Lekki",loc:"Lekki Phase 1",score:96,tier:"g",reports:412,av:"C"},
+ {name:"AbiodunVI",loc:"Victoria Island",score:88,tier:"g",reports:310,av:"A"},
+ {name:"SurulereKing",loc:"Surulere",score:74,tier:"y",reports:198,av:"S"},
+ {name:"IkejaGuy01",loc:"Ikeja Allen",score:71,tier:"y",reports:155,av:"I"},
+ {name:"VGC_Reporter",loc:"VGC",score:61,tier:"y",reports:89,av:"V"},
+ {name:"MarylandBoy",loc:"Maryland",score:38,tier:"r",reports:42,av:"M"},
 ];
+const CM={on:{s:"#22c55e",f:"#22c55e"},off:{s:"#ef4444",f:"#ef4444"},unk:{s:"#475569",f:"#334155"}};
 
-const C={on:{s:"#22c55e",f:"#22c55e"},off:{s:"#ef4444",f:"#ef4444"},unk:{s:"#475569",f:"#334155"}};
+// ══════════════════════════════════════════════════════════
+// GATE — SEARCHABLE LOCATION INPUT
+// ══════════════════════════════════════════════════════════
+let gateChoice=null,gateZoneId=null;
+const gLocInput=document.getElementById('g-loc-input');
+const gLocSugg=document.getElementById('g-loc-sugg');
 
-// ═══════════════════════════════════════════════
-// GATE
-// ═══════════════════════════════════════════════
-(function initGate(){
-  const sel=document.getElementById('gate-sel');
-  const sorted=[...ZONES].sort((a,b)=>a.name.localeCompare(b.name));
-  sorted.forEach(z=>{const o=document.createElement('option');o.value=z.id;o.textContent=z.name+' ('+z.lga+')';sel.appendChild(o)});
-})();
+gLocInput.addEventListener('input',()=>{
+ const q=gLocInput.value.trim().toLowerCase();
+ gateZoneId=null;
+ document.getElementById('g-btn').classList.remove('ready');
+ if(!q){gLocSugg.className='';gLocSugg.innerHTML='';return;}
+ const hits=ZONES.filter(z=>z.name.toLowerCase().includes(q)||z.lga.toLowerCase().includes(q)).slice(0,8);
+ if(!hits.length){gLocSugg.innerHTML='<div class="g-sugg-item" style="color:#5a6380;cursor:default"><strong>No results</strong><span>Try a different name</span></div>';gLocSugg.className='open';return;}
+ gLocSugg.innerHTML='';
+ hits.forEach(z=>{
+ const item=document.createElement('div');item.className='g-sugg-item';
+ item.innerHTML=`<strong>${z.name}</strong><span>${z.lga} · ${z.area}</span>`;
+ item.addEventListener('click',()=>{gLocInput.value=z.name;gateZoneId=z.id;gLocSugg.className='';gLocSugg.innerHTML='';if(gateChoice&&gateChoice!=='unk')document.getElementById('g-btn').classList.add('ready')});
+ gLocSugg.appendChild(item);
+ });
+ gLocSugg.className='open';
+});
+document.addEventListener('click',e=>{if(!e.target.closest('#g-loc'))gLocSugg.className=''});
 
 function selGate(c){
-  gateChoice=c;
-  ['on','off','unk'].forEach(x=>{
-    document.getElementById('gc-'+x).className='gate-card'+(x===c?' sel-'+x:'');
-    document.getElementById('gck-'+x).textContent=x===c?'✓':'';
-  });
-  document.getElementById('gate-loc').style.display=c!=='unk'?'block':'none';
-  document.getElementById('gate-btn').classList.add('ready');
+ gateChoice=c;
+ ['on','off','unk'].forEach(x=>{
+ document.getElementById('gc-'+x).className='g-card'+(x===c?' s'+x:'');
+ document.getElementById('gck-'+x).textContent=x===c?'✓':'';
+ });
+ const locDiv=document.getElementById('g-loc');
+ locDiv.style.display=c!=='unk'?'block':'none';
+ if(c==='unk'){gateZoneId='__skip';document.getElementById('g-btn').classList.add('ready');}
+ else if(gateZoneId&&gateZoneId!=='__skip') document.getElementById('g-btn').classList.add('ready');
 }
 
 function enterApp(){
-  if(!gateChoice)return;
-  const zId=document.getElementById('gate-sel').value;
-  if(gateChoice!=='unk'&&zId) processVote(zId,gateChoice==='on'?'light_on':'light_off',0.8,true);
-  document.getElementById('gate').style.display='none';
-  document.getElementById('app').classList.add('visible');
-  setTimeout(()=>map.invalidateSize(),300);
+ if(!gateChoice)return;
+ if(gateChoice!=='unk'&&gateZoneId&&gateZoneId!=='__skip'){
+ myZoneId=gateZoneId;
+ processVote(gateZoneId,gateChoice==='on'?'light_on':'light_off',0.9,true);
+ // lock the report panel
+ const z=ZONES.find(x=>x.id===gateZoneId);
+ document.getElementById('rp-zone-name').textContent=z.name;
+ document.getElementById('rbtn-on').disabled=false;
+ document.getElementById('rbtn-off').disabled=false;
+ document.getElementById('mzb-name').textContent=z.name;
+ document.getElementById('my-zone-bar').style.display='flex';
+ }
+ document.getElementById('gate').style.display='none';
+ document.getElementById('app').classList.add('vis');
+ setTimeout(()=>map.invalidateSize(),300);
 }
 
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 // MAP
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 const map=L.map('map').setView([6.52,3.40],12);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'&copy; OpenStreetMap &copy; CARTO',maxZoom:18}).addTo(map);
-
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'&copy; OpenStreetMap &copy; CARTO',maxZoom:19}).addTo(map);
 ZONES.forEach(z=>{
-  const c=C.unk;
-  const circle=L.circle([z.lat,z.lng],{color:c.s,fillColor:c.f,fillOpacity:0.22,radius:z.r,weight:1.5}).addTo(map);
-  circle.bindPopup('');
-  circle.on('click',()=>openMapPopup(z.id));
-  S[z.id].circle=circle;
+ const c=CM.unk;
+ const circle=L.circle([z.lat,z.lng],{color:c.s,fillColor:c.f,fillOpacity:0.22,radius:z.r,weight:1.5}).addTo(map);
+ circle.bindPopup('');
+ circle.on('click',()=>openPopup(z.id));
+ S[z.id].circle=circle;
 });
-
-function openMapPopup(id){
-  const z=ZONES.find(x=>x.id===id),s=S[id];
-  const lbl=s.status==='on'?'💡 Light is ON':s.status==='off'?'🛑 Blackout':'❓ Unknown';
-  const ago=s.lastReport?timeAgo(s.lastReport):'No reports yet';
-  s.circle.setPopupContent(`<div style="font-family:-apple-system,sans-serif;font-size:13px;min-width:170px"><b style="font-size:14px">${z.name}</b><span style="display:block;font-size:11px;color:#888;margin:2px 0 5px">${z.lga} · ${z.area}</span><span style="display:block;margin-bottom:3px">${lbl}</span><span style="color:#888;font-size:11px">Score: ${s.score.toFixed(1)} · ${ago}</span></div>`).openPopup();
-  showSro(id);
+function openPopup(id){
+ const z=ZONES.find(x=>x.id===id),s=S[id];
+ const lbl=s.status==='on'?' Light is ON':s.status==='off'?' Blackout':' Unknown';
+ const ago=s.lastReport?timeAgo(s.lastReport):'No reports yet';
+ s.circle.setPopupContent(`<div style="font-family:-apple-system,sans-serif;font-size:13px;min-width:175px"><b style="font-size:14px">${z.name}</b><span style="display:block;font-size:10px;color:#888;margin:2px 0 5px">${z.lga} · ${z.type}</span><span style="display:block;margin-bottom:3px">${lbl}</span><span style="color:#888;font-size:11px">Score: ${s.score.toFixed(1)} · ${ago}</span></div>`).openPopup();
+ showSro(id);
 }
 
-// ═══════════════════════════════════════════════
-// SIDEBAR
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
+// SIDEBAR BUILD
+// ══════════════════════════════════════════════════════════
 function buildSidebar(q='',sf=null){
-  const wrap=document.getElementById('zone-list'),selZ=document.getElementById('sel-z');
-  wrap.innerHTML=''; selZ.innerHTML='';
-  const areas=[...new Set(ZONES.map(z=>z.area))];
-  let total=0;
-  areas.forEach(area=>{
-    let list=ZONES.filter(z=>z.area===area&&(
-      z.name.toLowerCase().includes(q.toLowerCase())||
-      z.lga.toLowerCase().includes(q.toLowerCase())||
-      z.area.toLowerCase().includes(q.toLowerCase())
-    ));
-    if(sf) list=list.filter(z=>S[z.id].status===sf);
-    if(!list.length)return;
-    const lbl=document.createElement('div');lbl.className='zsec';lbl.textContent=area;wrap.appendChild(lbl);
-    list.forEach(z=>{
-      const s=S[z.id],dot=s.status==='on'?'on':s.status==='off'?'off':'unk';
-      const badge=s.status==='on'?'<span class="zb zb-on">Light On</span>':s.status==='off'?'<span class="zb zb-off">Blackout</span>':'<span class="zb zb-unk">Unknown</span>';
-      const ago=s.lastReport?timeAgo(s.lastReport):'No reports';
-      const card=document.createElement('div');card.className='zcard';card.id='zc-'+z.id;
-      card.innerHTML=`<div class="zdot ${dot}"></div><div class="zi"><div class="zn">${z.name}</div><div class="zm">${z.lga} · ${ago}</div></div>${badge}`;
-      card.addEventListener('click',()=>{map.setView([z.lat,z.lng],14);openMapPopup(z.id)});
-      wrap.appendChild(card);total++;
-      const opt=document.createElement('option');opt.value=z.id;opt.textContent=z.name;selZ.appendChild(opt);
-    });
-  });
-  if(!total) wrap.innerHTML=`<div class="empty"><div class="ei">🔍</div>No results for "<strong>${q}</strong>"<br><small>Try a different name or LGA</small></div>`;
+ const wrap=document.getElementById('zl');
+ wrap.innerHTML='';
+ const areas=[...new Set(ZONES.map(z=>z.area))];
+ let total=0;
+ areas.forEach(area=>{
+ let list=ZONES.filter(z=>z.area===area&&(
+ z.name.toLowerCase().includes(q.toLowerCase())||
+ z.lga.toLowerCase().includes(q.toLowerCase())||
+ z.type.toLowerCase().includes(q.toLowerCase())
+ ));
+ if(sf)list=list.filter(z=>S[z.id].status===sf);
+ if(!list.length)return;
+ const lbl=document.createElement('div');lbl.className='zsec';lbl.textContent=area;wrap.appendChild(lbl);
+ list.forEach(z=>{
+ const s=S[z.id],dot=s.status==='on'?'on':s.status==='off'?'off':'unk';
+ const badge=s.status==='on'?'<span class="zb on">Light On</span>':s.status==='off'?'<span class="zb off">Blackout</span>':'<span class="zb unk">?</span>';
+ const ago=s.lastReport?timeAgo(s.lastReport):'—';
+ const card=document.createElement('div');card.className='zc';card.id='zc-'+z.id;
+ const typeIcon=z.type==='estate'?' ':z.type==='busstop'?' ':z.type==='street'?' ':z.type==='landmark'?' ':' ';
+ card.innerHTML=`<div class="zd ${dot}"></div><div class="zi"><div class="zn">${typeIcon} ${z.name}</div><div class="zm">${z.lga} · ${ago}</div></div>${badge}`;
+ card.addEventListener('click',()=>{map.setView([z.lat,z.lng],15);openPopup(z.id)});
+ wrap.appendChild(card);total++;
+ });
+ });
+ if(!total)wrap.innerHTML=`<div class="empty"><div class="ei"> </div>No results for "<b>${q}</b>"<br><small>Try area, estate, bus stop name</small></div>`;
+ // Also repopulate the report zone select (just for internal use, UI is locked)
 }
-
 function refreshCard(id){
-  const card=document.getElementById('zc-'+id);if(!card)return;
-  const z=ZONES.find(x=>x.id===id),s=S[id];
-  const dot=s.status==='on'?'on':s.status==='off'?'off':'unk';
-  const badge=s.status==='on'?'<span class="zb zb-on">Light On</span>':s.status==='off'?'<span class="zb zb-off">Blackout</span>':'<span class="zb zb-unk">Unknown</span>';
-  const ago=s.lastReport?timeAgo(s.lastReport):'No reports';
-  card.innerHTML=`<div class="zdot ${dot}"></div><div class="zi"><div class="zn">${z.name}</div><div class="zm">${z.lga} · ${ago}</div></div>${badge}`;
-  card.addEventListener('click',()=>{map.setView([z.lat,z.lng],14);openMapPopup(z.id)});
+ const card=document.getElementById('zc-'+id);if(!card)return;
+ const z=ZONES.find(x=>x.id===id),s=S[id];
+ const dot=s.status==='on'?'on':s.status==='off'?'off':'unk';
+ const badge=s.status==='on'?'<span class="zb on">Light On</span>':s.status==='off'?'<span class="zb off">Blackout</span>':'<span class="zb unk">?</span>';
+ const ago=s.lastReport?timeAgo(s.lastReport):'—';
+ const typeIcon=z.type==='estate'?' ':z.type==='busstop'?' ':z.type==='street'?' ':z.type==='landmark'?' ':' ';
+ card.innerHTML=`<div class="zd ${dot}"></div><div class="zi"><div class="zn">${typeIcon} ${z.name}</div><div class="zm">${z.lga} · ${ago}</div></div>${badge}`;
+ card.addEventListener('click',()=>{map.setView([z.lat,z.lng],15);openPopup(z.id)});
 }
 
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 // FILTER PILLS
-// ═══════════════════════════════════════════════
-function filterSt(st){
-  if(activeFilter===st){activeFilter=null;['on','off','unk'].forEach(s=>document.getElementById('pill-'+s).className='stat-pill');buildSidebar('');}
-  else{activeFilter=st;['on','off','unk'].forEach(s=>document.getElementById('pill-'+s).className='stat-pill'+(s===st?' f'+s:''));buildSidebar('',st);}
-  document.getElementById('srch').value='';
+// ══════════════════════════════════════════════════════════
+function filt(st){
+ if(activeFilter===st){activeFilter=null;['on','off','unk'].forEach(s=>document.getElementById('sp-'+s).className='sp');buildSidebar('');}
+ else{activeFilter=st;['on','off','unk'].forEach(s=>document.getElementById('sp-'+s).className='sp'+(s===st?' f'+s:''));buildSidebar('',st);}
+ document.getElementById('srch').value='';
 }
 
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 // STATS
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 function updateStats(){
-  const v=Object.values(S);
-  document.getElementById('stat-on').textContent=v.filter(s=>s.status==='on').length;
-  document.getElementById('stat-off').textContent=v.filter(s=>s.status==='off').length;
-  document.getElementById('stat-unk').textContent=v.filter(s=>s.status==='unk').length;
+ const v=Object.values(S);
+ document.getElementById('st-on').textContent=v.filter(s=>s.status==='on').length;
+ document.getElementById('st-off').textContent=v.filter(s=>s.status==='off').length;
+ document.getElementById('st-unk').textContent=v.filter(s=>s.status==='unk').length;
 }
 
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 // SEARCH + SUGGESTIONS
-// ═══════════════════════════════════════════════
-const srch=document.getElementById('srch'),sugg=document.getElementById('sugg');
+// ══════════════════════════════════════════════════════════
+const srch=document.getElementById('srch'),sg=document.getElementById('sg');
 srch.addEventListener('input',e=>{
-  const q=e.target.value.trim();
-  activeFilter=null;['on','off','unk'].forEach(s=>document.getElementById('pill-'+s).className='stat-pill');
-  if(!q){sugg.className='';sugg.innerHTML='';buildSidebar('');closeSro();return;}
-  const hits=ZONES.filter(z=>z.name.toLowerCase().includes(q.toLowerCase())||z.lga.toLowerCase().includes(q.toLowerCase())||z.area.toLowerCase().includes(q.toLowerCase())).slice(0,10);
-  if(hits.length){
-    sugg.innerHTML='';
-    hits.forEach(z=>{
-      const s=S[z.id],dot=s.status==='on'?'on':s.status==='off'?'off':'unk';
-      const stxt=s.status==='on'?'Light On':s.status==='off'?'Blackout':'Unknown';
-      const item=document.createElement('div');item.className='si';
-      item.innerHTML=`<div class="si-dot ${dot}"></div><span class="si-name">${z.name}</span><span class="si-area">${z.lga} · ${stxt}</span>`;
-      item.addEventListener('click',()=>{srch.value=z.name;sugg.className='';sugg.innerHTML='';map.setView([z.lat,z.lng],14);openMapPopup(z.id);buildSidebar(z.name)});
-      sugg.appendChild(item);
-    });
-    sugg.className='open';
-  } else {
-    sugg.innerHTML=`<div class="si" style="color:var(--muted2);cursor:default">No results for "${q}"</div>`;
-    sugg.className='open';
-  }
-  buildSidebar(q);
+ const q=e.target.value.trim();
+ activeFilter=null;['on','off','unk'].forEach(s=>document.getElementById('sp-'+s).className='sp');
+ if(!q){sg.className='';sg.innerHTML='';buildSidebar('');closeSro();return;}
+ const hits=ZONES.filter(z=>z.name.toLowerCase().includes(q.toLowerCase())||z.lga.toLowerCase().includes(q.toLowerCase())||z.type.toLowerCase().includes(q.toLowerCase())).slice(0,10);
+ sg.innerHTML='';
+ if(hits.length){
+ hits.forEach(z=>{
+ const s=S[z.id],dot=s.status==='on'?'on':s.status==='off'?'off':'unk';
+ const stxt=s.status==='on'?'Light On':s.status==='off'?'Blackout':'Unknown';
+ const item=document.createElement('div');item.className='si';
+ item.innerHTML=`<div class="si-dot ${dot}"></div><span class="si-name">${z.name}</span><span class="si-lga">${z.lga} · ${stxt}</span>`;
+ item.addEventListener('click',()=>{srch.value=z.name;sg.className='';sg.innerHTML='';map.setView([z.lat,z.lng],15);openPopup(z.id);buildSidebar(z.name)});
+ sg.appendChild(item);
+ });
+ }else{sg.innerHTML=`<div class="si" style="color:var(--mu2);cursor:default"><span class="si-name">No results for "${q}"</span></div>`;}
+ sg.className='open';
+ buildSidebar(q);
 });
-document.addEventListener('click',e=>{if(!e.target.closest('.srch-wrap'))sugg.className=''});
+document.addEventListener('click',e=>{if(!e.target.closest('.sw'))sg.className=''});
 
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 // SEARCH RESULT OVERLAY
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 function showSro(id){
-  const z=ZONES.find(x=>x.id===id),s=S[id],el=document.getElementById('sro');
-  document.getElementById('sro-name').textContent=z.name;
-  if(s.status==='on'){
-    document.getElementById('sro-icon').innerHTML='<svg width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="31" fill="rgba(34,197,94,.12)" stroke="#22c55e" stroke-width="1.5"/><text x="32" y="44" text-anchor="middle" font-size="30">💡</text></svg>';
-    document.getElementById('sro-status').innerHTML='<span style="color:#22c55e;font-size:20px;font-weight:900">UpNEPA! 🎉</span>';
-    document.getElementById('sro-meta').textContent='Light is currently ON in '+z.name;
-    el.style.borderColor='#22c55e';
-  } else if(s.status==='off'){
-    document.getElementById('sro-icon').innerHTML='<svg width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="31" fill="rgba(239,68,68,.12)" stroke="#ef4444" stroke-width="1.5"/><text x="32" y="30" text-anchor="middle" font-size="18">🔌✂️</text><text x="32" y="50" text-anchor="middle" font-size="20">🦟</text></svg>';
-    document.getElementById('sro-status').innerHTML='<span style="color:#ef4444;font-size:19px;font-weight:900">No Light 😩</span>';
-    document.getElementById('sro-meta').textContent='Blackout reported in '+z.name+'. Generator on!';
-    el.style.borderColor='#ef4444';
-  } else {
-    document.getElementById('sro-icon').innerHTML='<svg width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="31" fill="rgba(100,116,139,.12)" stroke="#64748b" stroke-width="1.5"/><text x="32" y="44" text-anchor="middle" font-size="30">❓</text></svg>';
-    document.getElementById('sro-status').innerHTML='<span style="color:#64748b;font-size:17px;font-weight:700">Status Unknown</span>';
-    document.getElementById('sro-meta').textContent='No recent reports for '+z.name+'. Be the first!';
-    el.style.borderColor='#334155';
-  }
-  el.className='vis';
+ currentSroId=id;
+ const z=ZONES.find(x=>x.id===id),s=S[id],el=document.getElementById('sro');
+ document.getElementById('sro-nm').textContent=z.name;
+ if(s.status==='on'){
+ document.getElementById('sro-icon').innerHTML='<svg width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="30" r="29" fill="rgba(34,197,94,.12)" stroke="#22c55e" stroke-width="1.5"/><text x="30" y="42" text-anchor="middle" font-size="28"> </text></svg>';
+ document.getElementById('sro-st').innerHTML='<span style="color:#22c55e;font-size:19px;font-weight:900">UpNEPA! </span>';
+ document.getElementById('sro-mt').textContent='Light is currently ON in '+z.name;
+ el.style.borderColor='#22c55e';
+ } else if(s.status==='off'){
+ document.getElementById('sro-icon').innerHTML='<svg width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="30" r="29" fill="rgba(239,68,68,.12)" stroke="#ef4444" stroke-width="1.5"/><text x="30" y="28" text-anchor="middle" font-size="18"> </text><text x="30" y="48" text-anchor="middle" font-size="20"> </text></svg>';
+ document.getElementById('sro-st').innerHTML='<span style="color:#ef4444;font-size:18px;font-weight:900">No Light </span>';
+ document.getElementById('sro-mt').textContent='Blackout in '+z.name+'. Generator on!';
+ el.style.borderColor='#ef4444';
+ } else {
+ document.getElementById('sro-icon').innerHTML='<svg width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="30" r="29" fill="rgba(100,116,139,.12)" stroke="#64748b" stroke-width="1.5"/><text x="30" y="42" text-anchor="middle" font-size="28"> </text></svg>';
+ document.getElementById('sro-st').innerHTML='<span style="color:#64748b;font-size:17px;font-weight:700">Status Unknown</span>';
+ document.getElementById('sro-mt').textContent='No recent reports for '+z.name;
+ el.style.borderColor='#334155';
+ }
+ const wb=document.getElementById('sro-watch');
+ if(watchlist.has(id)){wb.className='watch-btn watching';wb.textContent=' Watching — tap to remove';}
+ else{wb.className='watch-btn';wb.textContent=' Notify me when light returns';}
+ el.className='vis';
 }
-function closeSro(){document.getElementById('sro').className=''}
+function closeSro(){document.getElementById('sro').className='';currentSroId=null;}
 
-// ═══════════════════════════════════════════════
-// CORE CONSENSUS ENGINE
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
+// CONSENSUS ENGINE
+// ══════════════════════════════════════════════════════════
 function processVote(zId,vote,weight,silent=false){
-  const s=S[zId],z=ZONES.find(x=>x.id===zId),dir=vote==='light_on'?1:-1;
-  s.score+=dir*weight; s.lastReport=new Date();
-  const prev=s.status;
-  s.status=s.score>=THR?'on':s.score<=-THR?'off':'unk';
-  const c=C[s.status];
-  s.circle.setStyle({color:c.s,fillColor:c.f,fillOpacity:0.3});
-  refreshCard(zId); updateStats();
-  if(!silent){
-    if(s.status!==prev&&s.status!=='unk') showToast(s.status==='on'?`💡 Light confirmed in ${z.name}!`:`🛑 Blackout in ${z.name}`,s.status==='on'?'ton':'toff');
-    addFeed(z.name,vote,weight);
-    const sro=document.getElementById('sro');
-    if(sro.classList.contains('vis')&&document.getElementById('sro-name').textContent===z.name) showSro(zId);
-  }
-  setTimeout(()=>{s.score-=dir*weight*.5;s.status=s.score>=THR?'on':s.score<=-THR?'off':'unk';const c2=C[s.status];s.circle.setStyle({color:c2.s,fillColor:c2.f,fillOpacity:0.22});refreshCard(zId);updateStats()},30000);
+ const s=S[zId],z=ZONES.find(x=>x.id===zId),dir=vote==='light_on'?1:-1;
+ s.score+=dir*weight;s.lastReport=new Date();
+ const prev=s.status;
+ s.status=s.score>=THR?'on':s.score<=-THR?'off':'unk';
+ const c=CM[s.status];
+ s.circle.setStyle({color:c.s,fillColor:c.f,fillOpacity:0.3});
+ refreshCard(zId);updateStats();
+ if(!silent){
+ if(s.status!==prev&&s.status!=='unk'){
+ showToast(s.status==='on'?` Light confirmed in ${z.name}!`:` Blackout in ${z.name}`,s.status==='on'?'ton':'toff');
+ // Check watchlist
+ if(s.status==='on'&&watchlist.has(zId)) triggerNotif(z.name);
+ }
+ addFeed(z.name,vote,weight);
+ if(currentSroId===zId) showSro(zId);
+ }
+ setTimeout(()=>{
+ s.score-=dir*weight*.5;
+ const pr=s.status;
+ s.status=s.score>=THR?'on':s.score<=-THR?'off':'unk';
+ if(s.status!==pr){const c2=CM[s.status];s.circle.setStyle({color:c2.s,fillColor:c2.f,fillOpacity:0.22});refreshCard(zId);updateStats();}
+ },30000);
 }
 
+// ══════════════════════════════════════════════════════════
+// REPORT — LOCKED TO USER'S ZONE
+// ══════════════════════════════════════════════════════════
 function submitR(vote){
-  const zId=document.getElementById('sel-z').value,w=parseFloat(document.getElementById('sel-t').value);
-  if(!zId)return;
-  processVote(zId,vote,w);
-  karma+=w>=0.9?10:w>=0.3?5:2;
-  document.getElementById('karma').textContent=Math.round(karma)+' XP';
+ if(!myZoneId){showToast('Set your zone at the gate first','twa');return;}
+ processVote(myZoneId,vote,1.0);
+ karma+=10;document.getElementById('karma').textContent=Math.round(karma)+' XP';
 }
 
-function toggleT(type){
-  telemetry[type]=!telemetry[type];
-  const btn=document.getElementById('btn-'+type),v=document.getElementById(type==='wifi'?'wv':'cv');
-  v.textContent=telemetry[type]?'ON':'OFF';
-  btn.className='tbtn '+(telemetry[type]?'tok':'tbad');
-  if(!telemetry.wifi&&!telemetry.charge){const zId=document.getElementById('sel-z').value;if(zId)processVote(zId,'light_off',0.35)}
+function togT(type){
+ tele[type]=!tele[type];
+ const btn=document.getElementById('btn-'+type),v=document.getElementById(type==='wifi'?'wv':'cv');
+ v.textContent=tele[type]?'ON':'OFF';
+ btn.className='tb '+(tele[type]?'tok':'tbad');
+ if(!tele.wifi&&!tele.charge&&myZoneId) processVote(myZoneId,'light_off',0.35);
 }
 
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
+// WATCHLIST
+// ══════════════════════════════════════════════════════════
+function toggleWatch(){
+ if(!currentSroId)return;
+ if(watchlist.has(currentSroId)){
+ watchlist.delete(currentSroId);
+ showToast('Removed from watchlist','twa');
+ } else {
+ watchlist.add(currentSroId);
+ showToast('Added to watchlist — we'll alert you when light returns ','ton');
+ }
+ updateWatchlistUI();
+ showSro(currentSroId);
+}
+function updateWatchlistUI(){
+ document.getElementById('wl-cnt').textContent=watchlist.size;
+ const body=document.getElementById('wl-body');
+ if(!watchlist.size){body.innerHTML='<div class="wl-empty">No areas watched yet.<br>Search an area and tap </div>';return;}
+ body.innerHTML='';
+ watchlist.forEach(id=>{
+ const z=ZONES.find(x=>x.id===id),s=S[id];
+ const dot=s.status==='on'?' ':s.status==='off'?' ':' ';
+ const item=document.createElement('div');item.className='wl-item';
+ item.innerHTML=`<span>${dot}</span><span class="wl-nm">${z.name}</span><button class="wl-rm" onclick="removeWatch('${id}')">×</button>`;
+ body.appendChild(item);
+ });
+}
+function removeWatch(id){watchlist.delete(id);updateWatchlistUI();if(currentSroId===id)showSro(id);}
+function togWatch(){const wp=document.getElementById('wp');wp.className=wp.classList.contains('open')?'':'open';document.getElementById('pp').className='';}
+
+// ══════════════════════════════════════════════════════════
+// NOTIFICATION POPUP (simulated push)
+// ══════════════════════════════════════════════════════════
+function triggerNotif(zoneName){
+ document.getElementById('notif-nm').textContent=zoneName;
+ document.getElementById('notif-st').textContent='Light just came on — reported by multiple users.';
+ document.getElementById('notif').className='show';
+ clearTimeout(notifTmr);notifTmr=setTimeout(closeNotif,6000);
+}
+function closeNotif(){document.getElementById('notif').className=''}
+
+// ══════════════════════════════════════════════════════════
 // PROFILES
-// ═══════════════════════════════════════════════
-(function buildProfiles(){
-  const list=document.getElementById('prof-list');
-  REPORTERS.forEach(r=>{
-    const tc={g:'pav-g',y:'pav-y',r:'pav-r'}[r.tier],bc={g:'psb-g',y:'psb-y',r:'psb-r'}[r.tier],tl={g:'🟢',y:'🟡',r:'🔴'}[r.tier];
-    const item=document.createElement('div');item.className='pi';
-    item.innerHTML=`<div class="pav ${tc}">${r.av}</div><div class="pinfo"><div class="pname">${r.name}</div><div class="ploc">📍 ${r.loc} · ${r.reports} reports</div></div><span class="psb ${bc}">${tl} ${r.score}%</span>`;
-    list.appendChild(item);
-  });
+// ══════════════════════════════════════════════════════════
+(function(){
+ const list=document.getElementById('pp-list');
+ REPORTERS.forEach(r=>{
+ const tc={g:'pg',y:'py',r:'pr'}[r.tier],bc={g:'sbg',y:'sby',r:'sbr'}[r.tier],tl={g:' ',y:' ',r:' '}[r.tier];
+ const item=document.createElement('div');item.className='pi';
+ item.innerHTML=`<div class="pav ${tc}">${r.av}</div><div class="pinf"><div class="pnm">${r.name}</div><div class="plc"> ${r.loc} · ${r.reports} reports</div></div><span class="psb ${bc}">${tl} ${r.score}%</span>`;
+ list.appendChild(item);
+ });
 })();
-function toggleProf(){const p=document.getElementById('prof-panel');p.className=p.classList.contains('open')?'':'open'}
-document.addEventListener('click',e=>{if(!e.target.closest('#prof-panel')&&!e.target.closest('#prof-btn'))document.getElementById('prof-panel').className=''});
+function togProf(){const p=document.getElementById('pp');p.className=p.classList.contains('open')?'':'open';document.getElementById('wp').className='';}
+document.addEventListener('click',e=>{
+ if(!e.target.closest('#pp')&&!e.target.closest('#pb'))document.getElementById('pp').className='';
+ if(!e.target.closest('#wp')&&!e.target.closest('#wbtn'))document.getElementById('wp').className='';
+});
 
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 // FEED
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 function addFeed(zone,vote,w){
-  const body=document.getElementById('feed-body'),isOn=vote==='light_on',now=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-  const ph=body.querySelector('.fi');if(ph&&ph.textContent.includes('Waiting'))ph.remove();
-  const item=document.createElement('div');item.className='fi';
-  item.innerHTML=`${isOn?'💡':'🛑'} <span class="${isOn?'fon':'foff'}">${isOn?'Light On':'Blackout'}</span> · ${zone} <span style="color:var(--muted);float:right">${now}</span>`;
-  body.insertBefore(item,body.firstChild);
-  while(body.children.length>20)body.removeChild(body.lastChild);
+ const body=document.getElementById('fd-body'),isOn=vote==='light_on',now=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+ const ph=body.querySelector('.fi');if(ph&&ph.textContent.includes('Waiting'))ph.remove();
+ const item=document.createElement('div');item.className='fi';
+ item.innerHTML=`${isOn?' ':' '} <span class="${isOn?'fon':'foff'}">${isOn?'Light On':'Blackout'}</span> · ${zone} <span style="color:var(--mu);float:right">${now}</span>`;
+ body.insertBefore(item,body.firstChild);
+ while(body.children.length>20)body.removeChild(body.lastChild);
 }
 
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 // TOAST
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 function showToast(msg,cls=''){
-  const t=document.getElementById('toast');t.textContent=msg;t.className='show '+cls;
-  clearTimeout(toastTmr);toastTmr=setTimeout(()=>t.className='',4500);
+ const t=document.getElementById('toast');t.textContent=msg;t.className='show '+cls;
+ clearTimeout(toastTmr);toastTmr=setTimeout(()=>t.className='',4500);
 }
-
 function timeAgo(d){const s=Math.floor((Date.now()-d)/1000);return s<60?s+'s ago':s<3600?Math.floor(s/60)+'m ago':Math.floor(s/3600)+'h ago'}
 setInterval(()=>ZONES.forEach(z=>{if(S[z.id].lastReport)refreshCard(z.id)}),30000);
 
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 // SEED DEMO DATA
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 const seeds=[
-  {id:'lekki1',v:'light_on',w:1},{id:'lekki1',v:'light_on',w:1},{id:'vi',v:'light_on',w:1},{id:'vi',v:'light_on',w:1},
-  {id:'ikoyi',v:'light_on',w:1},{id:'ikoyi',v:'light_on',w:1},{id:'banana',v:'light_on',w:1},{id:'banana',v:'light_on',w:1},
-  {id:'vgc',v:'light_on',w:1},{id:'vgc',v:'light_on',w:1},{id:'osapa',v:'light_on',w:1},{id:'osapa',v:'light_on',w:1},
-  {id:'chevron',v:'light_on',w:1},{id:'chevron',v:'light_on',w:1},{id:'ikeja',v:'light_on',w:1},{id:'ikeja',v:'light_on',w:1},
-  {id:'ikejaGRA',v:'light_on',w:1},{id:'ikejaGRA',v:'light_on',w:1},{id:'parkview',v:'light_on',w:1},{id:'parkview',v:'light_on',w:1},
-  {id:'festac',v:'light_on',w:1},{id:'festac',v:'light_on',w:.4},{id:'nicon',v:'light_on',w:1},{id:'nicon',v:'light_on',w:1},
-  {id:'chevyview',v:'light_on',w:1},{id:'chevyview',v:'light_on',w:1},{id:'vi_1004',v:'light_on',w:1},{id:'vi_1004',v:'light_on',w:1},
-  {id:'omole1',v:'light_on',w:1},{id:'omole1',v:'light_on',w:1},{id:'magodo1',v:'light_on',w:1},{id:'magodo1',v:'light_on',w:1},
-  {id:'gbagada',v:'light_on',w:.4},{id:'gbagada',v:'light_on',w:.4},{id:'maryland',v:'light_on',w:1},{id:'maryland',v:'light_on',w:1},
-  {id:'surulere',v:'light_off',w:1},{id:'surulere',v:'light_off',w:1},{id:'yaba',v:'light_off',w:1},{id:'yaba',v:'light_off',w:1},
-  {id:'agege',v:'light_off',w:1},{id:'agege',v:'light_off',w:1},{id:'mushin',v:'light_off',w:1},{id:'mushin',v:'light_off',w:1},
-  {id:'oshodi',v:'light_off',w:1},{id:'oshodi',v:'light_off',w:1},{id:'isolo',v:'light_off',w:1},{id:'isolo',v:'light_off',w:1},
-  {id:'mile12',v:'light_off',w:1},{id:'mile12',v:'light_off',w:.4},{id:'ikotun',v:'light_off',w:.4},
-  {id:'amuwo',v:'light_on',w:.4},{id:'ajah',v:'light_on',w:.4},
+ {id:'lekki1',v:'light_on',w:1},{id:'lekki1',v:'light_on',w:1},
+ {id:'vi',v:'light_on',w:1},{id:'vi',v:'light_on',w:1},
+ {id:'ikoyi',v:'light_on',w:1},{id:'ikoyi',v:'light_on',w:1},
+ {id:'banana',v:'light_on',w:1},{id:'banana',v:'light_on',w:1},
+ {id:'vgc',v:'light_on',w:1},{id:'vgc',v:'light_on',w:1},
+ {id:'osapa',v:'light_on',w:1},{id:'osapa',v:'light_on',w:1},
+ {id:'chevron',v:'light_on',w:1},{id:'chevron',v:'light_on',w:1},
+ {id:'ikeja',v:'light_on',w:1},{id:'ikeja',v:'light_on',w:1},
+ {id:'ikejaGRA',v:'light_on',w:1},{id:'ikejaGRA',v:'light_on',w:1},
+ {id:'parkview',v:'light_on',w:1},{id:'parkview',v:'light_on',w:1},
+ {id:'festac',v:'light_on',w:1},{id:'festac',v:'light_on',w:.4},
+ {id:'nicon',v:'light_on',w:1},{id:'nicon',v:'light_on',w:1},
+ {id:'chevyview',v:'light_on',w:1},{id:'chevyview',v:'light_on',w:1},
+ {id:'vi_1004',v:'light_on',w:1},{id:'vi_1004',v:'light_on',w:1},
+ {id:'omole1',v:'light_on',w:1},{id:'omole1',v:'light_on',w:1},
+ {id:'magodo1',v:'light_on',w:1},{id:'magodo1',v:'light_on',w:1},
+ {id:'maryland',v:'light_on',w:1},{id:'maryland',v:'light_on',w:1},
+ {id:'gbagada',v:'light_on',w:.4},{id:'gbagada',v:'light_on',w:.4},
+ {id:'surulere',v:'light_off',w:1},{id:'surulere',v:'light_off',w:1},
+ {id:'yaba',v:'light_off',w:1},{id:'yaba',v:'light_off',w:1},
+ {id:'agege',v:'light_off',w:1},{id:'agege',v:'light_off',w:1},
+ {id:'mushin',v:'light_off',w:1},{id:'mushin',v:'light_off',w:1},
+ {id:'oshodi',v:'light_off',w:1},{id:'oshodi',v:'light_off',w:1},
+ {id:'isolo',v:'light_off',w:1},{id:'isolo',v:'light_off',w:1},
+ {id:'mile12',v:'light_off',w:1},{id:'mile12',v:'light_off',w:.4},
+ {id:'ajah',v:'light_on',w:.4},{id:'awoyaya',v:'light_on',w:.4},
+ {id:'amuwo',v:'light_on',w:.4},{id:'ikotun',v:'light_off',w:.4},
 ];
-seeds.forEach((s,i)=>setTimeout(()=>processVote(s.id,s.v,s.w,true),i*40));
-setTimeout(()=>{buildSidebar();updateStats()},seeds.length*40+200);
-
-buildSidebar(); updateStats();
+seeds.forEach((s,i)=>setTimeout(()=>processVote(s.id,s.v,s.w,true),i*35));
+setTimeout(()=>{buildSidebar();updateStats()},seeds.length*35+200);
+buildSidebar();updateStats();
 </script>
 </body>
 </html>
-
