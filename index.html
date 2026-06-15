@@ -1,693 +1,753 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NEPA Dey! — Crowdsourced Grid Telemetry</title>
-  
-  <!-- Leaflet Maps CSS -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
-  
-  <style>
-    :root {
-      --bg-dark: #0f172a;
-      --card-bg: #1e293b;
-      --accent-neon: #10b981;
-      --accent-dim: #047857;
-      --alert-red: #ef4444;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --border-slate: #334155;
-    }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GridPulse Lagos – Live Power Map</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0d12;--surface:#13161f;--surface2:#1a1e2b;--surface3:#222636;
+  --border:#272b3a;--border2:#31364a;
+  --text:#e4e8f1;--muted:#5a6380;--muted2:#7a859e;
+  --on:#16a34a;--on-light:#22c55e;--on-glow:rgba(34,197,94,.15);
+  --off:#dc2626;--off-light:#ef4444;--off-glow:rgba(239,68,68,.15);
+  --unk:#3b4563;--unk-light:#64748b;
+  --warn:#d97706;--warn-light:#f59e0b;
+  --accent:#4f46e5;--accent-light:#6366f1;
+  --sidebar-w:330px;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+}
+html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;overflow:hidden}
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
+/* GATE */
+#gate{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#080a10 0%,#0f1320 50%,#080a10 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+.gate-logo{font-size:42px;margin-bottom:8px;filter:drop-shadow(0 0 20px rgba(34,197,94,.5))}
+.gate-title{font-size:26px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px}
+.gate-title span{color:var(--on-light)}
+.gate-sub{font-size:13px;color:var(--muted2);margin-bottom:28px;text-align:center;max-width:300px;line-height:1.6}
+.gate-prompt{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:14px;font-weight:600}
+.gate-cards{display:flex;flex-direction:column;gap:10px;width:100%;max-width:360px;margin-bottom:20px}
+.gate-card{background:var(--surface);border:2px solid var(--border2);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:border-color .2s,background .2s,transform .15s;position:relative}
+.gate-card:hover{background:var(--surface2);transform:translateY(-1px)}
+.gate-card.sel-on {border-color:var(--on-light);background:rgba(34,197,94,.07)}
+.gate-card.sel-off{border-color:var(--off-light);background:rgba(239,68,68,.07)}
+.gate-card.sel-unk{border-color:var(--warn-light);background:rgba(245,158,11,.07)}
+.gate-card-icon{font-size:26px;width:40px;text-align:center;flex-shrink:0}
+.gate-card h4{font-size:14px;font-weight:700;margin-bottom:2px}
+.gate-card p{font-size:11px;color:var(--muted2);line-height:1.4}
+.gate-chk{width:20px;height:20px;border-radius:5px;border:2px solid var(--border2);position:absolute;right:14px;top:50%;transform:translateY(-50%);display:flex;align-items:center;justify-content:center;font-size:12px;transition:.15s}
+.gate-card.sel-on  .gate-chk{background:var(--on-light);border-color:var(--on-light);color:#000}
+.gate-card.sel-off .gate-chk{background:var(--off-light);border-color:var(--off-light);color:#fff}
+.gate-card.sel-unk .gate-chk{background:var(--warn-light);border-color:var(--warn-light);color:#000}
+#gate-loc{width:100%;max-width:360px;margin-bottom:16px;display:none}
+#gate-loc label{font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px}
+#gate-sel{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:10px 14px;color:var(--text);font-size:13px;outline:none}
+#gate-btn{background:var(--on-light);color:#000;font-weight:800;font-size:14px;border:none;border-radius:12px;padding:13px 40px;cursor:pointer;opacity:.35;pointer-events:none;transition:.2s;letter-spacing:.3px}
+#gate-btn.ready{opacity:1;pointer-events:all}
+#gate-btn.ready:hover{background:#1adb6a}
+.gate-note{font-size:11px;color:var(--muted);margin-top:10px;text-align:center}
 
-    body {
-      background-color: var(--bg-dark);
-      color: var(--text-main);
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      overflow: hidden;
-    }
+/* APP */
+#app{display:flex;height:100vh;overflow:hidden;opacity:0;transition:opacity .5s}
+#app.visible{opacity:1}
 
-    header {
-      background-color: #0b1329;
-      padding: 1rem 1.5rem;
-      border-bottom: 1px solid var(--border-slate);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      z-index: 10;
-    }
+/* SIDEBAR */
+#sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;z-index:100}
+#sid-hdr{padding:14px 14px 10px;border-bottom:1px solid var(--border);flex-shrink:0}
+.brand{display:flex;align-items:center;gap:9px;margin-bottom:12px}
+.brand-name{font-size:16px;font-weight:800;letter-spacing:-.3px}
+.brand-name em{color:var(--on-light);font-style:normal}
+.stat-row{display:flex;gap:5px;margin-bottom:10px}
+.stat-pill{flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:9px;padding:8px 6px;text-align:center;cursor:pointer;transition:.15s;user-select:none}
+.stat-pill:hover{background:var(--surface3)}
+.stat-pill.fon {border-color:var(--on-light)!important;background:var(--on-glow)!important}
+.stat-pill.foff{border-color:var(--off-light)!important;background:var(--off-glow)!important}
+.stat-pill.funk{border-color:var(--unk-light)!important;background:rgba(59,69,99,.3)!important}
+.stat-pill .val{font-size:18px;font-weight:800;line-height:1.1;display:block}
+.stat-pill .lbl{font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.5px;margin-top:1px}
+.srch-wrap{position:relative}
+.srch-wrap input{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:9px;padding:8px 10px 8px 32px;color:var(--text);font-size:13px;outline:none;transition:border .15s}
+.srch-wrap input:focus{border-color:var(--accent-light)}
+.srch-wrap::before{content:"🔍";position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:12px;pointer-events:none}
+#sugg{position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:500;background:var(--surface);border:1px solid var(--border2);border-radius:10px;overflow:hidden;display:none;box-shadow:0 8px 32px rgba(0,0,0,.5);max-height:240px;overflow-y:auto}
+#sugg.open{display:block}
+#sugg::-webkit-scrollbar{width:3px}
+#sugg::-webkit-scrollbar-thumb{background:var(--border2)}
+.si{padding:8px 12px;font-size:12px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;transition:.1s}
+.si:last-child{border-bottom:none}
+.si:hover{background:var(--surface2)}
+.si-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.si-dot.on{background:var(--on-light)}.si-dot.off{background:var(--off-light)}.si-dot.unk{background:var(--unk-light)}
+.si-name{font-weight:600;flex:1}
+.si-area{font-size:10px;color:var(--muted2)}
 
-    .brand h1 {
-      font-size: 1.25rem;
-      color: var(--accent-neon);
-      letter-spacing: 0.5px;
-    }
+/* ZONE LIST */
+#zone-list{flex:1;overflow-y:auto;padding:8px 10px;display:flex;flex-direction:column;gap:4px}
+#zone-list::-webkit-scrollbar{width:3px}
+#zone-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+.zsec{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);padding:6px 4px 2px;font-weight:700}
+.zcard{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:9px 11px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:.15s}
+.zcard:hover{background:var(--surface3);border-color:var(--border2)}
+.zdot{width:8px;height:8px;border-radius:50%;flex-shrink:0;transition:.3s}
+.zdot.on{background:var(--on-light);box-shadow:0 0 5px var(--on-light)}
+.zdot.off{background:var(--off-light);box-shadow:0 0 5px var(--off-light)}
+.zdot.unk{background:var(--unk-light)}
+.zi{flex:1;min-width:0}
+.zn{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.zm{font-size:10px;color:var(--muted2);margin-top:1px}
+.zb{font-size:9px;font-weight:700;text-transform:uppercase;padding:2px 6px;border-radius:20px;letter-spacing:.3px;white-space:nowrap}
+.zb-on{background:var(--on-glow);color:var(--on-light);border:1px solid var(--on)}
+.zb-off{background:var(--off-glow);color:var(--off-light);border:1px solid var(--off)}
+.zb-unk{background:rgba(59,69,99,.25);color:var(--unk-light);border:1px solid var(--unk)}
+.empty{text-align:center;padding:28px 14px;color:var(--muted2);font-size:13px}
+.empty .ei{font-size:30px;margin-bottom:8px}
 
-    .brand p {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
+/* REPORT PANEL */
+#rp{border-top:1px solid var(--border);padding:11px 13px;flex-shrink:0;background:var(--surface)}
+#rp h3{font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:9px;font-weight:700}
+.rrow{display:flex;gap:6px;margin-bottom:6px}
+.rsel{flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:7px 9px;color:var(--text);font-size:12px;outline:none}
+.rbtns{display:flex;gap:6px;margin-bottom:7px}
+.rbtn{flex:1;padding:9px;border:none;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;transition:.15s}
+.rbtn:active{transform:scale(.97)}
+.btn-on{background:var(--on-light);color:#000}
+.btn-off{background:var(--off-light);color:#fff}
+.btn-on:hover,.btn-off:hover{filter:brightness(1.1)}
+.trow{display:flex;gap:6px;margin-bottom:7px}
+.tbtn{flex:1;padding:6px 8px;border-radius:7px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:11px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:.15s}
+.tv{font-weight:800;font-size:9px;padding:2px 5px;border-radius:4px}
+.tbtn.tok{border-color:rgba(34,197,94,.3)}.tbtn.tok .tv{background:var(--on-glow);color:var(--on-light)}
+.tbtn.tbad{border-color:rgba(239,68,68,.3)}.tbtn.tbad .tv{background:var(--off-glow);color:var(--off-light)}
+.kbar{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--muted2);padding-top:7px;border-top:1px solid var(--border)}
+.kval{font-weight:800;color:var(--warn-light);font-size:13px}
 
-    .main-container {
-      display: flex;
-      flex: 1;
-      position: relative;
-      overflow: hidden;
-    }
+/* MAP */
+#map-wrap{flex:1;position:relative;overflow:hidden}
+#map{width:100%;height:100%}
 
-    #map {
-      flex: 1;
-      height: 100%;
-      background: #0d1527;
-    }
+/* SEARCH RESULT OVERLAY */
+#sro{position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:800;display:none;background:var(--surface);border:1px solid var(--border2);border-radius:18px;padding:18px 24px;text-align:center;box-shadow:0 16px 48px rgba(0,0,0,.7);min-width:240px}
+#sro.vis{display:block}
+.sro-icon{font-size:58px;line-height:1;margin-bottom:8px;display:block}
+.sro-name{font-size:17px;font-weight:800;margin-bottom:3px}
+.sro-status{font-size:13px;font-weight:700;margin-bottom:5px}
+.sro-meta{font-size:11px;color:var(--muted2)}
+.sro-close{position:absolute;top:10px;right:13px;background:none;border:none;color:var(--muted2);cursor:pointer;font-size:18px}
 
-    .sidebar {
-      width: 380px;
-      background-color: #111c30;
-      border-left: 1px solid var(--border-slate);
-      display: flex;
-      flex-direction: column;
-      z-index: 10;
-      overflow-y: auto;
-    }
+/* PROFILES */
+#prof-btn{position:absolute;top:14px;right:14px;z-index:700;background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:7px 12px;font-size:12px;font-weight:700;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:7px;transition:.15s;box-shadow:0 4px 16px rgba(0,0,0,.4)}
+#prof-btn:hover{background:var(--surface2)}
+#prof-panel{position:absolute;top:50px;right:14px;z-index:700;width:272px;background:var(--surface);border:1px solid var(--border2);border-radius:13px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.6);display:none}
+#prof-panel.open{display:block}
+#prof-panel h4{padding:11px 14px;font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted2);font-weight:700;border-bottom:1px solid var(--border)}
+.pi{padding:10px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px}
+.pi:last-child{border-bottom:none}
+.pav{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0}
+.pav-g{background:rgba(34,197,94,.2);color:var(--on-light);border:1px solid var(--on)}
+.pav-y{background:rgba(245,158,11,.2);color:var(--warn-light);border:1px solid var(--warn)}
+.pav-r{background:rgba(239,68,68,.2);color:var(--off-light);border:1px solid var(--off)}
+.pinfo{flex:1;min-width:0}
+.pname{font-size:12px;font-weight:700}
+.ploc{font-size:10px;color:var(--muted2);margin-top:1px}
+.psb{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;white-space:nowrap}
+.psb-g{background:rgba(34,197,94,.15);color:var(--on-light);border:1px solid rgba(34,197,94,.3)}
+.psb-y{background:rgba(245,158,11,.15);color:var(--warn-light);border:1px solid rgba(245,158,11,.3)}
+.psb-r{background:rgba(239,68,68,.15);color:var(--off-light);border:1px solid rgba(239,68,68,.3)}
 
-    .panel {
-      padding: 1.25rem;
-      border-bottom: 1px solid var(--border-slate);
-    }
+/* FEED */
+#feed{position:absolute;bottom:14px;right:14px;width:262px;z-index:600;background:var(--surface);border:1px solid var(--border2);border-radius:13px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+#feed-hdr{padding:8px 13px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted2);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.ldot{width:7px;height:7px;border-radius:50%;background:var(--on-light);box-shadow:0 0 5px var(--on-light);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+#feed-body{max-height:150px;overflow-y:auto}
+#feed-body::-webkit-scrollbar{width:2px}
+#feed-body::-webkit-scrollbar-thumb{background:var(--border2)}
+.fi{padding:6px 13px;font-size:11px;color:var(--muted2);border-bottom:1px solid rgba(39,43,58,.5);line-height:1.5}
+.fi:last-child{border-bottom:none}
+.fi .fon{color:var(--on-light);font-weight:700}
+.fi .foff{color:var(--off-light);font-weight:700}
 
-    .panel-title {
-      font-size: 0.875rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--text-muted);
-      margin-bottom: 0.75rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
+/* TOAST */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface2);border:1px solid var(--border2);border-radius:11px;padding:9px 18px;font-size:13px;font-weight:700;z-index:9998;transition:transform .35s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+#toast.show{transform:translateX(-50%) translateY(0)}
+#toast.ton{border-color:var(--on-light);color:var(--on-light)}
+#toast.toff{border-color:var(--off-light);color:var(--off-light)}
 
-    .search-box {
-      width: 100%;
-      padding: 0.65rem 0.75rem;
-      background-color: var(--card-bg);
-      border: 1px solid var(--border-slate);
-      border-radius: 6px;
-      color: var(--text-main);
-      font-size: 0.9rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .search-box:focus {
-      outline: 1px solid var(--accent-neon);
-    }
-
-    select {
-      width: 100%;
-      padding: 0.65rem;
-      background-color: var(--card-bg);
-      border: 1px solid var(--border-slate);
-      border-radius: 6px;
-      color: var(--text-main);
-      font-size: 0.9rem;
-      cursor: pointer;
-    }
-
-    .telemetry-actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.75rem;
-      margin-top: 0.5rem;
-    }
-
-    .btn {
-      padding: 0.75rem;
-      border: none;
-      border-radius: 6px;
-      font-weight: 600;
-      cursor: pointer;
-      font-size: 0.85rem;
-      transition: opacity 0.2s;
-    }
-
-    .btn:hover {
-      opacity: 0.9;
-    }
-
-    .btn-upnepa {
-      background-color: var(--accent-neon);
-      color: #041e15;
-    }
-
-    .btn-nepadey {
-      background-color: var(--alert-red);
-      color: white;
-    }
-
-    .feed-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .feed-item {
-      background-color: var(--card-bg);
-      padding: 0.75rem;
-      border-radius: 6px;
-      border-left: 3px solid var(--border-slate);
-      font-size: 0.85rem;
-    }
-
-    .feed-item.up { border-left-color: var(--accent-neon); }
-    .feed-item.down { border-left-color: var(--alert-red); }
-
-    .feed-meta {
-      display: flex;
-      justify-content: space-between;
-      color: var(--text-muted);
-      font-size: 0.75rem;
-      margin-top: 0.25rem;
-    }
-
-    .stat-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.75rem;
-    }
-
-    .stat-card {
-      background: var(--card-bg);
-      padding: 0.75rem;
-      border-radius: 6px;
-      text-align: center;
-    }
-
-    .stat-val {
-      font-size: 1.25rem;
-      font-weight: bold;
-      color: var(--text-main);
-    }
-
-    .stat-lbl {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-    }
-
-    @media (max-width: 768px) {
-      .main-container { flex-direction: column; }
-      .sidebar { width: 100%; height: 350px; }
-    }
-  </style>
+@media(max-width:700px){#app{flex-direction:column}#sidebar{width:100%;min-width:unset;max-height:52vh}#feed{display:none}#prof-panel{right:6px;width:255px}}
+</style>
 </head>
 <body>
 
-  <header>
-    <div class="brand">
-      <h1>NEPA Dey!</h1>
-      <p>Crowdsourced Grid Telemetry Engine &bull; Lagos Core</p>
+<!-- GATE -->
+<div id="gate">
+  <div class="gate-logo">⚡</div>
+  <div class="gate-title">Grid<span>Pulse</span> Lagos</div>
+  <div class="gate-sub">Real-time light tracking across Lagos.<br>Tell us your situation before you enter.</div>
+  <div class="gate-prompt">What's your power status right now?</div>
+  <div class="gate-cards">
+    <div class="gate-card" id="gc-on" onclick="selGate('on')">
+      <div class="gate-card-icon">💡</div>
+      <div><h4>NEPA Dey!</h4><p>Power is currently on at my location</p></div>
+      <div class="gate-chk" id="gck-on"></div>
     </div>
-  </header>
+    <div class="gate-card" id="gc-off" onclick="selGate('off')">
+      <div class="gate-card-icon">🛑</div>
+      <div><h4>No Light</h4><p>Currently experiencing a blackout</p></div>
+      <div class="gate-chk" id="gck-off"></div>
+    </div>
+    <div class="gate-card" id="gc-unk" onclick="selGate('unk')">
+      <div class="gate-card-icon">🏃</div>
+      <div><h4>I'm Not Home</h4><p>Can't confirm my area's power status</p></div>
+      <div class="gate-chk" id="gck-unk"></div>
+    </div>
+  </div>
+  <div id="gate-loc">
+    <label>Which area are you reporting from?</label>
+    <select id="gate-sel"></select>
+  </div>
+  <button id="gate-btn" onclick="enterApp()">Open GridPulse →</button>
+  <div class="gate-note">Your report helps thousands of Lagosians plan their day ✊</div>
+</div>
 
-  <div class="main-container">
-    <!-- Map Canvas Container -->
-    <div id="map"></div>
-
-    <!-- Telemetry Control Sidebar -->
-    <div class="sidebar">
-      
-      <!-- Selection & Location Profiles -->
-      <div class="panel">
-        <div class="panel-title">Target Grid Zone</div>
-        <input type="text" id="zone-search" class="search-box" placeholder="Search estates, gates, lines...">
-        <select id="zone-select">
-          <option value="">-- Select or Search Zone --</option>
+<!-- APP -->
+<div id="app">
+  <div id="sidebar">
+    <div id="sid-hdr">
+      <div class="brand"><span style="font-size:18px">⚡</span><span class="brand-name">Grid<em>Pulse</em> Lagos</span></div>
+      <div class="stat-row">
+        <div class="stat-pill" id="pill-on"  onclick="filterSt('on')"  title="Show areas with light">
+          <span class="val" id="stat-on"  style="color:var(--on-light)">—</span><div class="lbl">With Light</div>
+        </div>
+        <div class="stat-pill" id="pill-off" onclick="filterSt('off')" title="Show blackout areas">
+          <span class="val" id="stat-off" style="color:var(--off-light)">—</span><div class="lbl">Blackout</div>
+        </div>
+        <div class="stat-pill" id="pill-unk" onclick="filterSt('unk')" title="Show unknown areas">
+          <span class="val" id="stat-unk" style="color:var(--unk-light)">—</span><div class="lbl">Unknown</div>
+        </div>
+      </div>
+      <div class="srch-wrap" style="position:relative">
+        <input type="text" id="srch" placeholder="Search estate, area, LGA…" autocomplete="off"/>
+        <div id="sugg"></div>
+      </div>
+    </div>
+    <div id="zone-list"></div>
+    <div id="rp">
+      <h3>📣 Report Your Area</h3>
+      <div class="rrow">
+        <select id="sel-z" class="rsel"></select>
+        <select id="sel-t" class="rsel" style="max-width:108px">
+          <option value="1.0">Verified ✅</option>
+          <option value="0.4">New User</option>
+          <option value="0.1">Low Trust</option>
         </select>
       </div>
-
-      <!-- Live Broadcast Telemetry Submission -->
-      <div class="panel">
-        <div class="panel-title">Report Live Status</div>
-        <div class="telemetry-actions">
-          <button class="btn btn-upnepa" onclick="submitReport(true)">💡 Up NEPA!</button>
-          <button class="btn btn-nepadey" onclick="submitReport(false)">🔌 NEPA Dey</button>
-        </div>
+      <div class="rbtns">
+        <button class="rbtn btn-on"  onclick="submitR('light_on')">💡 NEPA Dey!</button>
+        <button class="rbtn btn-off" onclick="submitR('light_off')">🛑 No Light</button>
       </div>
-
-      <!-- Network Stats Panel -->
-      <div class="panel">
-        <div class="panel-title">Grid Summary</div>
-        <div class="stat-grid">
-          <div class="stat-card">
-            <div class="stat-val" id="stat-online-pct">100%</div>
-            <div class="stat-lbl">Estates Lit</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-val" id="stat-total-reports">0</div>
-            <div class="stat-lbl">Active Pings</div>
-          </div>
-        </div>
+      <div class="trow">
+        <button class="tbtn tok" id="btn-wifi"   onclick="toggleT('wifi')"><span>Wi-Fi</span><span class="tv" id="wv">ON</span></button>
+        <button class="tbtn tok" id="btn-charge" onclick="toggleT('charge')"><span>Charging</span><span class="tv" id="cv">ON</span></button>
       </div>
-
-      <!-- Real-Time Activity Feed -->
-      <div class="panel" style="flex: 1; border-bottom: none;">
-        <div class="panel-title">Live Telemetry Stream</div>
-        <ul id="feed-container" class="feed-list">
-          <!-- Feed items inserted dynamically -->
-        </ul>
-      </div>
-
+      <div class="kbar"><span>Contribution score</span><span class="kval" id="karma">140 XP</span></div>
     </div>
   </div>
 
-  <!-- Leaflet Engine Script Requirements -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
-  
-  <script>
-    // ═══════════════════════════════════════════════
-    // Master Lagos Locations: Estates & Landmarks
-    // ═══════════════════════════════════════════════
-    const ZONES = [
-      // ─── LEKKI PHASE 1 HUB & IMMEDIATE ENCLAVED SUB-ESTATES ───
-      {id:"lekki1",name:"Lekki Phase 1 (Main Hub)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4446,lng:3.4736,r:900},
-      {id:"lekki1_1st",name:"Lekki Phase 1 – 1st Avenue",lga:"Eti-Osa",area:"Island / Lekki",lat:6.448,lng:3.472,r:500},
-      {id:"admiralty",name:"Admiralty Way Linear Zone",lga:"Eti-Osa",area:"Island / Lekki",lat:6.446,lng:3.476,r:500},
-      {id:"periwinkle",name:"Periwinkle Lifestyle Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.447,lng:3.48,r:500},
-      {id:"victbay",name:"Victoria Bay Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4478,lng:3.481,r:500},
-      {id:"meadowhall",name:"Meadow Hall School Area",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4488,lng:3.483,r:500},
-      {id:"freedom",name:"Freedom Way Extension Axis",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4408,lng:3.4696,r:500},
-      {id:"lekki1_2nd",name:"Lekki Phase 1 – 2nd/3rd Avenue",lga:"Eti-Osa",area:"Island / Lekki",lat:6.45,lng:3.47,r:450},
-      {id:"lekki_LCC",name:"Lekki Conservation Centre (LCC)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4333,lng:3.4736,r:600},
-      {id:"nikeart",name:"Nike Art Gallery & Ikate Gate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4312,lng:3.4611,r:400},
-      {id:"palms_lekki",name:"The Palms Shopping Mall (Oniru)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4331,lng:3.4444,r:450},
+  <div id="map-wrap">
+    <div id="map"></div>
+    <div id="sro">
+      <button class="sro-close" onclick="closeSro()">×</button>
+      <span id="sro-icon" class="sro-icon">💡</span>
+      <div id="sro-name" class="sro-name"></div>
+      <div id="sro-status" class="sro-status"></div>
+      <div id="sro-meta" class="sro-meta"></div>
+    </div>
+    <button id="prof-btn" onclick="toggleProf()">👥 Top Reporters</button>
+    <div id="prof-panel"><h4>Community Reporters</h4><div id="prof-list"></div></div>
+    <div id="feed">
+      <div id="feed-hdr"><span>Live Reports</span><div class="ldot"></div></div>
+      <div id="feed-body"><div class="fi">Waiting for first report…</div></div>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
 
-      // ─── THE ONIRU & IKATE LUXURY BELT ───
-      {id:"oniru",name:"Oniru Estate / Private Enclave",lga:"Eti-Osa",area:"Island / Lekki",lat:6.432,lng:3.435,r:700},
-      {id:"ikate",name:"Ikate Elegushi (Main Axis)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4395,lng:3.491,r:900},
-      {id:"seagate",name:"Seagate Estate (Ikate Waterfront)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4395,lng:3.496,r:550},
-      {id:"nicon",name:"Nicon Town Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4393,lng:3.49,r:700},
-      {id:"cowrie",name:"Cowrie Creek Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.438,lng:3.488,r:600},
-      {id:"pinnock",name:"Pinnock Beach Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.435,lng:3.482,r:600},
-      {id:"victorypark",name:"Victory Park Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.437,lng:3.486,r:550},
-      {id:"marokobay",name:"Maroko Bays / Blue Water Axis",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4305,lng:3.4491,r:500},
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ═══════════════════════════════════════════════
+// 176 ZONES — ALL LAGOS ESTATES & AREAS
+// ═══════════════════════════════════════════════
+const ZONES=[
+  // LEKKI PHASE 1 & SURROUNDINGS
+  {id:"lekki1",name:"Lekki Phase 1",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4446,lng:3.4736,r:900},
+  {id:"lekki1_1st",name:"Lekki – 1st Avenue",lga:"Eti-Osa",area:"Island / Lekki",lat:6.448,lng:3.472,r:500},
+  {id:"admiralty",name:"Admiralty Way (Lekki)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.446,lng:3.476,r:500},
+  {id:"nicon",name:"Nicon Town Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4393,lng:3.49,r:700},
+  {id:"cowrie",name:"Cowrie Creek Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.438,lng:3.488,r:600},
+  {id:"hamptbay",name:"Hampton Bay Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.44,lng:3.492,r:550},
+  {id:"vintagepark",name:"Vintage Park Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4388,lng:3.494,r:550},
+  {id:"pinnock",name:"Pinnock Beach Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.435,lng:3.482,r:600},
+  {id:"victorypark",name:"Victory Park Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.437,lng:3.486,r:550},
+  {id:"arcadia",name:"Arcadia Grove Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.436,lng:3.521,r:550},
+  {id:"periwinkle",name:"Periwinkle Lifestyle Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.447,lng:3.48,r:500},
+  {id:"victbay",name:"Victoria Bay Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4478,lng:3.481,r:500},
+  {id:"meadowhall",name:"Meadow Hall Area",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4488,lng:3.483,r:500},
+  {id:"seagate",name:"Seagate Estate (Ikate)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4395,lng:3.496,r:550},
+  {id:"ilasan",name:"Ilasan",lga:"Eti-Osa",area:"Island / Lekki",lat:6.442,lng:3.499,r:600},
+  {id:"kusenla",name:"Kusenla Road Area",lga:"Eti-Osa",area:"Island / Lekki",lat:6.441,lng:3.496,r:500},
+  {id:"oniru",name:"Oniru Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.432,lng:3.435,r:700},
+  {id:"freedom",name:"Freedom Way (Lekki)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4408,lng:3.4696,r:500},
+  {id:"lekki1_2nd",name:"Lekki – 2nd / 3rd Avenue",lga:"Eti-Osa",area:"Island / Lekki",lat:6.45,lng:3.47,r:450},
+  {id:"lekki_LCC",name:"Lekki Conservation Centre",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4333,lng:3.4736,r:600},
+  // CHEVRON / OSAPA / AGUNGI
+  {id:"chevron",name:"Chevron Drive",lga:"Eti-Osa",area:"Island / Lekki",lat:6.438,lng:3.528,r:900},
+  {id:"chevyview",name:"Chevy View Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.437,lng:3.53,r:700},
+  {id:"northforeshore",name:"Northern Foreshore Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4355,lng:3.526,r:600},
+  {id:"northbera",name:"Northern Bera Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4365,lng:3.532,r:600},
+  {id:"osapa",name:"Osapa London",lga:"Eti-Osa",area:"Island / Lekki",lat:6.44,lng:3.52,r:850},
+  {id:"agungi",name:"Agungi",lga:"Eti-Osa",area:"Island / Lekki",lat:6.436,lng:3.534,r:800},
+  {id:"bakare",name:"Bakare Estate (Agungi)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.435,lng:3.535,r:550},
+  {id:"ologolo",name:"Ologolo",lga:"Eti-Osa",area:"Island / Lekki",lat:6.443,lng:3.514,r:750},
+  {id:"whiteoak",name:"White Oak Estate (Ologolo)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.444,lng:3.513,r:550},
+  {id:"jakande",name:"Jakande Estate (Lekki)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4351,lng:3.51,r:900},
+  {id:"orchidroad",name:"Orchid Road (Lekki)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.433,lng:3.538,r:700},
+  {id:"ikate",name:"Ikate Elegushi",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4395,lng:3.491,r:900},
+  {id:"carltongate",name:"Carlton Gate Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4345,lng:3.529,r:500},
+  // IKOTA / VGC / AJAH
+  {id:"ikota",name:"Ikota",lga:"Eti-Osa",area:"Island / Lekki",lat:6.437,lng:3.545,r:850},
+  {id:"ikotavilla",name:"Ikota Villa Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4365,lng:3.547,r:600},
+  {id:"lekki2",name:"Lekki Phase 2",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4339,lng:3.5388,r:900},
+  {id:"megamound",name:"Megamound Estate (Ikota)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.435,lng:3.549,r:600},
+  {id:"lakeview1",name:"Lakeview Park 1",lga:"Eti-Osa",area:"Island / Lekki",lat:6.434,lng:3.55,r:550},
+  {id:"lakeview2",name:"Lakeview Park 2",lga:"Eti-Osa",area:"Island / Lekki",lat:6.433,lng:3.552,r:550},
+  {id:"westend",name:"West End Estate (Lekki)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.432,lng:3.554,r:550},
+  {id:"vgc",name:"VGC (Victoria Garden City)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.43,lng:3.557,r:1000},
+  {id:"oral",name:"Oral Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.436,lng:3.541,r:550},
+  {id:"royalgarden",name:"Royal Garden Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.431,lng:3.556,r:600},
+  {id:"ajah",name:"Ajah",lga:"Eti-Osa",area:"Island / Lekki",lat:6.466,lng:3.562,r:1200},
+  {id:"badore",name:"Badore",lga:"Eti-Osa",area:"Island / Lekki",lat:6.471,lng:3.556,r:900},
+  {id:"addo",name:"Addo Road (Ajah)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.468,lng:3.558,r:700},
+  {id:"palmsres",name:"Palms Residences (Ajah)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.47,lng:3.559,r:550},
+  {id:"lekki_gardens",name:"Lekki Gardens Estate (Ajah)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.469,lng:3.564,r:650},
+  // SANGOTEDO / AWOYAYA / ABIJO / IBEJU-LEKKI
+  {id:"sangotedo",name:"Sangotedo",lga:"Eti-Osa",area:"Island / Ibeju-Lekki",lat:6.4419,lng:3.602,r:1000},
+  {id:"shoprite_sang",name:"Novare Mall / Shoprite (Sangotedo)",lga:"Eti-Osa",area:"Island / Ibeju-Lekki",lat:6.443,lng:3.608,r:400},
+  {id:"awoyaya",name:"Awoyaya",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.444,lng:3.625,r:1000},
+  {id:"mayfairgardens",name:"Mayfair Gardens Estate",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.445,lng:3.627,r:650},
+  {id:"meridianpark",name:"Meridian Park Estate",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.446,lng:3.629,r:600},
+  {id:"abijo",name:"Abijo",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.45,lng:3.655,r:1000},
+  {id:"amenest",name:"Amen Estate (Ibeju-Lekki)",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.438,lng:3.69,r:700},
+  {id:"lakowe",name:"Lakowe",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.442,lng:3.68,r:900},
+  {id:"bogije",name:"Bogije",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.45,lng:3.71,r:1000},
+  {id:"ibeju",name:"Ibeju-Lekki Town",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.448,lng:3.78,r:1100},
+  {id:"dangote",name:"Dangote Refinery Belt / FTZ",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.41,lng:3.85,r:2000},
+  {id:"adivaplain",name:"Adiva Plainfield Estate",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.447,lng:3.631,r:550},
+  {id:"eleko",name:"Eleko Beach Area",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.422,lng:3.72,r:800},
+  // VICTORIA ISLAND
+  {id:"vi",name:"Victoria Island (VI)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.4281,lng:3.4219,r:1100},
+  {id:"vi_adeola",name:"Adeola Odeku Street (VI)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.4292,lng:3.4227,r:400},
+  {id:"vi_akin",name:"Akin Adesola Street (VI)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.43,lng:3.424,r:400},
+  {id:"vi_1004",name:"1004 Housing Estate (VI)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.426,lng:3.42,r:500},
+  {id:"vi_ajose",name:"Ajose Adeogun Street (VI)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.4285,lng:3.4215,r:400},
+  {id:"vi_ahmadu",name:"Ahmadu Bello Way (VI)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.427,lng:3.4205,r:400},
+  // IKOYI & BANANA ISLAND
+  {id:"ikoyi",name:"Ikoyi",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.453,lng:3.4317,r:1000},
+  {id:"parkview",name:"Parkview Estate (Ikoyi)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.456,lng:3.438,r:700},
+  {id:"banana",name:"Banana Island",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.4598,lng:3.4411,r:600},
+  {id:"mojisolaonik",name:"Mojisola Onikoyi Estate",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.462,lng:3.443,r:550},
+  {id:"awolowo",name:"Awolowo Road (Ikoyi)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.449,lng:3.434,r:500},
+  {id:"bourdillon",name:"Bourdillon Road (Ikoyi)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.452,lng:3.436,r:500},
+  {id:"dolphin",name:"Dolphin Estate (Ikoyi)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.4552,lng:3.429,r:550},
+  {id:"gerrardsrd",name:"Gerard Road (Ikoyi)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.458,lng:3.442,r:450},
+  // LAGOS ISLAND / APAPA
+  {id:"lagosisland",name:"Lagos Island",lga:"Lagos Island",area:"Island / Lagos Island",lat:6.4541,lng:3.3947,r:1000},
+  {id:"marina",name:"Marina (Lagos Island)",lga:"Lagos Island",area:"Island / Lagos Island",lat:6.4531,lng:3.3924,r:500},
+  {id:"balogun",name:"Balogun Market Area",lga:"Lagos Island",area:"Island / Lagos Island",lat:6.455,lng:3.39,r:500},
+  {id:"apapa",name:"Apapa",lga:"Apapa",area:"Mainland / South",lat:6.4474,lng:3.3607,r:1200},
+  {id:"tincan",name:"Tin Can Island",lga:"Apapa",area:"Mainland / South",lat:6.435,lng:3.34,r:900},
+  {id:"ajegunle",name:"Ajegunle",lga:"Ajeromi-Ifelodun",area:"Mainland / South",lat:6.4583,lng:3.3397,r:1100},
+  // IKEJA AXIS
+  {id:"ikeja",name:"Ikeja (Allen / Computer Village)",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.5962,lng:3.3551,r:1000},
+  {id:"allen",name:"Allen Avenue (Ikeja)",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.589,lng:3.357,r:600},
+  {id:"ikejaGRA",name:"Ikeja GRA",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.5828,lng:3.3516,r:900},
+  {id:"oregun",name:"Oregun",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.576,lng:3.36,r:900},
+  {id:"opebi",name:"Opebi",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.582,lng:3.364,r:800},
+  {id:"toyin",name:"Toyin Street / Oba Akran",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.5871,lng:3.3598,r:700},
+  {id:"maryland",name:"Maryland",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.5663,lng:3.3519,r:900},
+  {id:"shonibare",name:"Shonibare Estate (Maryland)",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.567,lng:3.349,r:500},
+  {id:"mende",name:"Mende (Maryland)",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.57,lng:3.351,r:600},
+  {id:"arowojobe",name:"Arowojobe Estate (Maryland)",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.565,lng:3.35,r:500},
+  {id:"alausa",name:"Alausa Secretariat",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.576,lng:3.344,r:700},
+  {id:"orchidcourt",name:"Orchid Court Estate (GRA Ikeja)",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.583,lng:3.35,r:500},
+  {id:"emeka_any",name:"Emeka Anyaoku Estate (GRA)",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.582,lng:3.352,r:500},
+  {id:"county_court",name:"County Court Estate (Ikeja GRA)",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.584,lng:3.351,r:500},
+  {id:"ilupeju",name:"Ilupeju",lga:"Mushin",area:"Mainland / Ikeja",lat:6.558,lng:3.359,r:900},
+  {id:"palmgrove",name:"Palm Grove",lga:"Mushin",area:"Mainland / Ikeja",lat:6.536,lng:3.358,r:900},
+  {id:"airport",name:"Airport Road Area",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.5774,lng:3.3227,r:1000},
+  // MAGODO / OMOLE / OJODU
+  {id:"magodo1",name:"Magodo Phase 1",lga:"Kosofe",area:"Mainland / Magodo",lat:6.61,lng:3.375,r:900},
+  {id:"magodo2",name:"Magodo Phase 2",lga:"Kosofe",area:"Mainland / Magodo",lat:6.615,lng:3.38,r:900},
+  {id:"omole1",name:"Omole Phase 1",lga:"Ojodu",area:"Mainland / Magodo",lat:6.625,lng:3.342,r:1000},
+  {id:"omole2",name:"Omole Phase 2 (Olowora)",lga:"Ojodu",area:"Mainland / Magodo",lat:6.63,lng:3.35,r:900},
+  {id:"ojodu",name:"Ojodu Berger",lga:"Ojodu",area:"Mainland / Magodo",lat:6.6354,lng:3.3674,r:1100},
+  {id:"isheri_north",name:"Isheri North",lga:"Ojodu",area:"Mainland / Magodo",lat:6.64,lng:3.36,r:1000},
+  {id:"olowora",name:"Olowora",lga:"Ojodu",area:"Mainland / Magodo",lat:6.631,lng:3.354,r:800},
+  {id:"dankaro",name:"Dankaro Estate (Ojodu)",lga:"Ojodu",area:"Mainland / Magodo",lat:6.636,lng:3.37,r:500},
+  {id:"pine_est",name:"Pine Estate (Ojodu)",lga:"Ojodu",area:"Mainland / Magodo",lat:6.638,lng:3.368,r:500},
+  {id:"alagbole",name:"Alagbole / Yakoyo",lga:"Ojodu",area:"Mainland / Magodo",lat:6.65,lng:3.39,r:1000},
+  {id:"akute",name:"Akute",lga:"Ojodu",area:"Mainland / Magodo",lat:6.66,lng:3.33,r:1200},
+  // OGBA / AGEGE / IFAKO
+  {id:"ogba",name:"Ogba",lga:"Ifako-Ijaiye",area:"Mainland / Ogba",lat:6.5979,lng:3.3283,r:1100},
+  {id:"agege",name:"Agege",lga:"Agege",area:"Mainland / Agege",lat:6.6184,lng:3.3197,r:1200},
+  {id:"dopemu",name:"Dopemu",lga:"Agege",area:"Mainland / Agege",lat:6.6,lng:3.296,r:1000},
+  {id:"ifako",name:"Ifako-Ijaye",lga:"Ifako-Ijaiye",area:"Mainland / Ogba",lat:6.634,lng:3.31,r:1100},
+  {id:"ipaja",name:"Ipaja",lga:"Alimosho",area:"Mainland / Agege",lat:6.598,lng:3.268,r:1100},
+  {id:"iyana_ipaja",name:"Iyana Ipaja",lga:"Alimosho",area:"Mainland / Agege",lat:6.594,lng:3.274,r:1000},
+  // KOSOFE / OGUDU / KETU
+  {id:"kosofe",name:"Kosofe",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.564,lng:3.41,r:1000},
+  {id:"ketu",name:"Ketu",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.582,lng:3.393,r:900},
+  {id:"ojota",name:"Ojota",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.5748,lng:3.3906,r:900},
+  {id:"mile12",name:"Mile 12",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.6,lng:3.384,r:1000},
+  {id:"oworo",name:"Oworonshoki",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.55,lng:3.396,r:900},
+  {id:"ogudu",name:"Ogudu",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.5748,lng:3.4006,r:900},
+  {id:"oguduGRA",name:"Ogudu GRA",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.577,lng:3.406,r:700},
+  {id:"anthony",name:"Anthony Village",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.56,lng:3.362,r:700},
+  {id:"agboyi",name:"Agboyi Estate (Mile 12)",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.602,lng:3.386,r:700},
+  {id:"apollo",name:"Apollo Estate (Mile 12)",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.601,lng:3.382,r:500},
+  {id:"akerele_oworo",name:"Akerele Estate (Oworonshoki)",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.551,lng:3.398,r:500},
+  {id:"ramatcres",name:"Ramat Crescent (Ogudu)",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.576,lng:3.405,r:500},
+  // GBAGADA / YABA / SHOMOLU
+  {id:"gbagada",name:"Gbagada",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.5498,lng:3.3799,r:1000},
+  {id:"gbagada2",name:"Gbagada Phase 2",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.554,lng:3.384,r:700},
+  {id:"atunrase",name:"Atunrase Medina (Gbagada)",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.552,lng:3.377,r:600},
+  {id:"yaba",name:"Yaba",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.5161,lng:3.3858,r:1000},
+  {id:"sabo",name:"Sabo (Yaba)",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.518,lng:3.379,r:500},
+  {id:"adekunle",name:"Adekunle (Yaba)",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.514,lng:3.387,r:500},
+  {id:"pearlview",name:"Pearl View Estate (Yaba)",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.5155,lng:3.386,r:450},
+  {id:"fadeyi",name:"Fadeyi",lga:"Mushin",area:"Mainland / Central",lat:6.524,lng:3.37,r:800},
+  {id:"shomolu",name:"Shomolu",lga:"Shomolu",area:"Mainland / Central",lat:6.535,lng:3.378,r:900},
+  {id:"bariga",name:"Bariga",lga:"Shomolu",area:"Mainland / Central",lat:6.53,lng:3.395,r:900},
+  {id:"ebute",name:"Ebute-Metta",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.487,lng:3.367,r:1000},
+  // SURULERE / MUSHIN
+  {id:"surulere",name:"Surulere",lga:"Surulere",area:"Mainland / Surulere",lat:6.4994,lng:3.3644,r:1200},
+  {id:"aguda",name:"Aguda (Surulere)",lga:"Surulere",area:"Mainland / Surulere",lat:6.501,lng:3.36,r:600},
+  {id:"akerele",name:"Akerele Estate (Surulere)",lga:"Surulere",area:"Mainland / Surulere",lat:6.503,lng:3.366,r:600},
+  {id:"itire",name:"Itire",lga:"Surulere",area:"Mainland / Surulere",lat:6.506,lng:3.353,r:700},
+  {id:"eric_moore",name:"Eric Moore / Iponri",lga:"Surulere",area:"Mainland / Surulere",lat:6.494,lng:3.358,r:700},
+  {id:"mushin",name:"Mushin",lga:"Mushin",area:"Mainland / Surulere",lat:6.5218,lng:3.352,r:1100},
+  {id:"orile",name:"Orile Iganmu",lga:"Surulere",area:"Mainland / Surulere",lat:6.48,lng:3.35,r:900},
+  // OSHODI / ISOLO / EJIGBO
+  {id:"oshodi",name:"Oshodi",lga:"Oshodi-Isolo",area:"Mainland / Oshodi",lat:6.5558,lng:3.3286,r:1100},
+  {id:"isolo",name:"Isolo",lga:"Oshodi-Isolo",area:"Mainland / Oshodi",lat:6.512,lng:3.32,r:1100},
+  {id:"ejigbo",name:"Ejigbo",lga:"Oshodi-Isolo",area:"Mainland / Oshodi",lat:6.5054,lng:3.298,r:1000},
+  // ALIMOSHO
+  {id:"alimosho",name:"Alimosho",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.588,lng:3.27,r:1400},
+  {id:"ikotun",name:"Ikotun",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.511,lng:3.271,r:1200},
+  {id:"idimu",name:"Idimu",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.529,lng:3.281,r:1100},
+  {id:"isheri",name:"Isheri-Oshun",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.574,lng:3.28,r:1000},
+  {id:"shasha",name:"Shasha",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.56,lng:3.29,r:1000},
+  {id:"egbe",name:"Egbe",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.538,lng:3.282,r:1000},
+  {id:"igando",name:"Igando",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.524,lng:3.265,r:1000},
+  // AMUWO-ODOFIN / FESTAC / OJO
+  {id:"amuwo",name:"Amuwo Odofin",lga:"Amuwo-Odofin",area:"Mainland / South",lat:6.468,lng:3.306,r:1300},
+  {id:"festac",name:"FESTAC Town",lga:"Amuwo-Odofin",area:"Mainland / South",lat:6.467,lng:3.293,r:1100},
+  {id:"mile2",name:"Mile 2",lga:"Amuwo-Odofin",area:"Mainland / South",lat:6.478,lng:3.32,r:1000},
+  {id:"satellite",name:"Satellite Town",lga:"Ojo",area:"Mainland / South",lat:6.45,lng:3.28,r:1000},
+  {id:"ojo",name:"Ojo",lga:"Ojo",area:"Mainland / South",lat:6.464,lng:3.229,r:1300},
+  {id:"ajangbadi",name:"Ajangbadi",lga:"Ojo",area:"Mainland / South",lat:6.44,lng:3.175,r:1200},
+  // IKORODU
+  {id:"ikorodu",name:"Ikorodu Town",lga:"Ikorodu",area:"Mainland / Ikorodu",lat:6.619,lng:3.5052,r:1800},
+  {id:"benson",name:"Benson / Odogunyan (Ikorodu)",lga:"Ikorodu",area:"Mainland / Ikorodu",lat:6.605,lng:3.51,r:1200},
+  {id:"majidun",name:"Majidun",lga:"Ikorodu",area:"Mainland / Ikorodu",lat:6.638,lng:3.528,r:1100},
+  {id:"ijede",name:"Ijede",lga:"Ikorodu",area:"Mainland / Ikorodu",lat:6.66,lng:3.55,r:1200},
+  // EPE / BADAGRY
+  {id:"epe",name:"Epe",lga:"Epe",area:"Outskirts",lat:6.5872,lng:3.98,r:2000},
+  {id:"badagry",name:"Badagry",lga:"Badagry",area:"Outskirts",lat:6.414,lng:2.882,r:2000},
+];
 
-      // ─── OSAPA / AGUNGI / OLOGOLO / EXPRESSWAY INNER RUNS ───
-      {id:"osapa",name:"Osapa London (Gated Enclave)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.44,lng:3.52,r:850},
-      {id:"pinnock_prime",name:"Pinnock Prime Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4385,lng:3.5112,r:450},
-      {id:"friends_colony",name:"Friends Colony Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4391,lng:3.5165,r:500},
-      {id:"buena_vista",name:"Buena Vista Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4298,lng:3.5188,r:500},
-      {id:"agungi",name:"Agungi Residential Area",lga:"Eti-Osa",area:"Island / Lekki",lat:6.436,lng:3.534,r:800},
-      {id:"bakare",name:"Bakare Estate (Agungi)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.435,lng:3.535,r:550},
-      {id:"ologolo",name:"Ologolo Main Axis",lga:"Eti-Osa",area:"Island / Lekki",lat:6.443,lng:3.514,r:750},
-      {id:"whiteoak",name:"White Oak Estate (Ologolo)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.444,lng:3.513,r:550},
-      {id:"ilasan",name:"Ilasan Housing Complex",lga:"Eti-Osa",area:"Island / Lekki",lat:6.442,lng:3.499,r:600},
-      {id:"kusenla",name:"Kusenla Road Residences",lga:"Eti-Osa",area:"Island / Lekki",lat:6.441,lng:3.496,r:500},
-      {id:"jakande",name:"Jakande Estate Complex",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4351,lng:3.51,r:900},
+// ═══════════════════════════════════════════════
+// STATE & CONSTANTS
+// ═══════════════════════════════════════════════
+const S={};
+ZONES.forEach(z=>{S[z.id]={score:0,status:"unk",circle:null,lastReport:null}});
+const THR=2.0;
+let karma=140, telemetry={wifi:true,charge:true}, activeFilter=null, toastTmr, gateChoice=null;
 
-      // ─── CHEVRON DRIVE TO ORCHID INTERIOR ───
-      {id:"chevron",name:"Chevron Drive (HQ Corridor)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.438,lng:3.528,r:900},
-      {id:"chevyview",name:"Chevy View Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.437,lng:3.53,r:700},
-      {id:"northforeshore",name:"Northern Foreshore Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4355,lng:3.526,r:600},
-      {id:"northbera",name:"Northern Bera Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4365,lng:3.532,r:600},
-      {id:"carltongate",name:"Carlton Gate Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4345,lng:3.529,r:500},
-      {id:"lekkicounty",name:"Lekki County Homes",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4411,lng:3.5362,r:650},
-      {id:"orchidroad",name:"Orchid Road Gated Strip",lga:"Eti-Osa",area:"Island / Lekki",lat:6.433,lng:3.538,r:700},
-      {id:"victoria_crest",name:"Victoria Crest Estates Block",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4312,lng:3.5401,r:550},
-      {id:"ocean_bay",name:"Ocean Bay Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4251,lng:3.5422,r:600},
-      {id:"buena_vista2",name:"Buena Vista Estate Phase 2",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4301,lng:3.5212,r:450},
+const REPORTERS=[
+  {name:"Chidi_Lekki",loc:"Lekki Phase 1",score:96,tier:"g",reports:412,av:"C"},
+  {name:"AbiodunVI",loc:"Victoria Island",score:88,tier:"g",reports:310,av:"A"},
+  {name:"SurulereKing",loc:"Surulere",score:74,tier:"y",reports:198,av:"S"},
+  {name:"IkejaGuy01",loc:"Ikeja Allen",score:71,tier:"y",reports:155,av:"I"},
+  {name:"VGC_Reporter",loc:"VGC",score:61,tier:"y",reports:89,av:"V"},
+  {name:"MarylandBoy",loc:"Maryland",score:38,tier:"r",reports:42,av:"M"},
+];
 
-      // ─── IKOTA / VGC / CORNERSTONE / ROAD HOUSING ───
-      {id:"ikota",name:"Ikota Complex Axis",lga:"Eti-Osa",area:"Island / Lekki",lat:6.437,lng:3.545,r:850},
-      {id:"ikotavilla",name:"Ikota Villa Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4365,lng:3.547,r:600},
-      {id:"megamound",name:"Megamound Estate (Ikota)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.435,lng:3.549,r:600},
-      {id:"oral",name:"Oral Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.436,lng:3.541,r:550},
-      {id:"lakeview1",name:"Lakeview Park 1",lga:"Eti-Osa",area:"Island / Lekki",lat:6.434,lng:3.55,r:550},
-      {id:"lakeview2",name:"Lakeview Park 2",lga:"Eti-Osa",area:"Island / Lekki",lat:6.433,lng:3.552,r:550},
-      {id:"vgc",name:"VGC (Victoria Garden City)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.43,lng:3.557,r:1000},
-      {id:"royalgarden",name:"Royal Garden Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.431,lng:3.556,r:600},
-      {id:"lekki2",name:"Lekki Phase 2 Residential",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4339,lng:3.5388,r:900},
-      {id:"westend",name:"West End Estate Cluster",lga:"Eti-Osa",area:"Island / Lekki",lat:6.432,lng:3.554,r:550},
-      {id:"hamptbay",name:"Hampton Bay Gated Cluster",lga:"Eti-Osa",area:"Island / Lekki",lat:6.44,lng:3.492,r:550},
-      {id:"vintagepark",name:"Vintage Park Enclave",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4388,lng:3.494,r:550},
-      {id:"arcadia",name:"Arcadia Grove Compound",lga:"Eti-Osa",area:"Island / Lekki",lat:6.436,lng:3.521,r:550},
+const C={on:{s:"#22c55e",f:"#22c55e"},off:{s:"#ef4444",f:"#ef4444"},unk:{s:"#475569",f:"#334155"}};
 
-      // ─── AJAH / BADORE / LAFIAGI / COMMUTER WATERFRONT ───
-      {id:"ajah",name:"Ajah Jubilee Bridge Area",lga:"Eti-Osa",area:"Island / Lekki",lat:6.466,lng:3.562,r:1200},
-      {id:"badore",name:"Badore Residential Axis",lga:"Eti-Osa",area:"Island / Lekki",lat:6.471,lng:3.556,r:900},
-      {id:"addo",name:"Addo Road Gated Clusters",lga:"Eti-Osa",area:"Island / Lekki",lat:6.468,lng:3.558,r:700},
-      {id:"palmsres",name:"Palms Residences (Ajah)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.47,lng:3.559,r:550},
-      {id:"lekki_gardens",name:"Lekki Gardens Estate (Ajah)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.469,lng:3.564,r:650},
-      {id:"crown_estate",name:"Crown Estate (Ajah)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4612,lng:3.5815,r:650},
-      {id:"fountain_spring",name:"Fountain Springville Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4591,lng:3.5899,r:550},
-      {id:"happyland",name:"Happy Land Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4562,lng:3.5942,r:600},
+// ═══════════════════════════════════════════════
+// GATE
+// ═══════════════════════════════════════════════
+(function initGate(){
+  const sel=document.getElementById('gate-sel');
+  const sorted=[...ZONES].sort((a,b)=>a.name.localeCompare(b.name));
+  sorted.forEach(z=>{const o=document.createElement('option');o.value=z.id;o.textContent=z.name+' ('+z.lga+')';sel.appendChild(o)});
+})();
 
-      // ─── SANGOTEDO / ABIJO / AWOYAYA GRID ───
-      {id:"sangotedo",name:"Sangotedo Urban Center",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.4419,lng:3.602,r:1000},
-      {id:"shoprite_sang",name:"Novare Mall / Shoprite Sangotedo",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.443,lng:3.608,r:400},
-      {id:"lekkigardens_sang",name:"Lekki Gardens Phase 2 & 4",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.4415,lng:3.6121,r:700},
-      {id:"abijo",name:"Abijo Commercial Corridor",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.45,lng:3.655,r:1000},
-      {id:"abijo_gra",name:"Abijo GRA Block",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.4542,lng:3.6611,r:750},
-      {id:"awoyaya",name:"Awoyaya Intersection District",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.444,lng:3.625,r:1000},
-      {id:"mayfairgardens",name:"Mayfair Gardens Estate",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.445,lng:3.627,r:650},
-      {id:"meridianpark",name:"Meridian Park Estate",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.446,lng:3.629,r:600},
-      {id:"adivaplain",name:"Adiva Plainfield Estate",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.447,lng:3.631,r:550},
-      {id:"greensprings",name:"Greensprings School Compound",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.4425,lng:3.6215,r:450},
+function selGate(c){
+  gateChoice=c;
+  ['on','off','unk'].forEach(x=>{
+    document.getElementById('gc-'+x).className='gate-card'+(x===c?' sel-'+x:'');
+    document.getElementById('gck-'+x).textContent=x===c?'✓':'';
+  });
+  document.getElementById('gate-loc').style.display=c!=='unk'?'block':'none';
+  document.getElementById('gate-btn').classList.add('ready');
+}
 
-      // ─── DEEP IBEJU-LEKKI / FREE ZONE / COCONUT STRIPS ───
-      {id:"lakowe",name:"Lakowe Lakes & Golf Resort",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.442,lng:3.68,r:900},
-      {id:"bogije",name:"Bogije Town Settlement",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.45,lng:3.71,r:1000},
-      {id:"amenest",name:"Amen Estate Phase 1 & 2",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.438,lng:3.69,r:700},
-      {id:"eleko",name:"Eleko Beach Junction Axis",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.422,lng:3.72,r:800},
-      {id:"ibeju",name:"Ibeju-Lekki Central Town",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.448,lng:3.78,r:1100},
-      {id:"dangote",name:"Dangote Refinery & Petrochemical FTZ",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.41,lng:3.85,r:2000},
-      {id:"lekkiseaport",name:"Lekki Deep Sea Port Area",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.3985,lng:3.9122,r:1500},
+function enterApp(){
+  if(!gateChoice)return;
+  const zId=document.getElementById('gate-sel').value;
+  if(gateChoice!=='unk'&&zId) processVote(zId,gateChoice==='on'?'light_on':'light_off',0.8,true);
+  document.getElementById('gate').style.display='none';
+  document.getElementById('app').classList.add('visible');
+  setTimeout(()=>map.invalidateSize(),300);
+}
 
-      // ─── VICTORIA ISLAND COMMERCIAL & VERTICAL SECTORS ───
-      {id:"vi",name:"Victoria Island Central Business District",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.4281,lng:3.4219,r:1100},
-      {id:"vi_adeola",name:"Adeola Odeku Commercial Strip",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.4292,lng:3.4227,r:400},
-      {id:"vi_akin",name:"Akin Adesola Diplomatic Track",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.43,lng:3.424,r:400},
-      {id:"vi_ajose",name:"Ajose Adeogun Banking Core",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.4285,lng:3.4215,r:400},
-      {id:"vi_ahmadu",name:"Ahmadu Bello Beach Expressway",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.427,lng:3.4205,r:400},
-      {id:"vi_1004",name:"1004 Housing Estate Residential",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.426,lng:3.42,r:500},
-      {id:"eko_atlantic",name:"Eko Atlantic City (Reclaimed Hub)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.4112,lng:3.4182,r:1200},
+// ═══════════════════════════════════════════════
+// MAP
+// ═══════════════════════════════════════════════
+const map=L.map('map').setView([6.52,3.40],12);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'&copy; OpenStreetMap &copy; CARTO',maxZoom:18}).addTo(map);
 
-      // ─── IKOYI & BANANA ISLAND ULTRALUXURY CLUSTERS ───
-      {id:"ikoyi",name:"Old Ikoyi Residential Hub",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.453,lng:3.4317,r:1000},
-      {id:"parkview",name:"Parkview Premium Estate",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.456,lng:3.438,r:700},
-      {id:"banana",name:"Banana Island Gated Enclave",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.4598,lng:3.4411,r:600},
-      {id:"living_gold",name:"Living Gold Estate (Banana Island)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.4611,lng:3.4435,r:400},
-      {id:"mojisolaonik",name:"Mojisola Onikoyi Private Block",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.462,lng:3.443,r:550},
-      {id:"awolowo",name:"Awolowo Road Merchant Run",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.449,lng:3.434,r:500},
-      {id:"bourdillon",name:"Bourdillon Luxury Towers Track",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.452,lng:3.436,r:500},
-      {id:"gerrardsrd",name:"Gerard Road Residential Strip",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.458,lng:3.442,r:450},
-      {id:"dolphin",name:"Dolphin Estate Duplex Enclave",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.4552,lng:3.429,r:550},
-      {id:"osborne1",name:"Osborne Foreshore Phase 1",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.4592,lng:3.4241,r:550},
-      {id:"osborne2",name:"Osborne Foreshore Phase 2",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.4615,lng:3.4289,r:550},
-      {id:"ikoyiclub",name:"Ikoyi Club 1938 & Golf Course",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.4462,lng:3.4311,r:500},
-      {id:"linkbridge",name:"Lekki-Ikoyi Link Bridge Gate",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.4498,lng:3.4542,r:300},
+ZONES.forEach(z=>{
+  const c=C.unk;
+  const circle=L.circle([z.lat,z.lng],{color:c.s,fillColor:c.f,fillOpacity:0.22,radius:z.r,weight:1.5}).addTo(map);
+  circle.bindPopup('');
+  circle.on('click',()=>openMapPopup(z.id));
+  S[z.id].circle=circle;
+});
 
-      // ─── OLD LAGOS ISLAND PORT / MERCHANT MARKETS ───
-      {id:"lagosisland",name:"Lagos Island Markets Core",lga:"Lagos Island",area:"Island / Lagos Island",lat:6.4541,lng:3.3947,r:1000},
-      {id:"marina",name:"Marina Financial Bank Run",lga:"Lagos Island",area:"Island / Lagos Island",lat:6.4531,lng:3.3924,r:500},
-      {id:"balogun",name:"Balogun Wholesale Open Market",lga:"Lagos Island",area:"Island / Lagos Island",lat:6.455,lng:3.39,r:500},
-      {id:"cms",name:"CMS Ferry Terminal & Bus Station",lga:"Lagos Island",area:"Island / Lagos Island",lat:6.4511,lng:3.3892,r:400},
+function openMapPopup(id){
+  const z=ZONES.find(x=>x.id===id),s=S[id];
+  const lbl=s.status==='on'?'💡 Light is ON':s.status==='off'?'🛑 Blackout':'❓ Unknown';
+  const ago=s.lastReport?timeAgo(s.lastReport):'No reports yet';
+  s.circle.setPopupContent(`<div style="font-family:-apple-system,sans-serif;font-size:13px;min-width:170px"><b style="font-size:14px">${z.name}</b><span style="display:block;font-size:11px;color:#888;margin:2px 0 5px">${z.lga} · ${z.area}</span><span style="display:block;margin-bottom:3px">${lbl}</span><span style="color:#888;font-size:11px">Score: ${s.score.toFixed(1)} · ${ago}</span></div>`).openPopup();
+  showSro(id);
+}
 
-      // ─── APAPA MARINE PORT & INDUSTRIAL EXTENSIONS ───
-      {id:"apapa",name:"Apapa Port District",lga:"Apapa",area:"Mainland / South",lat:6.4474,lng:3.3607,r:1200},
-      {id:"apapa_gra",name:"Apapa GRA Residential",lga:"Apapa",area:"Mainland / South",lat:6.4588,lng:3.3512,r:850},
-      {id:"tincan",name:"Tin Can Island Container Terminal",lga:"Apapa",area:"Mainland / South",lat:6.435,lng:3.34,r:900},
-      {id:"ajegunle",name:"Ajegunle Urban Settlement",lga:"Ajeromi-Ifelodun",area:"Mainland / South",lat:6.4583,lng:3.3397,r:1100},
-
-      // ─── IKEJA METROPOLITAN SEAT & TRADITIONAL GRA ───
-      {id:"ikeja",name:"Ikeja Allen / Computer Village Central",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.5962,lng:3.3551,r:1000},
-      {id:"allen",name:"Allen Avenue Retails",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.589,lng:3.357,r:600},
-      {id:"ikejaGRA",name:"Ikeja GRA Traditional",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.5828,lng:3.3516,r:900},
-      {id:"shonibare",name:"Shonibare Estate (Premium Secure)",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.567,lng:3.349,r:500},
-      {id:"orchidcourt",name:"Orchid Court Estate (GRA Ikeja)",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.583,lng:3.35,r:500},
-      {id:"emeka_any",name:"Emeka Anyaoku Estate (GRA)",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.582,lng:3.352,r:500},
-      {id:"county_court",name:"County Court Estate (Ikeja GRA)",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.584,lng:3.351,r:500},
-      {id:"oregun",name:"Oregun Industrial Avenue",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.576,lng:3.36,r:900},
-      {id:"opebi",name:"Opebi High Run",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.582,lng:3.364,r:800},
-      {id:"toyin",name:"Toyin Street Commercial Track",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.5871,lng:3.3598,r:700},
-      {id:"alausa",name:"Alausa Lagos Secretariat Complex",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.576,lng:3.344,r:700},
-      {id:"mko_gardens",name:"MKO Abiola Gardens (Alausa)",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.5812,lng:3.3411,r:600},
-      {id:"icm_mall",name:"Ikeja City Mall (ICM)",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.5785,lng:3.3462,r:400},
-
-      // ─── MARYLAND / ILUPEJU STRATEGIC JUNCTIONS ───
-      {id:"maryland",name:"Maryland Intersection Hub",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.5663,lng:3.3519,r:900},
-      {id:"mende",name:"Mende Housing Sub-hub",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.57,lng:3.351,r:600},
-      {id:"arowojobe",name:"Arowojobe Estate (Maryland)",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.565,lng:3.35,r:500},
-      {id:"ilupeju",name:"Ilupeju Residential Block",lga:"Mushin",area:"Mainland / Ikeja",lat:6.558,lng:3.359,r:900},
-      {id:"palmgrove",name:"Palm Grove Residential Gated",lga:"Mushin",area:"Mainland / Ikeja",lat:6.536,lng:3.358,r:900},
-      {id:"airport",name:"Murtala Muhammed Airport Link Rd",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.5774,lng:3.3227,r:1000},
-
-      // ─── MAGODO / OMOLE GATED RESIDENTIAL GRA SYSTEMS ───
-      {id:"magodo1",name:"Magodo Phase 1 (Isheri Side)",lga:"Kosofe",area:"Mainland / Magodo",lat:6.61,lng:3.375,r:900},
-      {id:"magodo2",name:"Magodo Phase 2 (Shangisa Gates)",lga:"Kosofe",area:"Mainland / Magodo",lat:6.615,lng:3.38,r:900},
-      {id:"omole1",name:"Omole Phase 1 Security Estate",lga:"Ojodu",area:"Mainland / Magodo",lat:6.625,lng:3.342,r:1000},
-      {id:"omole2",name:"Omole Phase 2 (Olowora End)",lga:"Ojodu",area:"Mainland / Magodo",lat:6.63,lng:3.35,r:900},
-      {id:"olowora",name:"Olowora Residential Sector",lga:"Ojodu",area:"Mainland / Magodo",lat:6.631,lng:3.354,r:800},
-      {id:"ojodu",name:"Ojodu Berger Express Terminus",lga:"Ojodu",area:"Mainland / Magodo",lat:6.6354,lng:3.3674,r:1100},
-      {id:"isheri_north",name:"Isheri North Residential GRA",lga:"Ojodu",area:"Mainland / Magodo",lat:6.64,lng:3.36,r:1000},
-      {id:"dankaro",name:"Dankaro Estate Complex",lga:"Ojodu",area:"Mainland / Magodo",lat:6.636,lng:3.37,r:500},
-      {id:"pine_est",name:"Pine Estate Gated Sector",lga:"Ojodu",area:"Mainland / Magodo",lat:6.638,lng:3.368,r:500},
-      {id:"alagbole",name:"Alagbole Sector",lga:"Ifako-Ijaiye",area:"Mainland / Magodo",lat:6.65,lng:3.39,r:1000},
-      {id:"akute",name:"Akute Commuter Hub",lga:"Ifako-Ijaiye",area:"Mainland / Magodo",lat:6.66,lng:3.33,r:1200},
-
-      // ─── INDUSTRIAL & CONSUMER RUNS: OGBA / AGEGE / ALIMOSHO ───
-      {id:"ogba",name:"Ogba Industrial Estate Sector",lga:"Ifako-Ijaiye",area:"Mainland / Ogba",lat:6.5979,lng:3.3283,r:1100},
-      {id:"agege",name:"Agege Main Hub & Pen Cinema Interchange",lga:"Agege",area:"Mainland / Agege",lat:6.6184,lng:3.3197,r:1200},
-      {id:"dopemu",name:"Dopemu Flyover Axis",lga:"Agege",area:"Mainland / Agege",lat:6.6,lng:3.296,r:1000},
-      {id:"ifako",name:"Ifako-Ijaiye Settlement",lga:"Ifako-Ijaiye",area:"Mainland / Ogba",lat:6.634,lng:3.31,r:1100},
-      {id:"ipaja",name:"Ipaja Megacity Track",lga:"Alimosho",area:"Mainland / Agege",lat:6.598,lng:3.268,r:1100},
-      {id:"iyana_ipaja",name:"Iyana Ipaja Junction Network",lga:"Alimosho",area:"Mainland / Agege",lat:6.594,lng:3.274,r:1000},
-
-      // ─── EXPRESS BELTS: KOSOFE / OGUDU / KETU / MILE 12 ───
-      {id:"kosofe",name:"Kosofe General Town Run",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.564,lng:3.41,r:1000},
-      {id:"ketu",name:"Ketu Bus Stop Central",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.582,lng:3.393,r:900},
-      {id:"ojota",name:"Ojota Interchange & Fuel Terminals",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.5748,lng:3.3906,r:900},
-      {id:"mile12",name:"Mile 12 Produce Mega Market",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.6,lng:3.384,r:1000},
-      {id:"agboyi",name:"Agboyi Water Gated Estate",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.602,lng:3.386,r:700},
-      {id:"apollo",name:"Apollo Estate Block",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.601,lng:3.382,r:500},
-      {id:"ogudu",name:"Ogudu Complex Center",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.5748,lng:3.4006,r:900},
-      {id:"oguduGRA",name:"Ogudu GRA Luxury Gated",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.577,lng:3.406,r:700},
-      {id:"ramatcres",name:"Ramat Crescent Secure Track",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.576,lng:3.405,r:500},
-      {id:"anthony",name:"Anthony Village Gated Units",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.56,lng:3.362,r:700},
-      {id:"oworo",name:"Oworonshoki Third Mainland Bridge Foot",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.55,lng:3.396,r:900},
-      {id:"akerele_oworo",name:"Akerele Estate (Oworonshoki)",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.551,lng:3.398,r:500},
-
-      // ─── GBAGADA COMMUTER & CENTRAL ACADEMIC TECH BELTS ───
-      {id:"gbagada",name:"Gbagada Phase 1 Residential Corridor",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.5498,lng:3.3799,r:1000},
-      {id:"gbagada2",name:"Gbagada Phase 2 Gated Estates",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.554,lng:3.384,r:700},
-      {id:"atunrase",name:"Atunrase Medina Gated Community",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.552,lng:3.377,r:600},
-      {id:"yaba",name:"Yaba Commercial / Tech District",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.5161,lng:3.3858,r:1000},
-      {id:"sabo",name:"Sabo Yaba Residential Ring",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.518,lng:3.379,r:500},
-      {id:"adekunle",name:"Adekunle Third Mainland Access Line",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.514,lng:3.387,r:500},
-      {id:"pearlview",name:"Pearl View Luxury Estate (Yaba)",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.5155,lng:3.386,r:450},
-      {id:"unilag",name:"University of Lagos Campus (Akoka)",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.5182,lng:3.3991,r:850},
-      {id:"shomolu",name:"Shomolu Printing & Commercial District",lga:"Shomolu",area:"Mainland / Central",lat:6.535,lng:3.378,r:900},
-      {id:"bariga",name:"Bariga Sector Core",lga:"Shomolu",area:"Mainland / Central",lat:6.53,lng:3.395,r:900},
-      {id:"fadeyi",name:"Fadeyi Ikorodu Road Run",lga:"Mushin",area:"Mainland / Central",lat:6.524,lng:3.37,r:800},
-      {id:"ebute",name:"Ebute-Metta Historic Sector",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.487,lng:3.367,r:1000},
-
-      // ─── SURULERE STADIUM & ENTERTAINMENT BELTS ───
-      {id:"surulere",name:"Surulere Adeniran Ogunsanya Hub",lga:"Surulere",area:"Mainland / Surulere",lat:6.4994,lng:3.3644,r:1200},
-      {id:"aguda",name:"Aguda Residential Hub",lga:"Surulere",area:"Mainland / Surulere",lat:6.501,lng:3.36,r:600},
-      {id:"akerele_suru",name:"Akerele Estate Zone (Surulere)",lga:"Surulere",area:"Mainland / Surulere",lat:6.503,lng:3.366,r:600},
-      {id:"itire",name:"Itire Consumer Sector",lga:"Surulere",area:"Mainland / Surulere",lat:6.506,lng:3.353,r:700},
-      {id:"eric_moore",name:"Eric Moore / Iponri Gated Towers",lga:"Surulere",area:"Mainland / Surulere",lat:6.494,lng:3.358,r:700},
-      {id:"shitta",name:"Shitta Gated/Open Complex",lga:"Surulere",area:"Mainland / Surulere",lat:6.4975,lng:3.3612,r:500},
-      {id:"mushin",name:"Mushin Commercial Core",lga:"Mushin",area:"Mainland / Surulere",lat:6.5218,lng:3.352,r:1100},
-      {id:"orile",name:"Orile Iganmu Rail Terminus",lga:"Surulere",area:"Mainland / Surulere",lat:6.48,lng:3.35,r:900},
-      {id:"natstadium",name:"National Stadium Complex Surulere",lga:"Surulere",area:"Mainland / Surulere",lat:6.4952,lng:3.3631,r:450},
-
-      // ─── WESTERN COMMUTER RUNS: OSHODI / ISOLO / EJIGBO ───
-      {id:"oshodi",name:"Oshodi Transport Interchange Mega Hub",lga:"Oshodi-Isolo",area:"Mainland / Oshodi",lat:6.5558,lng:3.3286,r:1100},
-      {id:"isolo",name:"Isolo Main Community Hub",lga:"Oshodi-Isolo",area:"Mainland / Oshodi",lat:6.512,lng:3.32,r:1100},
-      {id:"ejigbo",name:"Ejigbo Urban District",lga:"Oshodi-Isolo",area:"Mainland / Oshodi",lat:6.5054,lng:3.298,r:1000},
-
-      // ─── ALIMOSHO HIGH-DENSITY HOUSING SPREAD ───
-      {id:"alimosho",name:"Alimosho Central Hub",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.588,lng:3.27,r:1400},
-      {id:"ikotun",name:"Ikotun Market Intersection",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.511,lng:3.271,r:1200},
-      {id:"idimu",name:"Idimu Residential Sector",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.529,lng:3.281,r:1100},
-      {id:"isheri_oshun",name:"Isheri-Oshun Extension Field",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.574,lng:3.28,r:1000},
-      {id:"shasha",name:"Shasha Residential District",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.56,lng:3.29,r:1000},
-      {id:"egbe",name:"Egbe Residential Block",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.538,lng:3.282,r:1000},
-      {id:"igando",name:"Igando Town Hub",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.524,lng:3.265,r:1000},
-
-      // ─── AMUWO / INDUSTRIAL FESTAC / SATELITE RUNS ───
-      {id:"amuwo",name:"Amuwo Odofin Housing Complex",lga:"Amuwo-Odofin",area:"Mainland / South",lat:6.468,lng:3.306,r:1300},
-      {id:"festac",name:"FESTAC Town Historic Mega Block",lga:"Amuwo-Odofin",area:"Mainland / South",lat:6.467,lng:3.293,r:1100},
-      {id:"mile2",name:"Mile 2 Expressway Loop",lga:"Amuwo-Odofin",area:"Mainland / South",lat:6.478,lng:3.32,r:1000},
-      {id:"satellite",name:"Satellite Town Gated Zones",lga:"Ojo",area:"Mainland / South",lat:6.45,lng:3.28,r:1000},
-      {id:"ojo",name:"Ojo LASU University Belt",lga:"Ojo",area:"Mainland / South",lat:6.464,lng:3.229,r:1300},
-      {id:"ajangbadi",name:"Ajangbadi Sector",lga:"Ojo",area:"Mainland / South",lat:6.44,lng:3.175,r:1200},
-
-      // ─── SUBURBAN ANCHOR CORRIDORS ───
-      {id:"ikorodu",name:"Ikorodu Main Town Terminal",lga:"Ikorodu",area:"Mainland / Ikorodu",lat:6.619,lng:3.5052,r:1800},
-      {id:"benson",name:"Benson / Odogunyan Industrial Belt",lga:"Ikorodu",area:"Mainland / Ikorodu",lat:6.605,lng:3.51,r:1200},
-      {id:"majidun",name:"Majidun Commuter Hub",lga:"Ikorodu",area:"Mainland / Ikorodu",lat:6.638,lng:3.528,r:1100},
-      {id:"ijede",name:"Ijede Suburb Section",lga:"Ikorodu",area:"Mainland / Ikorodu",lat:6.66,lng:3.55,r:1200},
-      {id:"epe",name:"Epe Fish Market & Central Sector",lga:"Epe",area:"Outskirts",lat:6.5872,lng:3.98,r:2000},
-      {id:"badagry",name:"Badagry Historic Slave Route Enclave",lga:"Badagry",area:"Outskirts",lat:6.414,lng:2.882,r:2000}
-    ];
-
-    // Global App States
-    let map;
-    let gridState = {}; 
-    const mapElements = {}; 
-
-    // Initializing Engine Components
-    document.addEventListener("DOMContentLoaded", () => {
-      initMap();
-      populateDropdown(ZONES);
-      setupSearchEngine();
-      seedMockTelemetry();
+// ═══════════════════════════════════════════════
+// SIDEBAR
+// ═══════════════════════════════════════════════
+function buildSidebar(q='',sf=null){
+  const wrap=document.getElementById('zone-list'),selZ=document.getElementById('sel-z');
+  wrap.innerHTML=''; selZ.innerHTML='';
+  const areas=[...new Set(ZONES.map(z=>z.area))];
+  let total=0;
+  areas.forEach(area=>{
+    let list=ZONES.filter(z=>z.area===area&&(
+      z.name.toLowerCase().includes(q.toLowerCase())||
+      z.lga.toLowerCase().includes(q.toLowerCase())||
+      z.area.toLowerCase().includes(q.toLowerCase())
+    ));
+    if(sf) list=list.filter(z=>S[z.id].status===sf);
+    if(!list.length)return;
+    const lbl=document.createElement('div');lbl.className='zsec';lbl.textContent=area;wrap.appendChild(lbl);
+    list.forEach(z=>{
+      const s=S[z.id],dot=s.status==='on'?'on':s.status==='off'?'off':'unk';
+      const badge=s.status==='on'?'<span class="zb zb-on">Light On</span>':s.status==='off'?'<span class="zb zb-off">Blackout</span>':'<span class="zb zb-unk">Unknown</span>';
+      const ago=s.lastReport?timeAgo(s.lastReport):'No reports';
+      const card=document.createElement('div');card.className='zcard';card.id='zc-'+z.id;
+      card.innerHTML=`<div class="zdot ${dot}"></div><div class="zi"><div class="zn">${z.name}</div><div class="zm">${z.lga} · ${ago}</div></div>${badge}`;
+      card.addEventListener('click',()=>{map.setView([z.lat,z.lng],14);openMapPopup(z.id)});
+      wrap.appendChild(card);total++;
+      const opt=document.createElement('option');opt.value=z.id;opt.textContent=z.name;selZ.appendChild(opt);
     });
+  });
+  if(!total) wrap.innerHTML=`<div class="empty"><div class="ei">🔍</div>No results for "<strong>${q}</strong>"<br><small>Try a different name or LGA</small></div>`;
+}
 
-    function initMap() {
-      // Map configuration focused over central Lagos grid
-      map = L.map('map', {
-        zoomControl: true,
-        maxZoom: 18,
-        minZoom: 10
-      }).setView([6.4542, 3.4241], 12);
+function refreshCard(id){
+  const card=document.getElementById('zc-'+id);if(!card)return;
+  const z=ZONES.find(x=>x.id===id),s=S[id];
+  const dot=s.status==='on'?'on':s.status==='off'?'off':'unk';
+  const badge=s.status==='on'?'<span class="zb zb-on">Light On</span>':s.status==='off'?'<span class="zb zb-off">Blackout</span>':'<span class="zb zb-unk">Unknown</span>';
+  const ago=s.lastReport?timeAgo(s.lastReport):'No reports';
+  card.innerHTML=`<div class="zdot ${dot}"></div><div class="zi"><div class="zn">${z.name}</div><div class="zm">${z.lga} · ${ago}</div></div>${badge}`;
+  card.addEventListener('click',()=>{map.setView([z.lat,z.lng],14);openMapPopup(z.id)});
+}
 
-      // Dark Mode Basemap Tiles Setup
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap &copy; CARTO'
-      }).addTo(map);
-    }
+// ═══════════════════════════════════════════════
+// FILTER PILLS
+// ═══════════════════════════════════════════════
+function filterSt(st){
+  if(activeFilter===st){activeFilter=null;['on','off','unk'].forEach(s=>document.getElementById('pill-'+s).className='stat-pill');buildSidebar('');}
+  else{activeFilter=st;['on','off','unk'].forEach(s=>document.getElementById('pill-'+s).className='stat-pill'+(s===st?' f'+s:''));buildSidebar('',st);}
+  document.getElementById('srch').value='';
+}
 
-    function populateDropdown(zonesList) {
-      const select = document.getElementById("zone-select");
-      
-      // Clean dynamic elements without breaking option placeholder
-      select.innerHTML = '<option value="">-- Select or Search Zone --</option>';
-      
-      zonesList.forEach(z => {
-        const opt = document.createElement("option");
-        opt.value = z.id;
-        opt.textContent = `${z.name} (${z.lga})`;
-        select.appendChild(opt);
-      });
-    }
+// ═══════════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════════
+function updateStats(){
+  const v=Object.values(S);
+  document.getElementById('stat-on').textContent=v.filter(s=>s.status==='on').length;
+  document.getElementById('stat-off').textContent=v.filter(s=>s.status==='off').length;
+  document.getElementById('stat-unk').textContent=v.filter(s=>s.status==='unk').length;
+}
 
-    function setupSearchEngine() {
-      const searchBox = document.getElementById("zone-search");
-      const select = document.getElementById("zone-select");
+// ═══════════════════════════════════════════════
+// SEARCH + SUGGESTIONS
+// ═══════════════════════════════════════════════
+const srch=document.getElementById('srch'),sugg=document.getElementById('sugg');
+srch.addEventListener('input',e=>{
+  const q=e.target.value.trim();
+  activeFilter=null;['on','off','unk'].forEach(s=>document.getElementById('pill-'+s).className='stat-pill');
+  if(!q){sugg.className='';sugg.innerHTML='';buildSidebar('');closeSro();return;}
+  const hits=ZONES.filter(z=>z.name.toLowerCase().includes(q.toLowerCase())||z.lga.toLowerCase().includes(q.toLowerCase())||z.area.toLowerCase().includes(q.toLowerCase())).slice(0,10);
+  if(hits.length){
+    sugg.innerHTML='';
+    hits.forEach(z=>{
+      const s=S[z.id],dot=s.status==='on'?'on':s.status==='off'?'off':'unk';
+      const stxt=s.status==='on'?'Light On':s.status==='off'?'Blackout':'Unknown';
+      const item=document.createElement('div');item.className='si';
+      item.innerHTML=`<div class="si-dot ${dot}"></div><span class="si-name">${z.name}</span><span class="si-area">${z.lga} · ${stxt}</span>`;
+      item.addEventListener('click',()=>{srch.value=z.name;sugg.className='';sugg.innerHTML='';map.setView([z.lat,z.lng],14);openMapPopup(z.id);buildSidebar(z.name)});
+      sugg.appendChild(item);
+    });
+    sugg.className='open';
+  } else {
+    sugg.innerHTML=`<div class="si" style="color:var(--muted2);cursor:default">No results for "${q}"</div>`;
+    sugg.className='open';
+  }
+  buildSidebar(q);
+});
+document.addEventListener('click',e=>{if(!e.target.closest('.srch-wrap'))sugg.className=''});
 
-      searchBox.addEventListener("input", (e) => {
-        const query = e.target.value.toLowerCase().trim();
-        const filtered = ZONES.filter(z => 
-          z.name.toLowerCase().includes(query) || 
-          z.lga.toLowerCase().includes(query) ||
-          z.area.toLowerCase().includes(query)
-        );
-        populateDropdown(filtered);
-      });
+// ═══════════════════════════════════════════════
+// SEARCH RESULT OVERLAY
+// ═══════════════════════════════════════════════
+function showSro(id){
+  const z=ZONES.find(x=>x.id===id),s=S[id],el=document.getElementById('sro');
+  document.getElementById('sro-name').textContent=z.name;
+  if(s.status==='on'){
+    document.getElementById('sro-icon').innerHTML='<svg width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="31" fill="rgba(34,197,94,.12)" stroke="#22c55e" stroke-width="1.5"/><text x="32" y="44" text-anchor="middle" font-size="30">💡</text></svg>';
+    document.getElementById('sro-status').innerHTML='<span style="color:#22c55e;font-size:20px;font-weight:900">UpNEPA! 🎉</span>';
+    document.getElementById('sro-meta').textContent='Light is currently ON in '+z.name;
+    el.style.borderColor='#22c55e';
+  } else if(s.status==='off'){
+    document.getElementById('sro-icon').innerHTML='<svg width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="31" fill="rgba(239,68,68,.12)" stroke="#ef4444" stroke-width="1.5"/><text x="32" y="30" text-anchor="middle" font-size="18">🔌✂️</text><text x="32" y="50" text-anchor="middle" font-size="20">🦟</text></svg>';
+    document.getElementById('sro-status').innerHTML='<span style="color:#ef4444;font-size:19px;font-weight:900">No Light 😩</span>';
+    document.getElementById('sro-meta').textContent='Blackout reported in '+z.name+'. Generator on!';
+    el.style.borderColor='#ef4444';
+  } else {
+    document.getElementById('sro-icon').innerHTML='<svg width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="31" fill="rgba(100,116,139,.12)" stroke="#64748b" stroke-width="1.5"/><text x="32" y="44" text-anchor="middle" font-size="30">❓</text></svg>';
+    document.getElementById('sro-status').innerHTML='<span style="color:#64748b;font-size:17px;font-weight:700">Status Unknown</span>';
+    document.getElementById('sro-meta').textContent='No recent reports for '+z.name+'. Be the first!';
+    el.style.borderColor='#334155';
+  }
+  el.className='vis';
+}
+function closeSro(){document.getElementById('sro').className=''}
 
-      select.addEventListener("change", (e) => {
-        const zoneId = e.target.value;
-        if (!zoneId) return;
-        const target = ZONES.find(z => z.id === zoneId);
-        if (target) {
-          map.flyTo([target.lat, target.lng], 14, { animate: true, duration: 1.5 });
-        }
-      });
-    }
+// ═══════════════════════════════════════════════
+// CORE CONSENSUS ENGINE
+// ═══════════════════════════════════════════════
+function processVote(zId,vote,weight,silent=false){
+  const s=S[zId],z=ZONES.find(x=>x.id===zId),dir=vote==='light_on'?1:-1;
+  s.score+=dir*weight; s.lastReport=new Date();
+  const prev=s.status;
+  s.status=s.score>=THR?'on':s.score<=-THR?'off':'unk';
+  const c=C[s.status];
+  s.circle.setStyle({color:c.s,fillColor:c.f,fillOpacity:0.3});
+  refreshCard(zId); updateStats();
+  if(!silent){
+    if(s.status!==prev&&s.status!=='unk') showToast(s.status==='on'?`💡 Light confirmed in ${z.name}!`:`🛑 Blackout in ${z.name}`,s.status==='on'?'ton':'toff');
+    addFeed(z.name,vote,weight);
+    const sro=document.getElementById('sro');
+    if(sro.classList.contains('vis')&&document.getElementById('sro-name').textContent===z.name) showSro(zId);
+  }
+  setTimeout(()=>{s.score-=dir*weight*.5;s.status=s.score>=THR?'on':s.score<=-THR?'off':'unk';const c2=C[s.status];s.circle.setStyle({color:c2.s,fillColor:c2.f,fillOpacity:0.22});refreshCard(zId);updateStats()},30000);
+}
 
-    function submitReport(statusBool) {
-      const select = document.getElementById("zone-select");
-      const targetZoneId = select.value;
+function submitR(vote){
+  const zId=document.getElementById('sel-z').value,w=parseFloat(document.getElementById('sel-t').value);
+  if(!zId)return;
+  processVote(zId,vote,w);
+  karma+=w>=0.9?10:w>=0.3?5:2;
+  document.getElementById('karma').textContent=Math.round(karma)+' XP';
+}
 
-      if (!targetZoneId) {
-        alert("Please pick a target estate or landmark grid zone from the list first.");
-        return;
-      }
+function toggleT(type){
+  telemetry[type]=!telemetry[type];
+  const btn=document.getElementById('btn-'+type),v=document.getElementById(type==='wifi'?'wv':'cv');
+  v.textContent=telemetry[type]?'ON':'OFF';
+  btn.className='tbtn '+(telemetry[type]?'tok':'tbad');
+  if(!telemetry.wifi&&!telemetry.charge){const zId=document.getElementById('sel-z').value;if(zId)processVote(zId,'light_off',0.35)}
+}
 
-      executeTelemetryUpdate(targetZoneId, statusBool);
-    }
+// ═══════════════════════════════════════════════
+// PROFILES
+// ═══════════════════════════════════════════════
+(function buildProfiles(){
+  const list=document.getElementById('prof-list');
+  REPORTERS.forEach(r=>{
+    const tc={g:'pav-g',y:'pav-y',r:'pav-r'}[r.tier],bc={g:'psb-g',y:'psb-y',r:'psb-r'}[r.tier],tl={g:'🟢',y:'🟡',r:'🔴'}[r.tier];
+    const item=document.createElement('div');item.className='pi';
+    item.innerHTML=`<div class="pav ${tc}">${r.av}</div><div class="pinfo"><div class="pname">${r.name}</div><div class="ploc">📍 ${r.loc} · ${r.reports} reports</div></div><span class="psb ${bc}">${tl} ${r.score}%</span>`;
+    list.appendChild(item);
+  });
+})();
+function toggleProf(){const p=document.getElementById('prof-panel');p.className=p.classList.contains('open')?'':'open'}
+document.addEventListener('click',e=>{if(!e.target.closest('#prof-panel')&&!e.target.closest('#prof-btn'))document.getElementById('prof-panel').className=''});
 
-    function executeTelemetryUpdate(zoneId, statusBool) {
-      const target = ZONES.find(z => z.id === zoneId);
-      if (!target) return;
+// ═══════════════════════════════════════════════
+// FEED
+// ═══════════════════════════════════════════════
+function addFeed(zone,vote,w){
+  const body=document.getElementById('feed-body'),isOn=vote==='light_on',now=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  const ph=body.querySelector('.fi');if(ph&&ph.textContent.includes('Waiting'))ph.remove();
+  const item=document.createElement('div');item.className='fi';
+  item.innerHTML=`${isOn?'💡':'🛑'} <span class="${isOn?'fon':'foff'}">${isOn?'Light On':'Blackout'}</span> · ${zone} <span style="color:var(--muted);float:right">${now}</span>`;
+  body.insertBefore(item,body.firstChild);
+  while(body.children.length>20)body.removeChild(body.lastChild);
+}
 
-      // Overwrite/Update state parameters
-      gridState[zoneId] = {
-        status: statusBool,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-        count: (gridState[zoneId]?.count || 0) + 1
-      };
+// ═══════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════
+function showToast(msg,cls=''){
+  const t=document.getElementById('toast');t.textContent=msg;t.className='show '+cls;
+  clearTimeout(toastTmr);toastTmr=setTimeout(()=>t.className='',4500);
+}
 
-      // Handle Map Elements Rendering Loop Safely
-      if (mapElements[zoneId]) {
-        map.removeLayer(mapElements[zoneId]);
-      }
+function timeAgo(d){const s=Math.floor((Date.now()-d)/1000);return s<60?s+'s ago':s<3600?Math.floor(s/60)+'m ago':Math.floor(s/3600)+'h ago'}
+setInterval(()=>ZONES.forEach(z=>{if(S[z.id].lastReport)refreshCard(z.id)}),30000);
 
-      const colorHex = statusBool ? "#10b981" : "#ef4444";
-      
-      const circleMarker = L.circle([target.lat, target.lng], {
-        color: colorHex,
-        fillColor: colorHex,
-        fillOpacity: 0.35,
-        radius: target.r,
-        weight: 2
-      });
+// ═══════════════════════════════════════════════
+// SEED DEMO DATA
+// ═══════════════════════════════════════════════
+const seeds=[
+  {id:'lekki1',v:'light_on',w:1},{id:'lekki1',v:'light_on',w:1},{id:'vi',v:'light_on',w:1},{id:'vi',v:'light_on',w:1},
+  {id:'ikoyi',v:'light_on',w:1},{id:'ikoyi',v:'light_on',w:1},{id:'banana',v:'light_on',w:1},{id:'banana',v:'light_on',w:1},
+  {id:'vgc',v:'light_on',w:1},{id:'vgc',v:'light_on',w:1},{id:'osapa',v:'light_on',w:1},{id:'osapa',v:'light_on',w:1},
+  {id:'chevron',v:'light_on',w:1},{id:'chevron',v:'light_on',w:1},{id:'ikeja',v:'light_on',w:1},{id:'ikeja',v:'light_on',w:1},
+  {id:'ikejaGRA',v:'light_on',w:1},{id:'ikejaGRA',v:'light_on',w:1},{id:'parkview',v:'light_on',w:1},{id:'parkview',v:'light_on',w:1},
+  {id:'festac',v:'light_on',w:1},{id:'festac',v:'light_on',w:.4},{id:'nicon',v:'light_on',w:1},{id:'nicon',v:'light_on',w:1},
+  {id:'chevyview',v:'light_on',w:1},{id:'chevyview',v:'light_on',w:1},{id:'vi_1004',v:'light_on',w:1},{id:'vi_1004',v:'light_on',w:1},
+  {id:'omole1',v:'light_on',w:1},{id:'omole1',v:'light_on',w:1},{id:'magodo1',v:'light_on',w:1},{id:'magodo1',v:'light_on',w:1},
+  {id:'gbagada',v:'light_on',w:.4},{id:'gbagada',v:'light_on',w:.4},{id:'maryland',v:'light_on',w:1},{id:'maryland',v:'light_on',w:1},
+  {id:'surulere',v:'light_off',w:1},{id:'surulere',v:'light_off',w:1},{id:'yaba',v:'light_off',w:1},{id:'yaba',v:'light_off',w:1},
+  {id:'agege',v:'light_off',w:1},{id:'agege',v:'light_off',w:1},{id:'mushin',v:'light_off',w:1},{id:'mushin',v:'light_off',w:1},
+  {id:'oshodi',v:'light_off',w:1},{id:'oshodi',v:'light_off',w:1},{id:'isolo',v:'light_off',w:1},{id:'isolo',v:'light_off',w:1},
+  {id:'mile12',v:'light_off',w:1},{id:'mile12',v:'light_off',w:.4},{id:'ikotun',v:'light_off',w:.4},
+  {id:'amuwo',v:'light_on',w:.4},{id:'ajah',v:'light_on',w:.4},
+];
+seeds.forEach((s,i)=>setTimeout(()=>processVote(s.id,s.v,s.w,true),i*40));
+setTimeout(()=>{buildSidebar();updateStats()},seeds.length*40+200);
 
-      // Interactive Popup Binding
-      circleMarker.bindPopup(`
-        <div style="color:#111; font-family:sans-serif; font-size:13px;">
-          <strong style="font-size:14px; color:#1e293b;">${target.name}</strong><br/>
-          <span>LGA: ${target.lga}</span><br/>
-          <hr style="margin: 6px 0; border:0; border-top:1px solid #ddd;"/>
-          Status: <span style="font-weight:bold; color:${colorHex};">${statusBool ? '💡 UP NEPA' : '🔌 NEPA DEY'}</span><br/>
-          <span style="font-size:11px; color:#64748b;">Telemetry Logs: ${gridState[zoneId].count} pings</span>
-        </div>
-      `);
-
-      circleMarker.addTo(map);
-      mapElements[zoneId] = circleMarker;
-
-      // Update Dashboard Metrics and Live Feeds
-      logFeedStream(target.name, statusBool, gridState[zoneId].timestamp);
-      recalculateStats();
-    }
-
-    function logFeedStream(name, statusBool, timeStr) {
-      const container = document.getElementById("feed-container");
-      const li = document.createElement("li");
-      
-      li.className = `feed-item ${statusBool ? 'up' : 'down'}`;
-      li.innerHTML = `
-        <div><strong>${statusBool ? '💡 Up NEPA!' : '🔌 NEPA Dey'}</strong> &bull; ${name}</div>
-        <div class="feed-meta"><span>Grid Confirmed</span><span>${timeStr}</span></div>
-      `;
-
-      container.insertBefore(li, container.firstChild);
-
-      // Max capacity cap at 6 entries visually to avoid vertical panel blowout
-      if (container.children.length > 6) {
-        container.removeChild(container.lastChild);
-      }
-    }
-
-    function recalculateStats() {
-      const keys = Object.keys(gridState);
-      if (keys.length === 0) return;
-
-      const totalReports = keys.reduce((acc, k) => acc + gridState[k].count, 0);
-      const onlineZonesCount = keys.filter(k => gridState[k].status === true).length;
-      const pctOnline = Math.round((onlineZonesCount / keys.length) * 100);
-
-      document.getElementById("stat-online-pct").textContent = `${pctOnline}%`;
-      document.getElementById("stat-total-reports").textContent = totalReports;
-    }
-
-    function seedMockTelemetry() {
-      // Seed initial telemetry indicators across major core hubs
-      const mockSeeds = [
-        { id: "vgc", state: true },
-        { id: "lekki1", state: false },
-        { id: "vi_1004", state: true },
-        { id: "ikejaGRA", state: true },
-        { id: "magodo2", state: false }
-      ];
-
-      mockSeeds.forEach(seed => {
-        executeTelemetryUpdate(seed.id, seed.state);
-      });
-    }
-  </script>
+buildSidebar(); updateStats();
+</script>
 </body>
 </html>
+
