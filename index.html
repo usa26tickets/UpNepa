@@ -1,1 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GridLock / LightUp — Live Utility Map</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        #map { height: 400px; width: 100%; border-radius: 12px; }
+        .custom-popup .leaflet-popup-content-wrapper { background: #0f172a; color: white; border: 1px solid #334155; }
+        .custom-popup .leaflet-popup-tip { background: #0f172a; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased">
 
+    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <span class="text-2xl">⚡</span>
+            <h1 class="text-xl font-bold bg-gradient-to-r from-amber-400 to-emerald-400 bg-clip-text text-transparent">GridLock / LightUp</h1>
+        </div>
+        <div class="flex items-center gap-4 text-sm">
+            <span class="bg-slate-800 px-3 py-1.5 rounded-full border border-slate-700 text-slate-300">
+                👤 Current User: <span class="text-emerald-400 font-bold">GenZ_Dev</span>
+            </span>
+            <span class="bg-slate-800 px-3 py-1.5 rounded-full border border-slate-700 text-slate-300">
+                🏆 Karma: <span id="karma-display" class="text-amber-400 font-bold">140 XP</span>
+            </span>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-4 lg:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <div class="space-y-6 lg:col-span-1">
+            
+            <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
+                <h2 class="text-md font-semibold text-slate-300 mb-2 flex items-center gap-2">
+                    📱 Device Signal Simulator (Background Tracking)
+                </h2>
+                <p class="text-xs text-slate-400 mb-4">Simulate hardware telemetry adjustments without deploying any physical devices to local street poles.</p>
+                
+                <div class="space-y-3">
+                    <button id="btn-wifi-toggle" class="w-full flex justify-between items-center p-3 rounded-xl bg-emerald-950/30 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-950/50 transition">
+                        <span class="text-xs font-medium">Home Wi-Fi Status</span>
+                        <span id="wifi-status" class="text-xs font-bold bg-emerald-500/20 px-2.5 py-1 rounded">CONNECTED</span>
+                    </button>
+                    
+                    <button id="btn-power-toggle" class="w-full flex justify-between items-center p-3 rounded-xl bg-emerald-950/30 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-950/50 transition">
+                        <span class="text-xs font-medium">Wall Charging State</span>
+                        <span id="power-status" class="text-xs font-bold bg-emerald-500/20 px-2.5 py-1 rounded">CHARGING</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
+                <h3 class="text-md font-semibold text-slate-300 mb-3">Crowdsourced Action Sandbox</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-xs text-slate-400 block mb-1">Target Mainland Location:</label>
+                        <select id="select-location" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-200 outline-none">
+                            <option value="yaba">Yaba Hub Zone</option>
+                            <option value="ikeja">Ikeja Allen Ave</option>
+                            <option value="surulere">Surulere Stadium Axis</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="text-xs text-slate-400 block mb-1">Select User Integrity (Trust Weight):</label>
+                        <select id="select-trust" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-200 outline-none">
+                            <option value="1.0">Verified Local Resorter (Weight: 1.0)</option>
+                            <option value="0.1">Unverified Account / Troll (Weight: 0.1)</option>
+                        </select>
+                    </div>
+
+                    <div class="pt-2 border-t border-slate-800/80">
+                        <span class="text-xs text-slate-400 block mb-2">Simulate Crowd Manual Reports:</span>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="submitSimulatedPing('light_on')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs py-2.5 px-4 rounded-xl transition shadow-lg shadow-emerald-900/20">💡 NEPA Dey</button>
+                            <button onclick="submitSimulatedPing('light_off')" class="bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs py-2.5 px-4 rounded-xl transition shadow-lg shadow-rose-900/20">🛑 No Light</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="lg:col-span-2 space-y-6">
+            
+            <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl flex flex-col">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h2 class="text-lg font-bold">Mainland Utility Canvas</h2>
+                        <p class="text-xs text-slate-400">Showing crowdsourced grid assessments across Lagos zones.</p>
+                    </div>
+                    <div id="live-toast-container" class="text-xs text-amber-400 bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-500/20 hidden animate-pulse">
+                        ⚠️ Network State Mutation Triggered
+                    </div>
+                </div>
+
+                <div class="relative bg-slate-950 rounded-xl overflow-hidden border border-slate-800">
+                    <div id="map"></div>
+                </div>
+
+                <div class="flex flex-wrap gap-4 items-center mt-4 text-xs text-slate-400 border-t border-slate-800/60 pt-4">
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-3 h-3 bg-emerald-500 rounded-full inline-block"></span> 🟩 Confirmed Grid Power On
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-3 h-3 bg-rose-500 rounded-full inline-block"></span> 🟥 Confirmed Grid Blackout
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-3 h-3 bg-slate-500 rounded-full inline-block"></span> 🟪 Uncertain Status
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
+                <h3 class="text-sm font-bold text-slate-300 mb-3 flex justify-between items-center">
+                    <span>Algorithmic Computation Logs</span>
+                    <button onclick="clearLogs()" class="text-xs text-slate-500 hover:text-slate-300 transition">Clear Console</button>
+                </h3>
+                <div id="system-console" class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs font-mono h-36 overflow-y-auto space-y-1.5 text-slate-400">
+                    <div>[SYSTEM]: Client Core initialized successfully.</div>
+                    <div>[SYSTEM]: Awaiting telemetry reports from virtual device coordinates.</div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // App State Model Configuration
+        let karmaScore = 140;
+        let localTelemetry = { wifiConnected: true, chargerConnected: true };
+
+        // Neighborhood Data Models
+        const zones = {
+            yaba: { name: "Yaba Hub Zone", lat: 6.5161, lng: 3.3858, netScore: 0, status: "uncertain", circleElement: null },
+            ikeja: { name: "Ikeja Allen Ave", lat: 6.5962, lng: 3.3551, netScore: 0, status: "uncertain", circleElement: null },
+            surulere: { name: "Surulere Stadium Axis", lat: 6.4994, lng: 3.3644, netScore: 0, status: "uncertain", circleElement: null }
+        };
+
+        // Initialize Map View Centered over Lagos Mainland
+        const map = L.map('map').setView([6.5350, 3.3650], 12);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+        }).addTo(map);
+
+        // Plot Grid Locations dynamically onto Leaflet map
+        function buildMapZones() {
+            Object.keys(zones).forEach(key => {
+                const zone = zones[key];
+                zone.circleElement = L.circle([zone.lat, zone.lng], {
+                    color: '#64748b',
+                    fillColor: '#475569',
+                    fillOpacity: 0.4,
+                    radius: 1200
+                }).addTo(map);
+                
+                zone.circleElement.bindPopup(`
+                    <div class="custom-popup p-1">
+                        <strong class="text-sm block text-slate-200">${zone.name}</strong>
+                        <span class="text-xs block mt-1 text-slate-400">Consensus Metric: <span class="text-amber-400 font-bold" id="popup-score-${key}">${zone.netScore.toFixed(2)}</span></span>
+                    </div>
+                `);
+            });
+        }
+        buildMapZones();
+
+        // Logger Helper Utility
+        function logToConsole(message, type = 'info') {
+            const consoleBox = document.getElementById('system-console');
+            const logItem = document.createElement('div');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            if (type === 'success') logItem.className = 'text-emerald-400';
+            else if (type === 'danger') logItem.className = 'text-rose-400';
+            else if (type === 'warn') logItem.className = 'text-amber-400';
+            
+            logItem.innerHTML = `[${timestamp}] ${message}`;
+            consoleBox.appendChild(logItem);
+            consoleBox.scrollTop = consoleBox.scrollHeight;
+        }
+
+        function clearLogs() {
+            document.getElementById('system-console').innerHTML = "<div>[SYSTEM]: Log state wiped clean.</div>";
+        }
+
+        // Simulating Foreground/Background Passive Device Telemetry Drops
+        document.getElementById('btn-wifi-toggle').addEventListener('click', () => {
+            localTelemetry.wifiConnected = !localTelemetry.wifiConnected;
+            const statusEl = document.getElementById('wifi-status');
+            const btn = document.getElementById('btn-wifi-toggle');
+            
+            if (localTelemetry.wifiConnected) {
+                statusEl.innerText = "CONNECTED";
+                btn.className = "w-full flex justify-between items-center p-3 rounded-xl bg-emerald-950/30 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-950/50 transition";
+                logToConsole("Device attached to local SSID infrastructure.", "info");
+            } else {
+                statusEl.innerText = "DROPPED";
+                btn.className = "w-full flex justify-between items-center p-3 rounded-xl bg-rose-950/30 border border-rose-500/30 text-rose-400 hover:bg-rose-950/50 transition";
+                logToConsole("⚠️ Sudden Wi-Fi drop detected without standard user logs.", "warn");
+                triggerImplicitAnomaly('light_off');
+            }
+        });
+
+        document.getElementById('btn-power-toggle').addEventListener('click', () => {
+            localTelemetry.chargerConnected = !localTelemetry.chargerConnected;
+            const statusEl = document.getElementById('power-status');
+            const btn = document.getElementById('btn-power-toggle');
+            
+            if (localTelemetry.chargerConnected) {
+                statusEl.innerText = "CHARGING";
+                btn.className = "w-full flex justify-between items-center p-3 rounded-xl bg-emerald-950/30 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-950/50 transition";
+                logToConsole("Device receiving system power standard.", "info");
+            } else {
+                statusEl.innerText = "DISCHARGING";
+                btn.className = "w-full flex justify-between items-center p-3 rounded-xl bg-amber-950/30 border border-amber-500/30 text-amber-400 hover:bg-amber-950/50 transition";
+                logToConsole("⚠️ Wall charging connection terminated unexpectedly.", "warn");
+                triggerImplicitAnomaly('light_off');
+            }
+        });
+
+        // Implicit Passive Engine Trigger Logic
+        function triggerImplicitAnomaly(inferredState) {
+            if (!localTelemetry.wifiConnected && !localTelemetry.chargerConnected) {
+                const selectedZoneKey = document.getElementById('select-location').value;
+                logToConsole(`🤖 Background logic matches anomaly conditions. Injecting automatic low-weight vote into system for ${zones[selectedZoneKey].name}.`, 'warn');
+                processConsensusAlgorithm(selectedZoneKey, inferredState, 0.4); // Automatic background weight anchor
+            }
+        }
+
+        // Explicit Reporting Interface
+        function submitSimulatedPing(reportedStatus) {
+            const selectedZoneKey = document.getElementById('select-location').value;
+            const trustWeight = parseFloat(document.getElementById('select-trust').value);
+            
+            logToConsole(`📥 Explicit entry submitted for ${zones[selectedZoneKey].name}. State: ${reportedStatus}, User Weight: ${trustWeight}`, 'info');
+            
+            processConsensusAlgorithm(selectedZoneKey, reportedStatus, trustWeight);
+            
+            // Allocate points to user interface for participating
+            karmaScore += trustWeight > 0.5 ? 10 : 2;
+            document.getElementById('karma-display').innerText = `${karmaScore} XP`;
+        }
+
+        // Core Weighted Consensus Formula Pipeline Execution
+        function processConsensusAlgorithm(zoneKey, status, weight) {
+            const zone = zones[zoneKey];
+            const direction = (status === 'light_on') ? 1 : -1;
+            
+            // Apply weighted change to the score
+            zone.netScore += (direction * weight);
+            
+            logToConsole(`⚙️ Recalculated net confidence for ${zone.name}: ${zone.netScore.toFixed(2)}`, 'info');
+
+            const CONFIDENCE_THRESHOLD = 2.0;
+            let previousStatus = zone.status;
+
+            // Determine status based on the confidence threshold
+            if (zone.netScore >= CONFIDENCE_THRESHOLD) {
+                zone.status = 'light_on';
+                zone.circleElement.setStyle({ color: '#10b981', fillColor: '#10b981' });
+            } else if (zone.netScore <= -CONFIDENCE_THRESHOLD) {
+                zone.status = 'light_off';
+                zone.circleElement.setStyle({ color: '#f43f5e', fillColor: '#f43f5e' });
+            } else {
+                zone.status = 'uncertain';
+                zone.circleElement.setStyle({ color: '#64748b', fillColor: '#475569' });
+            }
+
+            // Update open tooltip indicators if present
+            const scorePopupSpan = document.getElementById(`popup-score-${zoneKey}`);
+            if (scorePopupSpan) scorePopupSpan.innerText = zone.netScore.toFixed(2);
+
+            // Trigger notification banner if state boundary crossed
+            if (zone.status !== previousStatus && zone.status !== 'uncertain') {
+                showPushNotificationNotification(zone.name, zone.status);
+            }
+        }
+
+        // Notification Banner Display Management
+        function showPushNotificationNotification(zoneName, status) {
+            const toast = document.getElementById('live-toast-container');
+            toast.innerText = status === 'light_on' ? `💡 Grid Alert: NEPA Dey inside ${zoneName}!` : `🛑 Grid Alert: Blackout reported in ${zoneName}!`;
+            toast.classList.remove('hidden');
+            
+            logToConsole(`📣 BROADCAST_ALERT: Sent notification to users tracking updates for ${zoneName}.`, 'success');
+            
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
