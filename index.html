@@ -1,297 +1,672 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GridLock / LightUp — Live Utility Map</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <style>
-        #map { height: 400px; width: 100%; border-radius: 12px; }
-        .custom-popup .leaflet-popup-content-wrapper { background: #0f172a; color: white; border: 1px solid #334155; }
-        .custom-popup .leaflet-popup-tip { background: #0f172a; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GridPulse Lagos – Live Power Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    /* ── Reset & Base ───────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d0f14;
+      --surface:   #161920;
+      --surface2:  #1e2130;
+      --border:    #2a2d3a;
+      --text:      #e2e8f0;
+      --muted:     #64748b;
+      --on:        #22c55e;
+      --on-glow:   rgba(34,197,94,0.18);
+      --off:       #ef4444;
+      --off-glow:  rgba(239,68,68,0.18);
+      --warn:      #f59e0b;
+      --accent:    #6366f1;
+      --sidebar-w: 340px;
+      --font:      -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    html, body { height: 100%; font-family: var(--font); background: var(--bg); color: var(--text); font-size: 14px; }
+
+    /* ── Layout ─────────────────────────────────────────────── */
+    #app { display: flex; height: 100vh; overflow: hidden; }
+
+    /* ── Sidebar ────────────────────────────────────────────── */
+    #sidebar {
+      width: var(--sidebar-w);
+      min-width: var(--sidebar-w);
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 100;
+    }
+
+    /* header */
+    #sidebar-header {
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+    .brand-icon { font-size: 22px; line-height: 1; }
+    .brand-name { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
+    .brand-name span { color: var(--on); }
+
+    /* stat pills */
+    .stat-row { display: flex; gap: 8px; margin-bottom: 14px; }
+    .stat-pill {
+      flex: 1; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px 12px; text-align: center;
+    }
+    .stat-pill .val { font-size: 18px; font-weight: 700; line-height: 1.2; }
+    .stat-pill .lbl { font-size: 10px; color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: .5px; }
+
+    /* search */
+    .search-wrap { position: relative; }
+    .search-wrap input {
+      width: 100%; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 9px 12px 9px 34px;
+      color: var(--text); font-size: 13px; outline: none; transition: border .15s;
+    }
+    .search-wrap input:focus { border-color: var(--accent); }
+    .search-wrap::before {
+      content: "🔍"; position: absolute; left: 10px; top: 50%;
+      transform: translateY(-50%); font-size: 13px; pointer-events: none;
+    }
+
+    /* zone list */
+    #zone-list-wrap {
+      flex: 1; overflow-y: auto; padding: 12px 14px;
+      display: flex; flex-direction: column; gap: 7px;
+    }
+    #zone-list-wrap::-webkit-scrollbar { width: 4px; }
+    #zone-list-wrap::-webkit-scrollbar-track { background: transparent; }
+    #zone-list-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .zone-section-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: .8px;
+      color: var(--muted); padding: 6px 4px 2px; font-weight: 600;
+    }
+
+    .zone-card {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 11px 13px;
+      display: flex; align-items: center; gap: 10px;
+      cursor: pointer; transition: background .15s, border-color .15s;
+    }
+    .zone-card:hover { background: #252a38; border-color: #3a3f52; }
+    .zone-card.active { border-color: var(--accent); }
+
+    .zone-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .zone-dot.on  { background: var(--on);  box-shadow: 0 0 6px var(--on); }
+    .zone-dot.off { background: var(--off); box-shadow: 0 0 6px var(--off); }
+    .zone-dot.unk { background: var(--muted); }
+
+    .zone-info { flex: 1; min-width: 0; }
+    .zone-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .zone-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    .zone-badge {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      padding: 3px 8px; border-radius: 20px; letter-spacing: .4px; white-space: nowrap;
+    }
+    .badge-on  { background: var(--on-glow);  color: var(--on);  border: 1px solid var(--on); }
+    .badge-off { background: var(--off-glow); color: var(--off); border: 1px solid var(--off); }
+    .badge-unk { background: rgba(100,116,139,.15); color: var(--muted); border: 1px solid var(--muted); }
+
+    /* ── Report Panel ───────────────────────────────────────── */
+    #report-panel {
+      border-top: 1px solid var(--border);
+      padding: 14px 16px;
+      flex-shrink: 0;
+      background: var(--surface);
+    }
+    #report-panel h3 { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; }
+
+    .report-row { display: flex; gap: 8px; margin-bottom: 8px; }
+    .report-select {
+      flex: 1; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 10px; color: var(--text); font-size: 12px; outline: none;
+    }
+
+    .report-btns { display: flex; gap: 8px; }
+    .btn-report {
+      flex: 1; padding: 9px 12px; border: none; border-radius: 9px;
+      font-size: 12px; font-weight: 700; cursor: pointer; transition: opacity .15s, transform .1s;
+    }
+    .btn-report:active { transform: scale(.97); }
+    .btn-on  { background: var(--on);  color: #000; }
+    .btn-off { background: var(--off); color: #fff; }
+    .btn-on:hover  { opacity: .9; }
+    .btn-off:hover { opacity: .9; }
+
+    /* telemetry toggles */
+    .tele-row { display: flex; gap: 8px; margin-top: 8px; }
+    .tele-btn {
+      flex: 1; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--surface2); color: var(--text); font-size: 11px; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center; transition: .15s;
+    }
+    .tele-btn .tele-val { font-weight: 700; font-size: 10px; padding: 2px 6px; border-radius: 4px; }
+    .tele-btn.ok  { border-color: rgba(34,197,94,.3); }
+    .tele-btn.ok .tele-val  { background: var(--on-glow); color: var(--on); }
+    .tele-btn.bad { border-color: rgba(239,68,68,.3); }
+    .tele-btn.bad .tele-val { background: var(--off-glow); color: var(--off); }
+
+    /* karma */
+    .karma-row {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 11px; color: var(--muted); margin-top: 8px;
+      padding-top: 8px; border-top: 1px solid var(--border);
+    }
+    .karma-val { font-weight: 700; color: var(--warn); font-size: 13px; }
+
+    /* ── Map ────────────────────────────────────────────────── */
+    #map { flex: 1; height: 100vh; }
+
+    /* ── Toast ──────────────────────────────────────────────── */
+    #toast {
+      position: fixed; top: 18px; left: 50%; transform: translateX(-50%) translateY(-80px);
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 10px 18px; font-size: 13px; font-weight: 600;
+      z-index: 9999; transition: transform .35s cubic-bezier(.34,1.56,.64,1);
+      white-space: nowrap; box-shadow: 0 8px 32px rgba(0,0,0,.5);
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+    #toast.green { border-color: var(--on); color: var(--on); }
+    #toast.red   { border-color: var(--off); color: var(--off); }
+
+    /* ── Activity Feed ──────────────────────────────────────── */
+    #feed-panel {
+      position: fixed; bottom: 18px; right: 18px;
+      width: 280px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 14px;
+      overflow: hidden; z-index: 500;
+      box-shadow: 0 8px 32px rgba(0,0,0,.5);
+    }
+    #feed-header {
+      padding: 10px 14px; font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .6px; color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    #feed-header .live-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--on); box-shadow: 0 0 6px var(--on);
+      animation: pulse 1.5s infinite;
+    }
+    #feed-body { max-height: 180px; overflow-y: auto; padding: 8px 0; }
+    #feed-body::-webkit-scrollbar { width: 3px; }
+    #feed-body::-webkit-scrollbar-thumb { background: var(--border); }
+    .feed-item {
+      padding: 6px 14px; font-size: 11px; color: var(--muted);
+      border-bottom: 1px solid rgba(42,45,58,.5); line-height: 1.5;
+    }
+    .feed-item:last-child { border-bottom: none; }
+    .feed-item span { font-weight: 600; }
+    .feed-item .feed-on  { color: var(--on); }
+    .feed-item .feed-off { color: var(--off); }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .3; }
+    }
+
+    /* ── Responsive ─────────────────────────────────────────── */
+    @media (max-width: 700px) {
+      #app { flex-direction: column; }
+      #sidebar { width: 100%; min-width: unset; height: auto; max-height: 55vh; }
+      #map { height: 45vh; }
+      #feed-panel { display: none; }
+    }
+  </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased">
+<body>
+<div id="app">
 
-    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
-        <div class="flex items-center gap-3">
-            <span class="text-2xl">⚡</span>
-            <h1 class="text-xl font-bold bg-gradient-to-r from-amber-400 to-emerald-400 bg-clip-text text-transparent">GridLock / LightUp</h1>
+  <!-- ── SIDEBAR ── -->
+  <div id="sidebar">
+
+    <div id="sidebar-header">
+      <div class="brand">
+        <span class="brand-icon">⚡</span>
+        <span class="brand-name">Grid<span>Pulse</span> Lagos</span>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-pill">
+          <div class="val" id="stat-on" style="color:var(--on)">—</div>
+          <div class="lbl">Areas with light</div>
         </div>
-        <div class="flex items-center gap-4 text-sm">
-            <span class="bg-slate-800 px-3 py-1.5 rounded-full border border-slate-700 text-slate-300">
-                👤 Current User: <span class="text-emerald-400 font-bold">GenZ_Dev</span>
-            </span>
-            <span class="bg-slate-800 px-3 py-1.5 rounded-full border border-slate-700 text-slate-300">
-                🏆 Karma: <span id="karma-display" class="text-amber-400 font-bold">140 XP</span>
-            </span>
+        <div class="stat-pill">
+          <div class="val" id="stat-off" style="color:var(--off)">—</div>
+          <div class="lbl">Areas in blackout</div>
         </div>
-    </header>
-
-    <main class="max-w-7xl mx-auto p-4 lg:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        <div class="space-y-6 lg:col-span-1">
-            
-            <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
-                <h2 class="text-md font-semibold text-slate-300 mb-2 flex items-center gap-2">
-                    📱 Device Signal Simulator (Background Tracking)
-                </h2>
-                <p class="text-xs text-slate-400 mb-4">Simulate hardware telemetry adjustments without deploying any physical devices to local street poles.</p>
-                
-                <div class="space-y-3">
-                    <button id="btn-wifi-toggle" class="w-full flex justify-between items-center p-3 rounded-xl bg-emerald-950/30 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-950/50 transition">
-                        <span class="text-xs font-medium">Home Wi-Fi Status</span>
-                        <span id="wifi-status" class="text-xs font-bold bg-emerald-500/20 px-2.5 py-1 rounded">CONNECTED</span>
-                    </button>
-                    
-                    <button id="btn-power-toggle" class="w-full flex justify-between items-center p-3 rounded-xl bg-emerald-950/30 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-950/50 transition">
-                        <span class="text-xs font-medium">Wall Charging State</span>
-                        <span id="power-status" class="text-xs font-bold bg-emerald-500/20 px-2.5 py-1 rounded">CHARGING</span>
-                    </button>
-                </div>
-            </div>
-
-            <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
-                <h3 class="text-md font-semibold text-slate-300 mb-3">Crowdsourced Action Sandbox</h3>
-                <div class="space-y-4">
-                    <div>
-                        <label class="text-xs text-slate-400 block mb-1">Target Mainland Location:</label>
-                        <select id="select-location" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-200 outline-none">
-                            <option value="yaba">Yaba Hub Zone</option>
-                            <option value="ikeja">Ikeja Allen Ave</option>
-                            <option value="surulere">Surulere Stadium Axis</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="text-xs text-slate-400 block mb-1">Select User Integrity (Trust Weight):</label>
-                        <select id="select-trust" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-200 outline-none">
-                            <option value="1.0">Verified Local Resorter (Weight: 1.0)</option>
-                            <option value="0.1">Unverified Account / Troll (Weight: 0.1)</option>
-                        </select>
-                    </div>
-
-                    <div class="pt-2 border-t border-slate-800/80">
-                        <span class="text-xs text-slate-400 block mb-2">Simulate Crowd Manual Reports:</span>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button onclick="submitSimulatedPing('light_on')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs py-2.5 px-4 rounded-xl transition shadow-lg shadow-emerald-900/20">💡 NEPA Dey</button>
-                            <button onclick="submitSimulatedPing('light_off')" class="bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs py-2.5 px-4 rounded-xl transition shadow-lg shadow-rose-900/20">🛑 No Light</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+        <div class="stat-pill">
+          <div class="val" id="stat-unk" style="color:var(--muted)">—</div>
+          <div class="lbl">Unknown</div>
         </div>
+      </div>
 
-        <div class="lg:col-span-2 space-y-6">
-            
-            <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl flex flex-col">
-                <div class="flex justify-between items-start mb-4">
-                    <div>
-                        <h2 class="text-lg font-bold">Mainland Utility Canvas</h2>
-                        <p class="text-xs text-slate-400">Showing crowdsourced grid assessments across Lagos zones.</p>
-                    </div>
-                    <div id="live-toast-container" class="text-xs text-amber-400 bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-500/20 hidden animate-pulse">
-                        ⚠️ Network State Mutation Triggered
-                    </div>
-                </div>
+      <div class="search-wrap">
+        <input type="text" id="search-input" placeholder="Search area or estate…" />
+      </div>
+    </div>
 
-                <div class="relative bg-slate-950 rounded-xl overflow-hidden border border-slate-800">
-                    <div id="map"></div>
-                </div>
+    <div id="zone-list-wrap">
+      <!-- populated by JS -->
+    </div>
 
-                <div class="flex flex-wrap gap-4 items-center mt-4 text-xs text-slate-400 border-t border-slate-800/60 pt-4">
-                    <div class="flex items-center gap-1.5">
-                        <span class="w-3 h-3 bg-emerald-500 rounded-full inline-block"></span> 🟩 Confirmed Grid Power On
-                    </div>
-                    <div class="flex items-center gap-1.5">
-                        <span class="w-3 h-3 bg-rose-500 rounded-full inline-block"></span> 🟥 Confirmed Grid Blackout
-                    </div>
-                    <div class="flex items-center gap-1.5">
-                        <span class="w-3 h-3 bg-slate-500 rounded-full inline-block"></span> 🟪 Uncertain Status
-                    </div>
-                </div>
-            </div>
+    <!-- ── REPORT PANEL ── -->
+    <div id="report-panel">
+      <h3>📣 Report Your Area</h3>
+      <div class="report-row">
+        <select id="sel-zone" class="report-select"></select>
+        <select id="sel-trust" class="report-select" style="max-width:120px">
+          <option value="1.0">Verified (1.0)</option>
+          <option value="0.4">New user (0.4)</option>
+          <option value="0.1">Low trust (0.1)</option>
+        </select>
+      </div>
+      <div class="report-btns">
+        <button class="btn-report btn-on"  onclick="submitReport('light_on')">💡 NEPA Dey!</button>
+        <button class="btn-report btn-off" onclick="submitReport('light_off')">🛑 No Light</button>
+      </div>
 
-            <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
-                <h3 class="text-sm font-bold text-slate-300 mb-3 flex justify-between items-center">
-                    <span>Algorithmic Computation Logs</span>
-                    <button onclick="clearLogs()" class="text-xs text-slate-500 hover:text-slate-300 transition">Clear Console</button>
-                </h3>
-                <div id="system-console" class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs font-mono h-36 overflow-y-auto space-y-1.5 text-slate-400">
-                    <div>[SYSTEM]: Client Core initialized successfully.</div>
-                    <div>[SYSTEM]: Awaiting telemetry reports from virtual device coordinates.</div>
-                </div>
-            </div>
+      <div class="tele-row">
+        <button class="tele-btn ok" id="btn-wifi" onclick="toggleTele('wifi')">
+          <span>Wi-Fi</span><span class="tele-val" id="wifi-val">ON</span>
+        </button>
+        <button class="tele-btn ok" id="btn-charge" onclick="toggleTele('charge')">
+          <span>Charging</span><span class="tele-val" id="charge-val">ON</span>
+        </button>
+      </div>
 
+      <div class="karma-row">
+        <span>Your contribution score</span>
+        <span class="karma-val" id="karma">140 XP</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MAP ── -->
+  <div id="map"></div>
+</div>
+
+<!-- ── TOAST ── -->
+<div id="toast"></div>
+
+<!-- ── ACTIVITY FEED ── -->
+<div id="feed-panel">
+  <div id="feed-header">
+    <span>Live activity</span>
+    <div class="live-dot"></div>
+  </div>
+  <div id="feed-body">
+    <div class="feed-item">Waiting for first report…</div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ─────────────────────────────────────────────
+//  DATA MODEL
+// ─────────────────────────────────────────────
+const ZONES = [
+  // Island
+  { id:"lekki1",    name:"Lekki Phase 1",    area:"Island",   lat:6.4446, lng:3.4736, radius:1200 },
+  { id:"lekki2",    name:"Lekki Phase 2",    area:"Island",   lat:6.4339, lng:3.5388, radius:1100 },
+  { id:"vi",        name:"Victoria Island",  area:"Island",   lat:6.4281, lng:3.4219, radius:1300 },
+  { id:"ikoyi",     name:"Ikoyi",            area:"Island",   lat:6.4530, lng:3.4317, radius:1000 },
+  { id:"ajah",      name:"Ajah",             area:"Island",   lat:6.4660, lng:3.5620, radius:1400 },
+  { id:"sangotedo", name:"Sangotedo",        area:"Island",   lat:6.4419, lng:3.6020, radius:1100 },
+  // Mainland
+  { id:"yaba",      name:"Yaba",             area:"Mainland", lat:6.5161, lng:3.3858, radius:1100 },
+  { id:"ikeja",     name:"Ikeja Allen Ave",  area:"Mainland", lat:6.5962, lng:3.3551, radius:1300 },
+  { id:"ikejaGRA",  name:"Ikeja GRA",        area:"Mainland", lat:6.5828, lng:3.3516, radius:1000 },
+  { id:"surulere",  name:"Surulere",         area:"Mainland", lat:6.4994, lng:3.3644, radius:1400 },
+  { id:"ojodu",     name:"Ojodu Berger",     area:"Mainland", lat:6.6354, lng:3.3674, radius:1200 },
+  { id:"ogba",      name:"Ogba",             area:"Mainland", lat:6.5979, lng:3.3283, radius:1200 },
+  { id:"agege",     name:"Agege",            area:"Mainland", lat:6.6184, lng:3.3197, radius:1300 },
+  { id:"maryland",  name:"Maryland",         area:"Mainland", lat:6.5663, lng:3.3519, radius:1000 },
+  { id:"gbagada",   name:"Gbagada",          area:"Mainland", lat:6.5498, lng:3.3799, radius:1100 },
+  { id:"kosofe",    name:"Kosofe",           area:"Mainland", lat:6.5748, lng:3.4006, radius:1200 },
+];
+
+// State per zone
+const state = {};
+ZONES.forEach(z => {
+  state[z.id] = { netScore: 0, status: "unk", circle: null, lastReport: null };
+});
+
+const THRESHOLD   = 2.0;   // votes needed to flip status
+const DECAY_MS    = 30 * 60 * 1000; // reports decay after 30 min (simulated as 30s for demo)
+const DECAY_DEMO  = 30 * 1000;      // 30 seconds demo decay
+
+let karma     = 140;
+let telemetry = { wifi: true, charge: true };
+
+// ─────────────────────────────────────────────
+//  MAP SETUP
+// ─────────────────────────────────────────────
+const map = L.map('map').setView([6.5, 3.42], 12);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+  maxZoom: 18
+}).addTo(map);
+
+// Colors
+const C = {
+  on:  { stroke:'#22c55e', fill:'#22c55e' },
+  off: { stroke:'#ef4444', fill:'#ef4444' },
+  unk: { stroke:'#64748b', fill:'#475569' },
+};
+
+function zoneColor(status) { return C[status] || C.unk; }
+
+// Draw circles
+ZONES.forEach(z => {
+  const c = zoneColor('unk');
+  const circle = L.circle([z.lat, z.lng], {
+    color: c.stroke, fillColor: c.fill, fillOpacity: 0.25, radius: z.radius, weight: 1.5
+  }).addTo(map);
+  circle.bindPopup(''); // filled on click
+  circle.on('click', () => openZonePopup(z.id));
+  state[z.id].circle = circle;
+});
+
+function openZonePopup(id) {
+  const z    = ZONES.find(x => x.id === id);
+  const s    = state[id];
+  const lbl  = s.status === 'on' ? '💡 Light is ON'
+             : s.status === 'off' ? '🛑 No light (blackout)'
+             : '❓ Status unknown';
+  const ago  = s.lastReport ? timeAgo(s.lastReport) : 'No reports yet';
+  const html = `
+    <div style="font-family:-apple-system,sans-serif;font-size:13px;min-width:160px;">
+      <b style="font-size:14px;">${z.name}</b><br>
+      <span style="display:block;margin:6px 0 4px;">${lbl}</span>
+      <span style="color:#888;font-size:11px;">Score: ${s.netScore.toFixed(1)} &nbsp;·&nbsp; ${ago}</span>
+    </div>`;
+  state[id].circle.setPopupContent(html).openPopup();
+}
+
+// ─────────────────────────────────────────────
+//  SIDEBAR ZONE LIST
+// ─────────────────────────────────────────────
+function buildSidebar(filter = '') {
+  const wrap    = document.getElementById('zone-list-wrap');
+  const selZone = document.getElementById('sel-zone');
+  wrap.innerHTML = '';
+  selZone.innerHTML = '';
+
+  const areas = [...new Set(ZONES.map(z => z.area))];
+  areas.forEach(area => {
+    const filtered = ZONES.filter(z =>
+      z.area === area && z.name.toLowerCase().includes(filter.toLowerCase())
+    );
+    if (!filtered.length) return;
+
+    const lbl = document.createElement('div');
+    lbl.className = 'zone-section-label';
+    lbl.textContent = area;
+    wrap.appendChild(lbl);
+
+    filtered.forEach(z => {
+      const s      = state[z.id];
+      const dotCls = s.status === 'on' ? 'on' : s.status === 'off' ? 'off' : 'unk';
+      const badge  = s.status === 'on'  ? '<span class="zone-badge badge-on">Light On</span>'
+                   : s.status === 'off' ? '<span class="zone-badge badge-off">Blackout</span>'
+                   :                      '<span class="zone-badge badge-unk">Unknown</span>';
+      const ago    = s.lastReport ? timeAgo(s.lastReport) : 'No reports';
+
+      const card = document.createElement('div');
+      card.className = 'zone-card';
+      card.id = `card-${z.id}`;
+      card.innerHTML = `
+        <div class="zone-dot ${dotCls}"></div>
+        <div class="zone-info">
+          <div class="zone-name">${z.name}</div>
+          <div class="zone-meta">${ago}</div>
         </div>
-    </main>
+        ${badge}`;
+      card.addEventListener('click', () => {
+        map.setView([z.lat, z.lng], 14);
+        openZonePopup(z.id);
+      });
+      wrap.appendChild(card);
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
-        // App State Model Configuration
-        let karmaScore = 140;
-        let localTelemetry = { wifiConnected: true, chargerConnected: true };
+      // Populate report dropdown
+      const opt = document.createElement('option');
+      opt.value = z.id;
+      opt.textContent = z.name;
+      selZone.appendChild(opt);
+    });
+  });
+}
 
-        // Neighborhood Data Models
-        const zones = {
-            yaba: { name: "Yaba Hub Zone", lat: 6.5161, lng: 3.3858, netScore: 0, status: "uncertain", circleElement: null },
-            ikeja: { name: "Ikeja Allen Ave", lat: 6.5962, lng: 3.3551, netScore: 0, status: "uncertain", circleElement: null },
-            surulere: { name: "Surulere Stadium Axis", lat: 6.4994, lng: 3.3644, netScore: 0, status: "uncertain", circleElement: null }
-        };
+// Update a single card without rebuilding list
+function refreshCard(id) {
+  const card = document.getElementById(`card-${id}`);
+  if (!card) return buildSidebar(document.getElementById('search-input').value);
+  const s      = state[id];
+  const dotCls = s.status === 'on' ? 'on' : s.status === 'off' ? 'off' : 'unk';
+  const badge  = s.status === 'on'  ? '<span class="zone-badge badge-on">Light On</span>'
+               : s.status === 'off' ? '<span class="zone-badge badge-off">Blackout</span>'
+               :                      '<span class="zone-badge badge-unk">Unknown</span>';
+  const ago    = s.lastReport ? timeAgo(s.lastReport) : 'No reports';
+  card.querySelector('.zone-dot').className = `zone-dot ${dotCls}`;
+  card.querySelector('.zone-meta').textContent = ago;
+  card.querySelector('.zone-badge') && (card.querySelector('.zone-badge').outerHTML = badge);
+  card.innerHTML = `
+    <div class="zone-dot ${dotCls}"></div>
+    <div class="zone-info">
+      <div class="zone-name">${ZONES.find(z=>z.id===id).name}</div>
+      <div class="zone-meta">${ago}</div>
+    </div>
+    ${badge}`;
+  card.addEventListener('click', () => {
+    const z = ZONES.find(x => x.id === id);
+    map.setView([z.lat, z.lng], 14);
+    openZonePopup(id);
+  });
+}
 
-        // Initialize Map View Centered over Lagos Mainland
-        const map = L.map('map').setView([6.5350, 3.3650], 12);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
-        }).addTo(map);
+// ─────────────────────────────────────────────
+//  STATS BAR
+// ─────────────────────────────────────────────
+function updateStats() {
+  const vals = Object.values(state);
+  document.getElementById('stat-on').textContent  = vals.filter(s=>s.status==='on').length;
+  document.getElementById('stat-off').textContent = vals.filter(s=>s.status==='off').length;
+  document.getElementById('stat-unk').textContent = vals.filter(s=>s.status==='unk').length;
+}
 
-        // Plot Grid Locations dynamically onto Leaflet map
-        function buildMapZones() {
-            Object.keys(zones).forEach(key => {
-                const zone = zones[key];
-                zone.circleElement = L.circle([zone.lat, zone.lng], {
-                    color: '#64748b',
-                    fillColor: '#475569',
-                    fillOpacity: 0.4,
-                    radius: 1200
-                }).addTo(map);
-                
-                zone.circleElement.bindPopup(`
-                    <div class="custom-popup p-1">
-                        <strong class="text-sm block text-slate-200">${zone.name}</strong>
-                        <span class="text-xs block mt-1 text-slate-400">Consensus Metric: <span class="text-amber-400 font-bold" id="popup-score-${key}">${zone.netScore.toFixed(2)}</span></span>
-                    </div>
-                `);
-            });
-        }
-        buildMapZones();
+// ─────────────────────────────────────────────
+//  CONSENSUS ENGINE
+// ─────────────────────────────────────────────
+function processVote(zoneId, vote, weight) {
+  const s    = state[zoneId];
+  const zone = ZONES.find(z => z.id === zoneId);
+  const dir  = vote === 'light_on' ? 1 : -1;
+  s.netScore += dir * weight;
+  s.lastReport = new Date();
 
-        // Logger Helper Utility
-        function logToConsole(message, type = 'info') {
-            const consoleBox = document.getElementById('system-console');
-            const logItem = document.createElement('div');
-            const timestamp = new Date().toLocaleTimeString();
-            
-            if (type === 'success') logItem.className = 'text-emerald-400';
-            else if (type === 'danger') logItem.className = 'text-rose-400';
-            else if (type === 'warn') logItem.className = 'text-amber-400';
-            
-            logItem.innerHTML = `[${timestamp}] ${message}`;
-            consoleBox.appendChild(logItem);
-            consoleBox.scrollTop = consoleBox.scrollHeight;
-        }
+  const prev = s.status;
+  if      (s.netScore >=  THRESHOLD) s.status = 'on';
+  else if (s.netScore <= -THRESHOLD) s.status = 'off';
+  else                               s.status = 'unk';
 
-        function clearLogs() {
-            document.getElementById('system-console').innerHTML = "<div>[SYSTEM]: Log state wiped clean.</div>";
-        }
+  // Update map circle
+  const c = zoneColor(s.status);
+  s.circle.setStyle({ color: c.stroke, fillColor: c.fill, fillOpacity: 0.3 });
 
-        // Simulating Foreground/Background Passive Device Telemetry Drops
-        document.getElementById('btn-wifi-toggle').addEventListener('click', () => {
-            localTelemetry.wifiConnected = !localTelemetry.wifiConnected;
-            const statusEl = document.getElementById('wifi-status');
-            const btn = document.getElementById('btn-wifi-toggle');
-            
-            if (localTelemetry.wifiConnected) {
-                statusEl.innerText = "CONNECTED";
-                btn.className = "w-full flex justify-between items-center p-3 rounded-xl bg-emerald-950/30 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-950/50 transition";
-                logToConsole("Device attached to local SSID infrastructure.", "info");
-            } else {
-                statusEl.innerText = "DROPPED";
-                btn.className = "w-full flex justify-between items-center p-3 rounded-xl bg-rose-950/30 border border-rose-500/30 text-rose-400 hover:bg-rose-950/50 transition";
-                logToConsole("⚠️ Sudden Wi-Fi drop detected without standard user logs.", "warn");
-                triggerImplicitAnomaly('light_off');
-            }
-        });
+  refreshCard(zoneId);
+  updateStats();
 
-        document.getElementById('btn-power-toggle').addEventListener('click', () => {
-            localTelemetry.chargerConnected = !localTelemetry.chargerConnected;
-            const statusEl = document.getElementById('power-status');
-            const btn = document.getElementById('btn-power-toggle');
-            
-            if (localTelemetry.chargerConnected) {
-                statusEl.innerText = "CHARGING";
-                btn.className = "w-full flex justify-between items-center p-3 rounded-xl bg-emerald-950/30 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-950/50 transition";
-                logToConsole("Device receiving system power standard.", "info");
-            } else {
-                statusEl.innerText = "DISCHARGING";
-                btn.className = "w-full flex justify-between items-center p-3 rounded-xl bg-amber-950/30 border border-amber-500/30 text-amber-400 hover:bg-amber-950/50 transition";
-                logToConsole("⚠️ Wall charging connection terminated unexpectedly.", "warn");
-                triggerImplicitAnomaly('light_off');
-            }
-        });
+  if (s.status !== prev && s.status !== 'unk') {
+    const msg = s.status === 'on'
+      ? `💡 Light confirmed in ${zone.name}!`
+      : `🛑 Blackout reported in ${zone.name}`;
+    showToast(msg, s.status === 'on' ? 'green' : 'red');
+  }
 
-        // Implicit Passive Engine Trigger Logic
-        function triggerImplicitAnomaly(inferredState) {
-            if (!localTelemetry.wifiConnected && !localTelemetry.chargerConnected) {
-                const selectedZoneKey = document.getElementById('select-location').value;
-                logToConsole(`🤖 Background logic matches anomaly conditions. Injecting automatic low-weight vote into system for ${zones[selectedZoneKey].name}.`, 'warn');
-                processConsensusAlgorithm(selectedZoneKey, inferredState, 0.4); // Automatic background weight anchor
-            }
-        }
+  addFeedItem(zone.name, vote, weight);
+}
 
-        // Explicit Reporting Interface
-        function submitSimulatedPing(reportedStatus) {
-            const selectedZoneKey = document.getElementById('select-location').value;
-            const trustWeight = parseFloat(document.getElementById('select-trust').value);
-            
-            logToConsole(`📥 Explicit entry submitted for ${zones[selectedZoneKey].name}. State: ${reportedStatus}, User Weight: ${trustWeight}`, 'info');
-            
-            processConsensusAlgorithm(selectedZoneKey, reportedStatus, trustWeight);
-            
-            // Allocate points to user interface for participating
-            karmaScore += trustWeight > 0.5 ? 10 : 2;
-            document.getElementById('karma-display').innerText = `${karmaScore} XP`;
-        }
+// Schedule score decay (in demo: 30 s)
+function scheduleDecay(zoneId, weight, direction) {
+  setTimeout(() => {
+    const s = state[zoneId];
+    s.netScore -= direction * weight * 0.5; // partial decay
+    const prev = s.status;
+    if      (s.netScore >=  THRESHOLD) s.status = 'on';
+    else if (s.netScore <= -THRESHOLD) s.status = 'off';
+    else                               s.status = 'unk';
+    if (s.status !== prev) {
+      const c = zoneColor(s.status);
+      s.circle.setStyle({ color: c.stroke, fillColor: c.fill, fillOpacity: 0.25 });
+      refreshCard(zoneId);
+      updateStats();
+    }
+  }, DECAY_DEMO);
+}
 
-        // Core Weighted Consensus Formula Pipeline Execution
-        function processConsensusAlgorithm(zoneKey, status, weight) {
-            const zone = zones[zoneKey];
-            const direction = (status === 'light_on') ? 1 : -1;
-            
-            // Apply weighted change to the score
-            zone.netScore += (direction * weight);
-            
-            logToConsole(`⚙️ Recalculated net confidence for ${zone.name}: ${zone.netScore.toFixed(2)}`, 'info');
+// ─────────────────────────────────────────────
+//  REPORT BUTTON
+// ─────────────────────────────────────────────
+function submitReport(vote) {
+  const zoneId = document.getElementById('sel-zone').value;
+  const weight = parseFloat(document.getElementById('sel-trust').value);
+  if (!zoneId) return;
 
-            const CONFIDENCE_THRESHOLD = 2.0;
-            let previousStatus = zone.status;
+  processVote(zoneId, vote, weight);
+  scheduleDecay(zoneId, weight, vote === 'light_on' ? 1 : -1);
 
-            // Determine status based on the confidence threshold
-            if (zone.netScore >= CONFIDENCE_THRESHOLD) {
-                zone.status = 'light_on';
-                zone.circleElement.setStyle({ color: '#10b981', fillColor: '#10b981' });
-            } else if (zone.netScore <= -CONFIDENCE_THRESHOLD) {
-                zone.status = 'light_off';
-                zone.circleElement.setStyle({ color: '#f43f5e', fillColor: '#f43f5e' });
-            } else {
-                zone.status = 'uncertain';
-                zone.circleElement.setStyle({ color: '#64748b', fillColor: '#475569' });
-            }
+  karma += weight >= 0.9 ? 10 : weight >= 0.3 ? 5 : 2;
+  document.getElementById('karma').textContent = `${Math.round(karma)} XP`;
+}
 
-            // Update open tooltip indicators if present
-            const scorePopupSpan = document.getElementById(`popup-score-${zoneKey}`);
-            if (scorePopupSpan) scorePopupSpan.innerText = zone.netScore.toFixed(2);
+// ─────────────────────────────────────────────
+//  TELEMETRY TOGGLES
+// ─────────────────────────────────────────────
+function toggleTele(type) {
+  telemetry[type] = !telemetry[type];
+  const btn = document.getElementById(`btn-${type}`);
+  const val = document.getElementById(`${type}-val`);
 
-            // Trigger notification banner if state boundary crossed
-            if (zone.status !== previousStatus && zone.status !== 'uncertain') {
-                showPushNotificationNotification(zone.name, zone.status);
-            }
-        }
+  if (type === 'wifi') {
+    val.textContent = telemetry.wifi ? 'ON' : 'OFF';
+    btn.className = `tele-btn ${telemetry.wifi ? 'ok' : 'bad'}`;
+  } else {
+    val.textContent = telemetry.charge ? 'ON' : 'OFF';
+    btn.className = `tele-btn ${telemetry.charge ? 'ok' : 'bad'}`;
+  }
 
-        // Notification Banner Display Management
-        function showPushNotificationNotification(zoneName, status) {
-            const toast = document.getElementById('live-toast-container');
-            toast.innerText = status === 'light_on' ? `💡 Grid Alert: NEPA Dey inside ${zoneName}!` : `🛑 Grid Alert: Blackout reported in ${zoneName}!`;
-            toast.classList.remove('hidden');
-            
-            logToConsole(`📣 BROADCAST_ALERT: Sent notification to users tracking updates for ${zoneName}.`, 'success');
-            
-            setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 5000);
-        }
-    </script>
+  // If both signals drop → implicit blackout signal
+  if (!telemetry.wifi && !telemetry.charge) {
+    const zoneId = document.getElementById('sel-zone').value;
+    if (zoneId) {
+      addFeedItem(ZONES.find(z=>z.id===zoneId).name, 'light_off', 0.4, true);
+      processVote(zoneId, 'light_off', 0.4);
+    }
+  }
+}
+
+// ─────────────────────────────────────────────
+//  TOAST
+// ─────────────────────────────────────────────
+let toastTimer;
+function showToast(msg, cls = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `show ${cls}`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.className = '', 4000);
+}
+
+// ─────────────────────────────────────────────
+//  ACTIVITY FEED
+// ─────────────────────────────────────────────
+function addFeedItem(zoneName, vote, weight, implicit = false) {
+  const body  = document.getElementById('feed-body');
+  const isOn  = vote === 'light_on';
+  const icon  = isOn ? '💡' : '🛑';
+  const cls   = isOn ? 'feed-on' : 'feed-off';
+  const label = isOn ? 'Light On' : 'Blackout';
+  const src   = implicit ? 'auto-detect' : `w=${weight}`;
+  const now   = new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+
+  // Remove placeholder
+  const placeholder = body.querySelector('.feed-item:only-child');
+  if (placeholder && placeholder.textContent.includes('Waiting')) placeholder.remove();
+
+  const item = document.createElement('div');
+  item.className = 'feed-item';
+  item.innerHTML = `${icon} <span class="${cls}">${label}</span> · ${zoneName} <span style="color:#888;float:right">${now}</span>`;
+  body.insertBefore(item, body.firstChild);
+
+  // keep max 20 items
+  while (body.children.length > 20) body.removeChild(body.lastChild);
+}
+
+// ─────────────────────────────────────────────
+//  SEARCH
+// ─────────────────────────────────────────────
+document.getElementById('search-input').addEventListener('input', e => {
+  buildSidebar(e.target.value);
+});
+
+// ─────────────────────────────────────────────
+//  HELPERS
+// ─────────────────────────────────────────────
+function timeAgo(date) {
+  const s = Math.floor((Date.now() - date) / 1000);
+  if (s < 60)  return `${s}s ago`;
+  if (s < 3600) return `${Math.floor(s/60)}m ago`;
+  return `${Math.floor(s/3600)}h ago`;
+}
+
+// Refresh "X min ago" labels every 30s
+setInterval(() => {
+  ZONES.forEach(z => {
+    if (state[z.id].lastReport) refreshCard(z.id);
+  });
+}, 30000);
+
+// ─────────────────────────────────────────────
+//  SEED a few demo reports on load
+// ─────────────────────────────────────────────
+function seedDemo() {
+  const seeds = [
+    { id:'lekki1',   vote:'light_on',  w:1.0 },
+    { id:'vi',       vote:'light_on',  w:1.0 },
+    { id:'ikoyi',    vote:'light_on',  w:1.0 },
+    { id:'lekki1',   vote:'light_on',  w:1.0 },
+    { id:'vi',       vote:'light_on',  w:1.0 },
+    { id:'surulere', vote:'light_off', w:1.0 },
+    { id:'yaba',     vote:'light_off', w:1.0 },
+    { id:'surulere', vote:'light_off', w:1.0 },
+    { id:'yaba',     vote:'light_off', w:1.0 },
+    { id:'agege',    vote:'light_off', w:0.4 },
+    { id:'ikeja',    vote:'light_on',  w:1.0 },
+    { id:'ikeja',    vote:'light_on',  w:1.0 },
+    { id:'gbagada',  vote:'light_on',  w:0.4 },
+  ];
+  seeds.forEach((s, i) => {
+    setTimeout(() => processVote(s.id, s.vote, s.w), i * 60);
+  });
+}
+
+// ─────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────
+buildSidebar();
+updateStats();
+seedDemo();
+</script>
 </body>
 </html>
