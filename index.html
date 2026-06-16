@@ -8,16 +8,16 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0b0d12;--sf:#13161f;--sf2:#1a1e2b;--sf3:#222636;
-  --bd:#272b3a;--bd2:#31364a;
-  --tx:#e4e8f1;--mu:#5a6380;--mu2:#7a859e;
-  --on:#16a34a;--onl:#22c55e;--ong:rgba(34,197,94,.15);
-  --of:#dc2626;--ofl:#ef4444;--ofg:rgba(239,68,68,.15);
-  --uk:#3b4563;--ukl:#64748b;
-  --wa:#d97706;--wal:#f59e0b;
-  --ac:#4f46e5;--acl:#6366f1;
-  --sw:320px;
-  --fn:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+--bg:#0b0d12;--sf:#13161f;--sf2:#1a1e2b;--sf3:#222636;
+--bd:#272b3a;--bd2:#31364a;
+--tx:#e4e8f1;--mu:#5a6380;--mu2:#7a859e;
+--on:#16a34a;--onl:#22c55e;--ong:rgba(34,197,94,.15);
+--of:#dc2626;--ofl:#ef4444;--ofg:rgba(239,68,68,.15);
+--uk:#3b4563;--ukl:#64748b;
+--wa:#d97706;--wal:#f59e0b;
+--ac:#4f46e5;--acl:#6366f1;
+--sw:320px;
+--fn:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
 }
 html,body{height:100%;font-family:var(--fn);background:var(--bg);color:var(--tx);font-size:14px;overflow:hidden}
 
@@ -234,119 +234,119 @@ html,body{height:100%;font-family:var(--fn);background:var(--bg);color:var(--tx)
 
 <!-- ══ GATE ══════════════════════════════════ -->
 <div id="gate">
-  <div class="g-logo">
-    <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
-      <circle cx="26" cy="26" r="25" fill="rgba(34,197,94,0.12)" stroke="#22c55e" stroke-width="1.5"/>
-      <path d="M29 8L14 28h13L24 44 42 22H29L32 8z" fill="#22c55e" filter="drop-shadow(0 0 8px #22c55e)"/>
-    </svg>
-  </div>
-  <div class="g-title">Grid<span>Pulse</span> Lagos</div>
-  <div class="g-sub">Real-time light tracking across Lagos.<br>Tell us your situation before you enter.</div>
-  <div class="g-prompt">What's your power status right now?</div>
-  <div class="g-cards">
-    <div class="g-card" id="gc-on" onclick="selGate('on')">
-      <div class="g-icon">
-        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-          <circle cx="16" cy="16" r="15" fill="rgba(34,197,94,0.15)" stroke="#22c55e" stroke-width="1.5"/>
-          <path d="M18 4L8 18h8l-2 10 12-16h-8l2-12z" fill="#22c55e"/>
-        </svg>
-      </div>
-      <div><h4>NEPA Dey!</h4><p>Power is currently on at my location</p></div>
-      <div class="g-chk" id="gck-on"></div>
-    </div>
-    <div class="g-card" id="gc-off" onclick="selGate('off')">
-      <div class="g-icon">
-        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-          <circle cx="16" cy="16" r="15" fill="rgba(239,68,68,0.15)" stroke="#ef4444" stroke-width="1.5"/>
-          <path d="M16 8v10M16 22v2" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <div><h4>No Light</h4><p>Currently experiencing a blackout</p></div>
-      <div class="g-chk" id="gck-off"></div>
-    </div>
-    <div class="g-card" id="gc-unk" onclick="selGate('unk')">
-      <div class="g-icon">
-        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-          <circle cx="16" cy="16" r="15" fill="rgba(245,158,11,0.15)" stroke="#f59e0b" stroke-width="1.5"/>
-          <path d="M16 9a4 4 0 011 7.9V19M16 22v2" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <div><h4>I'm Not Home</h4><p>Can't confirm my area's power status</p></div>
-      <div class="g-chk" id="gck-unk"></div>
-    </div>
-  </div>
-  <div id="g-loc" style="display:none">
-    <label>Which area are you reporting from?</label>
-    <div class="g-loc-wrap">
-      <input type="text" id="g-loc-input" placeholder="Type your estate or area…" autocomplete="off"/>
-      <div id="g-loc-sugg"></div>
-    </div>
-  </div>
-  <button id="g-btn" onclick="enterApp()">Open GridPulse &rarr;</button>
-  <div class="g-note">Your report helps thousands of Lagosians plan their day ✊</div>
+<div class="g-logo">
+<svg width="52" height="52" viewBox="0 0 52 52" fill="none">
+<circle cx="26" cy="26" r="25" fill="rgba(34,197,94,0.12)" stroke="#22c55e" stroke-width="1.5"/>
+<path d="M29 8L14 28h13L24 44 42 22H29L32 8z" fill="#22c55e" filter="drop-shadow(0 0 8px #22c55e)"/>
+</svg>
+</div>
+<div class="g-title">Grid<span>Pulse</span> Lagos</div>
+<div class="g-sub">Real-time light tracking across Lagos.<br>Tell us your situation before you enter.</div>
+<div class="g-prompt">What's your power status right now?</div>
+<div class="g-cards">
+<div class="g-card" id="gc-on" onclick="selGate('on')">
+<div class="g-icon">
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+<circle cx="16" cy="16" r="15" fill="rgba(34,197,94,0.15)" stroke="#22c55e" stroke-width="1.5"/>
+<path d="M18 4L8 18h8l-2 10 12-16h-8l2-12z" fill="#22c55e"/>
+</svg>
+</div>
+<div><h4>NEPA Dey!</h4><p>Power is currently on at my location</p></div>
+<div class="g-chk" id="gck-on"></div>
+</div>
+<div class="g-card" id="gc-off" onclick="selGate('off')">
+<div class="g-icon">
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+<circle cx="16" cy="16" r="15" fill="rgba(239,68,68,0.15)" stroke="#ef4444" stroke-width="1.5"/>
+<path d="M16 8v10M16 22v2" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round"/>
+</svg>
+</div>
+<div><h4>No Light</h4><p>Currently experiencing a blackout</p></div>
+<div class="g-chk" id="gck-off"></div>
+</div>
+<div class="g-card" id="gc-unk" onclick="selGate('unk')">
+<div class="g-icon">
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+<circle cx="16" cy="16" r="15" fill="rgba(245,158,11,0.15)" stroke="#f59e0b" stroke-width="1.5"/>
+<path d="M16 9a4 4 0 011 7.9V19M16 22v2" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+</svg>
+</div>
+<div><h4>I'm Not Home</h4><p>Can't confirm my area's power status</p></div>
+<div class="g-chk" id="gck-unk"></div>
+</div>
+</div>
+<div id="g-loc" style="display:none">
+<label>Which area are you reporting from?</label>
+<div class="g-loc-wrap">
+<input type="text" id="g-loc-input" placeholder="Type your estate or area…" autocomplete="off"/>
+<div id="g-loc-sugg"></div>
+</div>
+</div>
+<button id="g-btn" onclick="enterApp()">Open GridPulse &rarr;</button>
+<div class="g-note">Your report helps thousands of Lagosians plan their day ✊</div>
 </div>
 
 <!-- ══ APP ════════════════════════════════════ -->
 <div id="app">
-  <div id="sb">
-    <div id="sb-hdr">
-      <div class="brand"><span style="font-size:17px">⚡</span><span class="brand-name">Grid<em>Pulse</em> Lagos</span></div>
-      <div id="my-zone-bar"><div class="mzb-dot"></div><span class="mzb-lbl">Reporting from:</span><span id="mzb-name" class="mzb-name"></span></div>
-      <div class="sp-row">
-        <div class="sp" id="sp-on"  onclick="filt('on')"  title="Show areas with light"><span class="sv" id="st-on"  style="color:var(--onl)">—</span><div class="sl">With Light</div></div>
-        <div class="sp" id="sp-off" onclick="filt('off')" title="Show blackout areas"><span class="sv" id="st-off" style="color:var(--ofl)">—</span><div class="sl">Blackout</div></div>
-        <div class="sp" id="sp-unk" onclick="filt('unk')" title="Show unknown areas"><span class="sv" id="st-unk" style="color:var(--ukl)">—</span><div class="sl">Unknown</div></div>
-      </div>
-      <div class="sw" style="position:relative">
-        <input type="text" id="srch" placeholder="Search estate, area, bus stop…" autocomplete="off"/>
-        <div id="sg"></div>
-      </div>
-    </div>
-    <div id="zl"></div>
-    <div id="rp">
-      <h3>📣 Report Your Area</h3>
-      <div id="rp-locked"><span>📍</span><span id="rp-zone-name">Select your area at gate</span><span class="rl-badge">YOUR ZONE</span></div>
-      <div class="rbtns">
-        <button class="rbtn btn-on"  id="rbtn-on"  onclick="submitR('light_on')"  disabled>💡 NEPA Dey!</button>
-        <button class="rbtn btn-off" id="rbtn-off" onclick="submitR('light_off')" disabled>🛑 No Light</button>
-      </div>
-      <div class="tr">
-        <button class="tb tok" id="btn-wifi"   onclick="togT('wifi')"><span>Wi-Fi</span><span class="tv" id="wv">ON</span></button>
-        <button class="tb tok" id="btn-chg"    onclick="togT('charge')"><span>Charging</span><span class="tv" id="cv">ON</span></button>
-      </div>
-      <div class="kb"><span>Contribution score</span><span class="kv" id="karma">140 XP</span></div>
-    </div>
-  </div>
+<div id="sb">
+<div id="sb-hdr">
+<div class="brand"><span style="font-size:17px">⚡</span><span class="brand-name">Grid<em>Pulse</em> Lagos</span></div>
+<div id="my-zone-bar"><div class="mzb-dot"></div><span class="mzb-lbl">Reporting from:</span><span id="mzb-name" class="mzb-name"></span></div>
+<div class="sp-row">
+<div class="sp" id="sp-on" onclick="filt('on')" title="Show areas with light"><span class="sv" id="st-on" style="color:var(--onl)">—</span><div class="sl">With Light</div></div>
+<div class="sp" id="sp-off" onclick="filt('off')" title="Show blackout areas"><span class="sv" id="st-off" style="color:var(--ofl)">—</span><div class="sl">Blackout</div></div>
+<div class="sp" id="sp-unk" onclick="filt('unk')" title="Show unknown areas"><span class="sv" id="st-unk" style="color:var(--ukl)">—</span><div class="sl">Unknown</div></div>
+</div>
+<div class="sw" style="position:relative">
+<input type="text" id="srch" placeholder="Search estate, area, bus stop…" autocomplete="off"/>
+<div id="sg"></div>
+</div>
+</div>
+<div id="zl"></div>
+<div id="rp">
+<h3>📣 Report Your Area</h3>
+<div id="rp-locked"><span>📍</span><span id="rp-zone-name">Select your area at gate</span><span class="rl-badge">YOUR ZONE</span></div>
+<div class="rbtns">
+<button class="rbtn btn-on" id="rbtn-on" onclick="submitR('light_on')" disabled>💡 NEPA Dey!</button>
+<button class="rbtn btn-off" id="rbtn-off" onclick="submitR('light_off')" disabled>🛑 No Light</button>
+</div>
+<div class="tr">
+<button class="tb tok" id="btn-wifi" onclick="togT('wifi')"><span>Wi-Fi</span><span class="tv" id="wv">ON</span></button>
+<button class="tb tok" id="btn-chg" onclick="togT('charge')"><span>Charging</span><span class="tv" id="cv">ON</span></button>
+</div>
+<div class="kb"><span>Contribution score</span><span class="kv" id="karma">140 XP</span></div>
+</div>
+</div>
 
-  <div id="mw">
-    <div id="map"></div>
-    <div id="sro">
-      <button class="sro-close" onclick="closeSro()">×</button>
-      <span id="sro-icon" class="sro-icon"></span>
-      <div id="sro-nm" class="sro-nm"></div>
-      <div id="sro-st" class="sro-st"></div>
-      <div id="sro-mt" class="sro-mt"></div>
-      <button class="watch-btn" id="sro-watch" onclick="toggleWatch()">🔔 Notify me when light returns</button>
-    </div>
-    <button id="pb" onclick="togProf()">👥 Reporters</button>
-    <button id="wbtn" onclick="togWatch()">🔔 Watchlist <span class="wbtn-cnt" id="wl-cnt">0</span></button>
-    <div id="pp"><h4>Community Reporters</h4><div id="pp-list"></div></div>
-    <div id="wp">
-      <h4>My Light Watchlist <span>Get notified when light returns</span></h4>
-      <div id="wl-body"><div class="wl-empty">No areas watched yet.<br>Search an area and tap 🔔</div></div>
-    </div>
-    <div id="fd">
-      <div id="fd-hdr"><span>Live Reports</span><div class="ldot"></div></div>
-      <div id="fd-body"><div class="fi">Waiting for first report…</div></div>
-    </div>
-  </div>
+<div id="mw">
+<div id="map"></div>
+<div id="sro">
+<button class="sro-close" onclick="closeSro()">×</button>
+<span id="sro-icon" class="sro-icon"></span>
+<div id="sro-nm" class="sro-nm"></div>
+<div id="sro-st" class="sro-st"></div>
+<div id="sro-mt" class="sro-mt"></div>
+<button class="watch-btn" id="sro-watch" onclick="toggleWatch()">🔔 Notify me when light returns</button>
+</div>
+<button id="pb" onclick="togProf()">👥 Reporters</button>
+<button id="wbtn" onclick="togWatch()">🔔 Watchlist <span class="wbtn-cnt" id="wl-cnt">0</span></button>
+<div id="pp"><h4>Community Reporters</h4><div id="pp-list"></div></div>
+<div id="wp">
+<h4>My Light Watchlist <span>Get notified when light returns</span></h4>
+<div id="wl-body"><div class="wl-empty">No areas watched yet.<br>Search an area and tap 🔔</div></div>
+</div>
+<div id="fd">
+<div id="fd-hdr"><span>Live Reports</span><div class="ldot"></div></div>
+<div id="fd-body"><div class="fi">Waiting for first report…</div></div>
+</div>
+</div>
 </div>
 <div id="toast"></div>
 <div id="notif">
-  <button class="nc" onclick="closeNotif()">×</button>
-  <div class="nt">🔔 Light Alert</div>
-  <div id="notif-nm" class="nm"></div>
-  <div id="notif-st" class="ns"></div>
+<button class="nc" onclick="closeNotif()">×</button>
+<div class="nt">🔔 Light Alert</div>
+<div id="notif-nm" class="nm"></div>
+<div id="notif-st" class="ns"></div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -607,12 +607,12 @@ let watchlist=new Set(); // watched zone ids
 let currentSroId=null; // zone shown in overlay
 
 const REPORTERS=[
-  {name:"Chidi_Lekki",loc:"Lekki Phase 1",score:96,tier:"g",reports:412,av:"C"},
-  {name:"AbiodunVI",loc:"Victoria Island",score:88,tier:"g",reports:310,av:"A"},
-  {name:"SurulereKing",loc:"Surulere",score:74,tier:"y",reports:198,av:"S"},
-  {name:"IkejaGuy01",loc:"Ikeja Allen",score:71,tier:"y",reports:155,av:"I"},
-  {name:"VGC_Reporter",loc:"VGC",score:61,tier:"y",reports:89,av:"V"},
-  {name:"MarylandBoy",loc:"Maryland",score:38,tier:"r",reports:42,av:"M"},
+{name:"Chidi_Lekki",loc:"Lekki Phase 1",score:96,tier:"g",reports:412,av:"C"},
+{name:"AbiodunVI",loc:"Victoria Island",score:88,tier:"g",reports:310,av:"A"},
+{name:"SurulereKing",loc:"Surulere",score:74,tier:"y",reports:198,av:"S"},
+{name:"IkejaGuy01",loc:"Ikeja Allen",score:71,tier:"y",reports:155,av:"I"},
+{name:"VGC_Reporter",loc:"VGC",score:61,tier:"y",reports:89,av:"V"},
+{name:"MarylandBoy",loc:"Maryland",score:38,tier:"r",reports:42,av:"M"},
 ];
 const CM={on:{s:"#22c55e",f:"#22c55e"},off:{s:"#ef4444",f:"#ef4444"},unk:{s:"#475569",f:"#334155"}};
 
@@ -624,61 +624,61 @@ const gLocInput=document.getElementById('g-loc-input');
 const gLocSugg=document.getElementById('g-loc-sugg');
 
 gLocInput.addEventListener('input',()=>{
-  const q=gLocInput.value.trim().toLowerCase();
-  gateZoneId=null;
-  document.getElementById('g-btn').classList.remove('ready');
-  if(!q){gLocSugg.className='';gLocSugg.innerHTML='';return;}
-  const hits=ZONES.filter(z=>z.name.toLowerCase().includes(q)||z.lga.toLowerCase().includes(q)).slice(0,8);
-  if(!hits.length){gLocSugg.innerHTML='<div class="g-sugg-item" style="color:#5a6380;cursor:default"><strong>No results</strong><span>Try a different name</span></div>';gLocSugg.className='open';return;}
-  gLocSugg.innerHTML='';
-  hits.forEach(z=>{
-    const item=document.createElement('div');item.className='g-sugg-item';
-    item.innerHTML=`<strong>${z.name}</strong><span>${z.lga} · ${z.area}</span>`;
-    item.addEventListener('click',()=>{gLocInput.value=z.name;gateZoneId=z.id;gLocSugg.className='';gLocSugg.innerHTML='';if(gateChoice&&gateChoice!=='unk')document.getElementById('g-btn').classList.add('ready')});
-    gLocSugg.appendChild(item);
-  });
-  gLocSugg.className='open';
+const q=gLocInput.value.trim().toLowerCase();
+gateZoneId=null;
+document.getElementById('g-btn').classList.remove('ready');
+if(!q){gLocSugg.className='';gLocSugg.innerHTML='';return;}
+const hits=ZONES.filter(z=>z.name.toLowerCase().includes(q)||z.lga.toLowerCase().includes(q)).slice(0,8);
+if(!hits.length){gLocSugg.innerHTML='<div class="g-sugg-item" style="color:#5a6380;cursor:default"><strong>No results</strong><span>Try a different name</span></div>';gLocSugg.className='open';return;}
+gLocSugg.innerHTML='';
+hits.forEach(z=>{
+const item=document.createElement('div');item.className='g-sugg-item';
+item.innerHTML=`<strong>${z.name}</strong><span>${z.lga} · ${z.area}</span>`;
+item.addEventListener('click',()=>{gLocInput.value=z.name;gateZoneId=z.id;gLocSugg.className='';gLocSugg.innerHTML='';if(gateChoice&&gateChoice!=='unk')document.getElementById('g-btn').classList.add('ready')});
+gLocSugg.appendChild(item);
+});
+gLocSugg.className='open';
 });
 document.addEventListener('click',e=>{if(!e.target.closest('#g-loc'))gLocSugg.className=''});
 
 function selGate(c){
-  gateChoice=c;
-  ['on','off','unk'].forEach(x=>{
-    document.getElementById('gc-'+x).className='g-card'+(x===c?' s'+x:'');
-    document.getElementById('gck-'+x).textContent=x===c?'✓':'';
-  });
-  const locDiv=document.getElementById('g-loc');
-  locDiv.style.display=c!=='unk'?'block':'none';
-  if(c==='unk'){gateZoneId='__skip';document.getElementById('g-btn').classList.add('ready');}
-  else if(gateZoneId&&gateZoneId!=='__skip') document.getElementById('g-btn').classList.add('ready');
+gateChoice=c;
+['on','off','unk'].forEach(x=>{
+document.getElementById('gc-'+x).className='g-card'+(x===c?' s'+x:'');
+document.getElementById('gck-'+x).textContent=x===c?'✓':'';
+});
+const locDiv=document.getElementById('g-loc');
+locDiv.style.display=c!=='unk'?'block':'none';
+if(c==='unk'){gateZoneId='__skip';document.getElementById('g-btn').classList.add('ready');}
+else if(gateZoneId&&gateZoneId!=='__skip') document.getElementById('g-btn').classList.add('ready');
 }
 
 function enterApp(){
-  if(!gateChoice){
-    const btn=document.getElementById('g-btn');
-    btn.style.animation='shake 0.4s ease';
-    setTimeout(()=>btn.style.animation='',400);
-    // Flash cards to prompt selection
-    document.querySelectorAll('.g-card').forEach(c=>{
-      c.style.borderColor='#ef4444';
-      setTimeout(()=>c.style.borderColor='',600);
-    });
-    return;
-  }
-  if(gateChoice!=='unk'&&gateZoneId&&gateZoneId!=='__skip'){
-    myZoneId=gateZoneId;
-    processVote(gateZoneId,gateChoice==='on'?'light_on':'light_off',0.9,true);
-    // lock the report panel
-    const z=ZONES.find(x=>x.id===gateZoneId);
-    document.getElementById('rp-zone-name').textContent=z.name;
-    document.getElementById('rbtn-on').disabled=false;
-    document.getElementById('rbtn-off').disabled=false;
-    document.getElementById('mzb-name').textContent=z.name;
-    document.getElementById('my-zone-bar').style.display='flex';
-  }
-  document.getElementById('gate').style.display='none';
-  document.getElementById('app').classList.add('vis');
-  setTimeout(()=>map.invalidateSize(),300);
+if(!gateChoice){
+const btn=document.getElementById('g-btn');
+btn.style.animation='shake 0.4s ease';
+setTimeout(()=>btn.style.animation='',400);
+// Flash cards to prompt selection
+document.querySelectorAll('.g-card').forEach(c=>{
+c.style.borderColor='#ef4444';
+setTimeout(()=>c.style.borderColor='',600);
+});
+return;
+}
+if(gateChoice!=='unk'&&gateZoneId&&gateZoneId!=='__skip'){
+myZoneId=gateZoneId;
+processVote(gateZoneId,gateChoice==='on'?'light_on':'light_off',0.9,true);
+// lock the report panel
+const z=ZONES.find(x=>x.id===gateZoneId);
+document.getElementById('rp-zone-name').textContent=z.name;
+document.getElementById('rbtn-on').disabled=false;
+document.getElementById('rbtn-off').disabled=false;
+document.getElementById('mzb-name').textContent=z.name;
+document.getElementById('my-zone-bar').style.display='flex';
+}
+document.getElementById('gate').style.display='none';
+document.getElementById('app').classList.add('vis');
+setTimeout(()=>map.invalidateSize(),300);
 }
 
 // -
@@ -687,79 +687,79 @@ function enterApp(){
 const map=L.map('map').setView([6.52,3.40],12);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'&copy; OpenStreetMap &copy; CARTO',maxZoom:19}).addTo(map);
 ZONES.forEach(z=>{
-  const c=CM.unk;
-  const circle=L.circle([z.lat,z.lng],{color:c.s,fillColor:c.f,fillOpacity:0.22,radius:z.r,weight:1.5}).addTo(map);
-  circle.bindPopup('');
-  circle.on('click',()=>openPopup(z.id));
-  S[z.id].circle=circle;
+const c=CM.unk;
+const circle=L.circle([z.lat,z.lng],{color:c.s,fillColor:c.f,fillOpacity:0.22,radius:z.r,weight:1.5}).addTo(map);
+circle.bindPopup('');
+circle.on('click',()=>openPopup(z.id));
+S[z.id].circle=circle;
 });
 function openPopup(id){
-  const z=ZONES.find(x=>x.id===id),s=S[id];
-  const lbl=s.status==='on'?'💡 Light is ON':s.status==='off'?'🛑 Blackout':'❓ Unknown';
-  const ago=s.lastReport?timeAgo(s.lastReport):'No reports yet';
-  s.circle.setPopupContent(`<div style="font-family:-apple-system,sans-serif;font-size:13px;min-width:175px"><b style="font-size:14px">${z.name}</b><span style="display:block;font-size:10px;color:#888;margin:2px 0 5px">${z.lga} · ${z.type}</span><span style="display:block;margin-bottom:3px">${lbl}</span><span style="color:#888;font-size:11px">Score: ${s.score.toFixed(1)} · ${ago}</span></div>`).openPopup();
-  showSro(id);
+const z=ZONES.find(x=>x.id===id),s=S[id];
+const lbl=s.status==='on'?'💡 Light is ON':s.status==='off'?'🛑 Blackout':'❓ Unknown';
+const ago=s.lastReport?timeAgo(s.lastReport):'No reports yet';
+s.circle.setPopupContent(`<div style="font-family:-apple-system,sans-serif;font-size:13px;min-width:175px"><b style="font-size:14px">${z.name}</b><span style="display:block;font-size:10px;color:#888;margin:2px 0 5px">${z.lga} · ${z.type}</span><span style="display:block;margin-bottom:3px">${lbl}</span><span style="color:#888;font-size:11px">Score: ${s.score.toFixed(1)} · ${ago}</span></div>`).openPopup();
+showSro(id);
 }
 
 // -
 // SIDEBAR BUILD
 // -
 function buildSidebar(q='',sf=null){
-  const wrap=document.getElementById('zl');
-  wrap.innerHTML='';
-  const areas=[...new Set(ZONES.map(z=>z.area))];
-  let total=0;
-  areas.forEach(area=>{
-    let list=ZONES.filter(z=>z.area===area&&(
-      z.name.toLowerCase().includes(q.toLowerCase())||
-      z.lga.toLowerCase().includes(q.toLowerCase())||
-      z.type.toLowerCase().includes(q.toLowerCase())
-    ));
-    if(sf)list=list.filter(z=>S[z.id].status===sf);
-    if(!list.length)return;
-    const lbl=document.createElement('div');lbl.className='zsec';lbl.textContent=area;wrap.appendChild(lbl);
-    list.forEach(z=>{
-      const s=S[z.id],dot=s.status==='on'?'on':s.status==='off'?'off':'unk';
-      const badge=s.status==='on'?'<span class="zb on">Light On</span>':s.status==='off'?'<span class="zb off">Blackout</span>':'<span class="zb unk">?</span>';
-      const ago=s.lastReport?timeAgo(s.lastReport):'--';
-      const card=document.createElement('div');card.className='zc';card.id='zc-'+z.id;
-      const typeIcon=z.type==='estate'?'🏘':z.type==='busstop'?'🚏':z.type==='street'?'🛣':z.type==='landmark'?'📍':'📌';
-      card.innerHTML=`<div class="zd ${dot}"></div><div class="zi"><div class="zn">${typeIcon} ${z.name}</div><div class="zm">${z.lga} · ${ago}</div></div>${badge}`;
-      card.addEventListener('click',()=>{map.setView([z.lat,z.lng],15);openPopup(z.id)});
-      wrap.appendChild(card);total++;
-    });
-  });
-  if(!total)wrap.innerHTML=`<div class="empty"><div class="ei">🔍</div>No results for "<b>${q}</b>"<br><small>Try area, estate, bus stop name</small></div>`;
-  // Also repopulate the report zone select (just for internal use, UI is locked)
+const wrap=document.getElementById('zl');
+wrap.innerHTML='';
+const areas=[...new Set(ZONES.map(z=>z.area))];
+let total=0;
+areas.forEach(area=>{
+let list=ZONES.filter(z=>z.area===area&&(
+z.name.toLowerCase().includes(q.toLowerCase())||
+z.lga.toLowerCase().includes(q.toLowerCase())||
+z.type.toLowerCase().includes(q.toLowerCase())
+));
+if(sf)list=list.filter(z=>S[z.id].status===sf);
+if(!list.length)return;
+const lbl=document.createElement('div');lbl.className='zsec';lbl.textContent=area;wrap.appendChild(lbl);
+list.forEach(z=>{
+const s=S[z.id],dot=s.status==='on'?'on':s.status==='off'?'off':'unk';
+const badge=s.status==='on'?'<span class="zb on">Light On</span>':s.status==='off'?'<span class="zb off">Blackout</span>':'<span class="zb unk">?</span>';
+const ago=s.lastReport?timeAgo(s.lastReport):'--';
+const card=document.createElement('div');card.className='zc';card.id='zc-'+z.id;
+const typeIcon=z.type==='estate'?'🏘':z.type==='busstop'?'🚏':z.type==='street'?'🛣':z.type==='landmark'?'📍':'📌';
+card.innerHTML=`<div class="zd ${dot}"></div><div class="zi"><div class="zn">${typeIcon} ${z.name}</div><div class="zm">${z.lga} · ${ago}</div></div>${badge}`;
+card.addEventListener('click',()=>{map.setView([z.lat,z.lng],15);openPopup(z.id)});
+wrap.appendChild(card);total++;
+});
+});
+if(!total)wrap.innerHTML=`<div class="empty"><div class="ei">🔍</div>No results for "<b>${q}</b>"<br><small>Try area, estate, bus stop name</small></div>`;
+// Also repopulate the report zone select (just for internal use, UI is locked)
 }
 function refreshCard(id){
-  const card=document.getElementById('zc-'+id);if(!card)return;
-  const z=ZONES.find(x=>x.id===id),s=S[id];
-  const dot=s.status==='on'?'on':s.status==='off'?'off':'unk';
-  const badge=s.status==='on'?'<span class="zb on">Light On</span>':s.status==='off'?'<span class="zb off">Blackout</span>':'<span class="zb unk">?</span>';
-  const ago=s.lastReport?timeAgo(s.lastReport):'--';
-  const typeIcon=z.type==='estate'?'🏘':z.type==='busstop'?'🚏':z.type==='street'?'🛣':z.type==='landmark'?'📍':'📌';
-  card.innerHTML=`<div class="zd ${dot}"></div><div class="zi"><div class="zn">${typeIcon} ${z.name}</div><div class="zm">${z.lga} · ${ago}</div></div>${badge}`;
-  card.addEventListener('click',()=>{map.setView([z.lat,z.lng],15);openPopup(z.id)});
+const card=document.getElementById('zc-'+id);if(!card)return;
+const z=ZONES.find(x=>x.id===id),s=S[id];
+const dot=s.status==='on'?'on':s.status==='off'?'off':'unk';
+const badge=s.status==='on'?'<span class="zb on">Light On</span>':s.status==='off'?'<span class="zb off">Blackout</span>':'<span class="zb unk">?</span>';
+const ago=s.lastReport?timeAgo(s.lastReport):'--';
+const typeIcon=z.type==='estate'?'🏘':z.type==='busstop'?'🚏':z.type==='street'?'🛣':z.type==='landmark'?'📍':'📌';
+card.innerHTML=`<div class="zd ${dot}"></div><div class="zi"><div class="zn">${typeIcon} ${z.name}</div><div class="zm">${z.lga} · ${ago}</div></div>${badge}`;
+card.addEventListener('click',()=>{map.setView([z.lat,z.lng],15);openPopup(z.id)});
 }
 
 // -
 // FILTER PILLS
 // -
 function filt(st){
-  if(activeFilter===st){activeFilter=null;['on','off','unk'].forEach(s=>document.getElementById('sp-'+s).className='sp');buildSidebar('');}
-  else{activeFilter=st;['on','off','unk'].forEach(s=>document.getElementById('sp-'+s).className='sp'+(s===st?' f'+s:''));buildSidebar('',st);}
-  document.getElementById('srch').value='';
+if(activeFilter===st){activeFilter=null;['on','off','unk'].forEach(s=>document.getElementById('sp-'+s).className='sp');buildSidebar('');}
+else{activeFilter=st;['on','off','unk'].forEach(s=>document.getElementById('sp-'+s).className='sp'+(s===st?' f'+s:''));buildSidebar('',st);}
+document.getElementById('srch').value='';
 }
 
 // -
 // STATS
 // -
 function updateStats(){
-  const v=Object.values(S);
-  document.getElementById('st-on').textContent=v.filter(s=>s.status==='on').length;
-  document.getElementById('st-off').textContent=v.filter(s=>s.status==='off').length;
-  document.getElementById('st-unk').textContent=v.filter(s=>s.status==='unk').length;
+const v=Object.values(S);
+document.getElementById('st-on').textContent=v.filter(s=>s.status==='on').length;
+document.getElementById('st-off').textContent=v.filter(s=>s.status==='off').length;
+document.getElementById('st-unk').textContent=v.filter(s=>s.status==='unk').length;
 }
 
 // -
@@ -767,23 +767,23 @@ function updateStats(){
 // -
 const srch=document.getElementById('srch'),sg=document.getElementById('sg');
 srch.addEventListener('input',e=>{
-  const q=e.target.value.trim();
-  activeFilter=null;['on','off','unk'].forEach(s=>document.getElementById('sp-'+s).className='sp');
-  if(!q){sg.className='';sg.innerHTML='';buildSidebar('');closeSro();return;}
-  const hits=ZONES.filter(z=>z.name.toLowerCase().includes(q.toLowerCase())||z.lga.toLowerCase().includes(q.toLowerCase())||z.type.toLowerCase().includes(q.toLowerCase())).slice(0,10);
-  sg.innerHTML='';
-  if(hits.length){
-    hits.forEach(z=>{
-      const s=S[z.id],dot=s.status==='on'?'on':s.status==='off'?'off':'unk';
-      const stxt=s.status==='on'?'Light On':s.status==='off'?'Blackout':'Unknown';
-      const item=document.createElement('div');item.className='si';
-      item.innerHTML=`<div class="si-dot ${dot}"></div><span class="si-name">${z.name}</span><span class="si-lga">${z.lga} · ${stxt}</span>`;
-      item.addEventListener('click',()=>{srch.value=z.name;sg.className='';sg.innerHTML='';map.setView([z.lat,z.lng],15);openPopup(z.id);buildSidebar(z.name)});
-      sg.appendChild(item);
-    });
-  }else{sg.innerHTML=`<div class="si" style="color:var(--mu2);cursor:default"><span class="si-name">No results for "${q}"</span></div>`;}
-  sg.className='open';
-  buildSidebar(q);
+const q=e.target.value.trim();
+activeFilter=null;['on','off','unk'].forEach(s=>document.getElementById('sp-'+s).className='sp');
+if(!q){sg.className='';sg.innerHTML='';buildSidebar('');closeSro();return;}
+const hits=ZONES.filter(z=>z.name.toLowerCase().includes(q.toLowerCase())||z.lga.toLowerCase().includes(q.toLowerCase())||z.type.toLowerCase().includes(q.toLowerCase())).slice(0,10);
+sg.innerHTML='';
+if(hits.length){
+hits.forEach(z=>{
+const s=S[z.id],dot=s.status==='on'?'on':s.status==='off'?'off':'unk';
+const stxt=s.status==='on'?'Light On':s.status==='off'?'Blackout':'Unknown';
+const item=document.createElement('div');item.className='si';
+item.innerHTML=`<div class="si-dot ${dot}"></div><span class="si-name">${z.name}</span><span class="si-lga">${z.lga} · ${stxt}</span>`;
+item.addEventListener('click',()=>{srch.value=z.name;sg.className='';sg.innerHTML='';map.setView([z.lat,z.lng],15);openPopup(z.id);buildSidebar(z.name)});
+sg.appendChild(item);
+});
+}else{sg.innerHTML=`<div class="si" style="color:var(--mu2);cursor:default"><span class="si-name">No results for "${q}"</span></div>`;}
+sg.className='open';
+buildSidebar(q);
 });
 document.addEventListener('click',e=>{if(!e.target.closest('.sw'))sg.className=''});
 
@@ -791,29 +791,29 @@ document.addEventListener('click',e=>{if(!e.target.closest('.sw'))sg.className='
 // SEARCH RESULT OVERLAY
 // -
 function showSro(id){
-  currentSroId=id;
-  const z=ZONES.find(x=>x.id===id),s=S[id],el=document.getElementById('sro');
-  document.getElementById('sro-nm').textContent=z.name;
-  if(s.status==='on'){
-    document.getElementById('sro-icon').innerHTML='<svg width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="30" r="29" fill="rgba(34,197,94,.12)" stroke="#22c55e" stroke-width="1.5"/><text x="30" y="42" text-anchor="middle" font-size="28">💡</text></svg>';
-    document.getElementById('sro-st').innerHTML='<span style="color:#22c55e;font-size:19px;font-weight:900">UpNEPA! 🎉</span>';
-    document.getElementById('sro-mt').textContent='Light is currently ON in '+z.name;
-    el.style.borderColor='#22c55e';
-  } else if(s.status==='off'){
-    document.getElementById('sro-icon').innerHTML='<svg width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="30" r="29" fill="rgba(239,68,68,.12)" stroke="#ef4444" stroke-width="1.5"/><text x="30" y="28" text-anchor="middle" font-size="18">🔌</text><text x="30" y="48" text-anchor="middle" font-size="20">🦟</text></svg>';
-    document.getElementById('sro-st').innerHTML='<span style="color:#ef4444;font-size:18px;font-weight:900">No Light 😩</span>';
-    document.getElementById('sro-mt').textContent='Blackout in '+z.name+'. Generator on!';
-    el.style.borderColor='#ef4444';
-  } else {
-    document.getElementById('sro-icon').innerHTML='<svg width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="30" r="29" fill="rgba(100,116,139,.12)" stroke="#64748b" stroke-width="1.5"/><text x="30" y="42" text-anchor="middle" font-size="28">❓</text></svg>';
-    document.getElementById('sro-st').innerHTML='<span style="color:#64748b;font-size:17px;font-weight:700">Status Unknown</span>';
-    document.getElementById('sro-mt').textContent='No recent reports for '+z.name;
-    el.style.borderColor='#334155';
-  }
-  const wb=document.getElementById('sro-watch');
-  if(watchlist.has(id)){wb.className='watch-btn watching';wb.textContent='🔔 Watching -- tap to remove';}
-  else{wb.className='watch-btn';wb.textContent='🔔 Notify me when light returns';}
-  el.className='vis';
+currentSroId=id;
+const z=ZONES.find(x=>x.id===id),s=S[id],el=document.getElementById('sro');
+document.getElementById('sro-nm').textContent=z.name;
+if(s.status==='on'){
+document.getElementById('sro-icon').innerHTML='<svg width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="30" r="29" fill="rgba(34,197,94,.12)" stroke="#22c55e" stroke-width="1.5"/><text x="30" y="42" text-anchor="middle" font-size="28">💡</text></svg>';
+document.getElementById('sro-st').innerHTML='<span style="color:#22c55e;font-size:19px;font-weight:900">UpNEPA! 🎉</span>';
+document.getElementById('sro-mt').textContent='Light is currently ON in '+z.name;
+el.style.borderColor='#22c55e';
+} else if(s.status==='off'){
+document.getElementById('sro-icon').innerHTML='<svg width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="30" r="29" fill="rgba(239,68,68,.12)" stroke="#ef4444" stroke-width="1.5"/><text x="30" y="28" text-anchor="middle" font-size="18">🔌</text><text x="30" y="48" text-anchor="middle" font-size="20">🦟</text></svg>';
+document.getElementById('sro-st').innerHTML='<span style="color:#ef4444;font-size:18px;font-weight:900">No Light 😩</span>';
+document.getElementById('sro-mt').textContent='Blackout in '+z.name+'. Generator on!';
+el.style.borderColor='#ef4444';
+} else {
+document.getElementById('sro-icon').innerHTML='<svg width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="30" r="29" fill="rgba(100,116,139,.12)" stroke="#64748b" stroke-width="1.5"/><text x="30" y="42" text-anchor="middle" font-size="28">❓</text></svg>';
+document.getElementById('sro-st').innerHTML='<span style="color:#64748b;font-size:17px;font-weight:700">Status Unknown</span>';
+document.getElementById('sro-mt').textContent='No recent reports for '+z.name;
+el.style.borderColor='#334155';
+}
+const wb=document.getElementById('sro-watch');
+if(watchlist.has(id)){wb.className='watch-btn watching';wb.textContent='🔔 Watching -- tap to remove';}
+else{wb.className='watch-btn';wb.textContent='🔔 Notify me when light returns';}
+el.className='vis';
 }
 function closeSro(){document.getElementById('sro').className='';currentSroId=null;}
 
@@ -821,74 +821,74 @@ function closeSro(){document.getElementById('sro').className='';currentSroId=nul
 // CONSENSUS ENGINE
 // -
 function processVote(zId,vote,weight,silent=false){
-  const s=S[zId],z=ZONES.find(x=>x.id===zId),dir=vote==='light_on'?1:-1;
-  s.score+=dir*weight;s.lastReport=new Date();
-  const prev=s.status;
-  s.status=s.score>=THR?'on':s.score<=-THR?'off':'unk';
-  const c=CM[s.status];
-  s.circle.setStyle({color:c.s,fillColor:c.f,fillOpacity:0.3});
-  refreshCard(zId);updateStats();
-  if(!silent){
-    if(s.status!==prev&&s.status!=='unk'){
-      showToast(s.status==='on'?`💡 Light confirmed in ${z.name}!`:`🛑 Blackout in ${z.name}`,s.status==='on'?'ton':'toff');
-      // Check watchlist
-      if(s.status==='on'&&watchlist.has(zId)) triggerNotif(z.name);
-    }
-    addFeed(z.name,vote,weight);
-    if(currentSroId===zId) showSro(zId);
-  }
-  setTimeout(()=>{
-    s.score-=dir*weight*.5;
-    const pr=s.status;
-    s.status=s.score>=THR?'on':s.score<=-THR?'off':'unk';
-    if(s.status!==pr){const c2=CM[s.status];s.circle.setStyle({color:c2.s,fillColor:c2.f,fillOpacity:0.22});refreshCard(zId);updateStats();}
-  },30000);
+const s=S[zId],z=ZONES.find(x=>x.id===zId),dir=vote==='light_on'?1:-1;
+s.score+=dir*weight;s.lastReport=new Date();
+const prev=s.status;
+s.status=s.score>=THR?'on':s.score<=-THR?'off':'unk';
+const c=CM[s.status];
+s.circle.setStyle({color:c.s,fillColor:c.f,fillOpacity:0.3});
+refreshCard(zId);updateStats();
+if(!silent){
+if(s.status!==prev&&s.status!=='unk'){
+showToast(s.status==='on'?`💡 Light confirmed in ${z.name}!`:`🛑 Blackout in ${z.name}`,s.status==='on'?'ton':'toff');
+// Check watchlist
+if(s.status==='on'&&watchlist.has(zId)) triggerNotif(z.name);
+}
+addFeed(z.name,vote,weight);
+if(currentSroId===zId) showSro(zId);
+}
+setTimeout(()=>{
+s.score-=dir*weight*.5;
+const pr=s.status;
+s.status=s.score>=THR?'on':s.score<=-THR?'off':'unk';
+if(s.status!==pr){const c2=CM[s.status];s.circle.setStyle({color:c2.s,fillColor:c2.f,fillOpacity:0.22});refreshCard(zId);updateStats();}
+},30000);
 }
 
 // -
 // REPORT -- LOCKED TO USER'S ZONE
 // -
 function submitR(vote){
-  if(!myZoneId){showToast('Set your zone at the gate first','twa');return;}
-  processVote(myZoneId,vote,1.0);
-  karma+=10;document.getElementById('karma').textContent=Math.round(karma)+' XP';
+if(!myZoneId){showToast('Set your zone at the gate first','twa');return;}
+processVote(myZoneId,vote,1.0);
+karma+=10;document.getElementById('karma').textContent=Math.round(karma)+' XP';
 }
 
 function togT(type){
-  tele[type]=!tele[type];
-  const btn=document.getElementById('btn-'+type),v=document.getElementById(type==='wifi'?'wv':'cv');
-  v.textContent=tele[type]?'ON':'OFF';
-  btn.className='tb '+(tele[type]?'tok':'tbad');
-  if(!tele.wifi&&!tele.charge&&myZoneId) processVote(myZoneId,'light_off',0.35);
+tele[type]=!tele[type];
+const btn=document.getElementById('btn-'+type),v=document.getElementById(type==='wifi'?'wv':'cv');
+v.textContent=tele[type]?'ON':'OFF';
+btn.className='tb '+(tele[type]?'tok':'tbad');
+if(!tele.wifi&&!tele.charge&&myZoneId) processVote(myZoneId,'light_off',0.35);
 }
 
 // -
 // WATCHLIST
 // -
 function toggleWatch(){
-  if(!currentSroId)return;
-  if(watchlist.has(currentSroId)){
-    watchlist.delete(currentSroId);
-    showToast('Removed from watchlist','twa');
-  } else {
-    watchlist.add(currentSroId);
-    showToast('Added to watchlist -- we\'ll alert you when light returns 🔔','ton');
-  }
-  updateWatchlistUI();
-  showSro(currentSroId);
+if(!currentSroId)return;
+if(watchlist.has(currentSroId)){
+watchlist.delete(currentSroId);
+showToast('Removed from watchlist','twa');
+} else {
+watchlist.add(currentSroId);
+showToast('Added to watchlist -- we\'ll alert you when light returns 🔔','ton');
+}
+updateWatchlistUI();
+showSro(currentSroId);
 }
 function updateWatchlistUI(){
-  document.getElementById('wl-cnt').textContent=watchlist.size;
-  const body=document.getElementById('wl-body');
-  if(!watchlist.size){body.innerHTML='<div class="wl-empty">No areas watched yet.<br>Search an area and tap 🔔</div>';return;}
-  body.innerHTML='';
-  watchlist.forEach(id=>{
-    const z=ZONES.find(x=>x.id===id),s=S[id];
-    const dot=s.status==='on'?'🟢':s.status==='off'?'🔴':'⚪';
-    const item=document.createElement('div');item.className='wl-item';
-    item.innerHTML=`<span>${dot}</span><span class="wl-nm">${z.name}</span><button class="wl-rm" onclick="removeWatch('${id}')">_</button>`;
-    body.appendChild(item);
-  });
+document.getElementById('wl-cnt').textContent=watchlist.size;
+const body=document.getElementById('wl-body');
+if(!watchlist.size){body.innerHTML='<div class="wl-empty">No areas watched yet.<br>Search an area and tap 🔔</div>';return;}
+body.innerHTML='';
+watchlist.forEach(id=>{
+const z=ZONES.find(x=>x.id===id),s=S[id];
+const dot=s.status==='on'?'🟢':s.status==='off'?'🔴':'⚪';
+const item=document.createElement('div');item.className='wl-item';
+item.innerHTML=`<span>${dot}</span><span class="wl-nm">${z.name}</span><button class="wl-rm" onclick="removeWatch('${id}')">_</button>`;
+body.appendChild(item);
+});
 }
 function removeWatch(id){watchlist.delete(id);updateWatchlistUI();if(currentSroId===id)showSro(id);}
 function togWatch(){const wp=document.getElementById('wp');wp.className=wp.classList.contains('open')?'':'open';document.getElementById('pp').className='';}
@@ -897,10 +897,10 @@ function togWatch(){const wp=document.getElementById('wp');wp.className=wp.class
 // NOTIFICATION POPUP (simulated push)
 // -
 function triggerNotif(zoneName){
-  document.getElementById('notif-nm').textContent=zoneName;
-  document.getElementById('notif-st').textContent='Light just came on -- reported by multiple users.';
-  document.getElementById('notif').className='show';
-  clearTimeout(notifTmr);notifTmr=setTimeout(closeNotif,6000);
+document.getElementById('notif-nm').textContent=zoneName;
+document.getElementById('notif-st').textContent='Light just came on -- reported by multiple users.';
+document.getElementById('notif').className='show';
+clearTimeout(notifTmr);notifTmr=setTimeout(closeNotif,6000);
 }
 function closeNotif(){document.getElementById('notif').className=''}
 
@@ -908,38 +908,38 @@ function closeNotif(){document.getElementById('notif').className=''}
 // PROFILES
 // -
 (function(){
-  const list=document.getElementById('pp-list');
-  REPORTERS.forEach(r=>{
-    const tc={g:'pg',y:'py',r:'pr'}[r.tier],bc={g:'sbg',y:'sby',r:'sbr'}[r.tier],tl={g:'🟢',y:'🟡',r:'🔴'}[r.tier];
-    const item=document.createElement('div');item.className='pi';
-    item.innerHTML=`<div class="pav ${tc}">${r.av}</div><div class="pinf"><div class="pnm">${r.name}</div><div class="plc">📍 ${r.loc} · ${r.reports} reports</div></div><span class="psb ${bc}">${tl} ${r.score}%</span>`;
-    list.appendChild(item);
-  });
+const list=document.getElementById('pp-list');
+REPORTERS.forEach(r=>{
+const tc={g:'pg',y:'py',r:'pr'}[r.tier],bc={g:'sbg',y:'sby',r:'sbr'}[r.tier],tl={g:'🟢',y:'🟡',r:'🔴'}[r.tier];
+const item=document.createElement('div');item.className='pi';
+item.innerHTML=`<div class="pav ${tc}">${r.av}</div><div class="pinf"><div class="pnm">${r.name}</div><div class="plc">📍 ${r.loc} · ${r.reports} reports</div></div><span class="psb ${bc}">${tl} ${r.score}%</span>`;
+list.appendChild(item);
+});
 })();
 function togProf(){const p=document.getElementById('pp');p.className=p.classList.contains('open')?'':'open';document.getElementById('wp').className='';}
 document.addEventListener('click',e=>{
-  if(!e.target.closest('#pp')&&!e.target.closest('#pb'))document.getElementById('pp').className='';
-  if(!e.target.closest('#wp')&&!e.target.closest('#wbtn'))document.getElementById('wp').className='';
+if(!e.target.closest('#pp')&&!e.target.closest('#pb'))document.getElementById('pp').className='';
+if(!e.target.closest('#wp')&&!e.target.closest('#wbtn'))document.getElementById('wp').className='';
 });
 
 // -
 // FEED
 // -
 function addFeed(zone,vote,w){
-  const body=document.getElementById('fd-body'),isOn=vote==='light_on',now=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-  const ph=body.querySelector('.fi');if(ph&&ph.textContent.includes('Waiting'))ph.remove();
-  const item=document.createElement('div');item.className='fi';
-  item.innerHTML=`${isOn?'💡':'🛑'} <span class="${isOn?'fon':'foff'}">${isOn?'Light On':'Blackout'}</span> · ${zone} <span style="color:var(--mu);float:right">${now}</span>`;
-  body.insertBefore(item,body.firstChild);
-  while(body.children.length>20)body.removeChild(body.lastChild);
+const body=document.getElementById('fd-body'),isOn=vote==='light_on',now=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+const ph=body.querySelector('.fi');if(ph&&ph.textContent.includes('Waiting'))ph.remove();
+const item=document.createElement('div');item.className='fi';
+item.innerHTML=`${isOn?'💡':'🛑'} <span class="${isOn?'fon':'foff'}">${isOn?'Light On':'Blackout'}</span> · ${zone} <span style="color:var(--mu);float:right">${now}</span>`;
+body.insertBefore(item,body.firstChild);
+while(body.children.length>20)body.removeChild(body.lastChild);
 }
 
 // -
 // TOAST
 // -
 function showToast(msg,cls=''){
-  const t=document.getElementById('toast');t.textContent=msg;t.className='show '+cls;
-  clearTimeout(toastTmr);toastTmr=setTimeout(()=>t.className='',4500);
+const t=document.getElementById('toast');t.textContent=msg;t.className='show '+cls;
+clearTimeout(toastTmr);toastTmr=setTimeout(()=>t.className='',4500);
 }
 function timeAgo(d){const s=Math.floor((Date.now()-d)/1000);return s<60?s+'s ago':s<3600?Math.floor(s/60)+'m ago':Math.floor(s/3600)+'h ago'}
 setInterval(()=>ZONES.forEach(z=>{if(S[z.id].lastReport)refreshCard(z.id)}),30000);
@@ -948,33 +948,33 @@ setInterval(()=>ZONES.forEach(z=>{if(S[z.id].lastReport)refreshCard(z.id)}),3000
 // SEED DEMO DATA
 // -
 const seeds=[
-  {id:'lekki1',v:'light_on',w:1},{id:'lekki1',v:'light_on',w:1},
-  {id:'vi',v:'light_on',w:1},{id:'vi',v:'light_on',w:1},
-  {id:'ikoyi',v:'light_on',w:1},{id:'ikoyi',v:'light_on',w:1},
-  {id:'banana',v:'light_on',w:1},{id:'banana',v:'light_on',w:1},
-  {id:'vgc',v:'light_on',w:1},{id:'vgc',v:'light_on',w:1},
-  {id:'osapa',v:'light_on',w:1},{id:'osapa',v:'light_on',w:1},
-  {id:'chevron',v:'light_on',w:1},{id:'chevron',v:'light_on',w:1},
-  {id:'ikeja',v:'light_on',w:1},{id:'ikeja',v:'light_on',w:1},
-  {id:'ikejaGRA',v:'light_on',w:1},{id:'ikejaGRA',v:'light_on',w:1},
-  {id:'parkview',v:'light_on',w:1},{id:'parkview',v:'light_on',w:1},
-  {id:'festac',v:'light_on',w:1},{id:'festac',v:'light_on',w:.4},
-  {id:'nicon',v:'light_on',w:1},{id:'nicon',v:'light_on',w:1},
-  {id:'chevyview',v:'light_on',w:1},{id:'chevyview',v:'light_on',w:1},
-  {id:'vi_1004',v:'light_on',w:1},{id:'vi_1004',v:'light_on',w:1},
-  {id:'omole1',v:'light_on',w:1},{id:'omole1',v:'light_on',w:1},
-  {id:'magodo1',v:'light_on',w:1},{id:'magodo1',v:'light_on',w:1},
-  {id:'maryland',v:'light_on',w:1},{id:'maryland',v:'light_on',w:1},
-  {id:'gbagada',v:'light_on',w:.4},{id:'gbagada',v:'light_on',w:.4},
-  {id:'surulere',v:'light_off',w:1},{id:'surulere',v:'light_off',w:1},
-  {id:'yaba',v:'light_off',w:1},{id:'yaba',v:'light_off',w:1},
-  {id:'agege',v:'light_off',w:1},{id:'agege',v:'light_off',w:1},
-  {id:'mushin',v:'light_off',w:1},{id:'mushin',v:'light_off',w:1},
-  {id:'oshodi',v:'light_off',w:1},{id:'oshodi',v:'light_off',w:1},
-  {id:'isolo',v:'light_off',w:1},{id:'isolo',v:'light_off',w:1},
-  {id:'mile12',v:'light_off',w:1},{id:'mile12',v:'light_off',w:.4},
-  {id:'ajah',v:'light_on',w:.4},{id:'awoyaya',v:'light_on',w:.4},
-  {id:'amuwo',v:'light_on',w:.4},{id:'ikotun',v:'light_off',w:.4},
+{id:'lekki1',v:'light_on',w:1},{id:'lekki1',v:'light_on',w:1},
+{id:'vi',v:'light_on',w:1},{id:'vi',v:'light_on',w:1},
+{id:'ikoyi',v:'light_on',w:1},{id:'ikoyi',v:'light_on',w:1},
+{id:'banana',v:'light_on',w:1},{id:'banana',v:'light_on',w:1},
+{id:'vgc',v:'light_on',w:1},{id:'vgc',v:'light_on',w:1},
+{id:'osapa',v:'light_on',w:1},{id:'osapa',v:'light_on',w:1},
+{id:'chevron',v:'light_on',w:1},{id:'chevron',v:'light_on',w:1},
+{id:'ikeja',v:'light_on',w:1},{id:'ikeja',v:'light_on',w:1},
+{id:'ikejaGRA',v:'light_on',w:1},{id:'ikejaGRA',v:'light_on',w:1},
+{id:'parkview',v:'light_on',w:1},{id:'parkview',v:'light_on',w:1},
+{id:'festac',v:'light_on',w:1},{id:'festac',v:'light_on',w:.4},
+{id:'nicon',v:'light_on',w:1},{id:'nicon',v:'light_on',w:1},
+{id:'chevyview',v:'light_on',w:1},{id:'chevyview',v:'light_on',w:1},
+{id:'vi_1004',v:'light_on',w:1},{id:'vi_1004',v:'light_on',w:1},
+{id:'omole1',v:'light_on',w:1},{id:'omole1',v:'light_on',w:1},
+{id:'magodo1',v:'light_on',w:1},{id:'magodo1',v:'light_on',w:1},
+{id:'maryland',v:'light_on',w:1},{id:'maryland',v:'light_on',w:1},
+{id:'gbagada',v:'light_on',w:.4},{id:'gbagada',v:'light_on',w:.4},
+{id:'surulere',v:'light_off',w:1},{id:'surulere',v:'light_off',w:1},
+{id:'yaba',v:'light_off',w:1},{id:'yaba',v:'light_off',w:1},
+{id:'agege',v:'light_off',w:1},{id:'agege',v:'light_off',w:1},
+{id:'mushin',v:'light_off',w:1},{id:'mushin',v:'light_off',w:1},
+{id:'oshodi',v:'light_off',w:1},{id:'oshodi',v:'light_off',w:1},
+{id:'isolo',v:'light_off',w:1},{id:'isolo',v:'light_off',w:1},
+{id:'mile12',v:'light_off',w:1},{id:'mile12',v:'light_off',w:.4},
+{id:'ajah',v:'light_on',w:.4},{id:'awoyaya',v:'light_on',w:.4},
+{id:'amuwo',v:'light_on',w:.4},{id:'ikotun',v:'light_off',w:.4},
 ];
 seeds.forEach((s,i)=>setTimeout(()=>processVote(s.id,s.v,s.w,true),i*35));
 setTimeout(()=>{buildSidebar();updateStats()},seeds.length*35+200);
