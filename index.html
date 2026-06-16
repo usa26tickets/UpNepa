@@ -8,16 +8,16 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
- --bg:#0b0d12;--sf:#13161f;--sf2:#1a1e2b;--sf3:#222636;
- --bd:#272b3a;--bd2:#31364a;
- --tx:#e4e8f1;--mu:#5a6380;--mu2:#7a859e;
- --on:#16a34a;--onl:#22c55e;--ong:rgba(34,197,94,.15);
- --of:#dc2626;--ofl:#ef4444;--ofg:rgba(239,68,68,.15);
- --uk:#3b4563;--ukl:#64748b;
- --wa:#d97706;--wal:#f59e0b;
- --ac:#4f46e5;--acl:#6366f1;
- --sw:320px;
- --fn:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  --bg:#0b0d12;--sf:#13161f;--sf2:#1a1e2b;--sf3:#222636;
+  --bd:#272b3a;--bd2:#31364a;
+  --tx:#e4e8f1;--mu:#5a6380;--mu2:#7a859e;
+  --on:#16a34a;--onl:#22c55e;--ong:rgba(34,197,94,.15);
+  --of:#dc2626;--ofl:#ef4444;--ofg:rgba(239,68,68,.15);
+  --uk:#3b4563;--ukl:#64748b;
+  --wa:#d97706;--wal:#f59e0b;
+  --ac:#4f46e5;--acl:#6366f1;
+  --sw:320px;
+  --fn:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
 }
 html,body{height:100%;font-family:var(--fn);background:var(--bg);color:var(--tx);font-size:14px;overflow:hidden}
 
@@ -47,7 +47,7 @@ html,body{height:100%;font-family:var(--fn);background:var(--bg);color:var(--tx)
 .g-loc-wrap{position:relative}
 .g-loc-wrap input{width:100%;background:var(--sf2);border:1px solid var(--bd2);border-radius:9px;padding:9px 12px 9px 32px;color:var(--tx);font-size:13px;outline:none;transition:border .15s}
 .g-loc-wrap input:focus{border-color:var(--acl)}
-.g-loc-wrap::before{content:" ";position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px;pointer-events:none}
+.g-loc-wrap::before{content:"📍";position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px;pointer-events:none}
 #g-loc-sugg{position:absolute;top:calc(100% + 3px);left:0;right:0;z-index:10000;background:var(--sf);border:1px solid var(--bd2);border-radius:9px;display:none;max-height:200px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.6)}
 #g-loc-sugg.open{display:block}
 #g-loc-sugg::-webkit-scrollbar{width:3px}
@@ -57,8 +57,8 @@ html,body{height:100%;font-family:var(--fn);background:var(--bg);color:var(--tx)
 .g-sugg-item:hover{background:var(--sf2)}
 .g-sugg-item strong{display:block;font-weight:600}
 .g-sugg-item span{font-size:10px;color:var(--mu2)}
-#g-btn{background:var(--onl);color:#000;font-weight:800;font-size:14px;border:none;border-radius:11px;padding:13px 38px;cursor:pointer;opacity:.35;pointer-events:none;transition:.2s;letter-spacing:.3px;width:100%;max-width:360px}
-#g-btn.ready{opacity:1;pointer-events:all}
+#g-btn{background:var(--onl);color:#000;font-weight:800;font-size:14px;border:none;border-radius:11px;padding:13px 38px;cursor:not-allowed;opacity:.35;transition:.2s;letter-spacing:.3px;width:100%;max-width:360px}
+#g-btn.ready{opacity:1;cursor:pointer;pointer-events:all}
 #g-btn.ready:hover{background:#18d966}
 .g-note{font-size:11px;color:var(--mu);margin-top:10px;text-align:center}
 
@@ -90,7 +90,7 @@ html,body{height:100%;font-family:var(--fn);background:var(--bg);color:var(--tx)
 .sw{position:relative}
 .sw input{width:100%;background:var(--sf2);border:1px solid var(--bd2);border-radius:9px;padding:8px 10px 8px 30px;color:var(--tx);font-size:12px;outline:none;transition:border .15s}
 .sw input:focus{border-color:var(--acl)}
-.sw::before{content:" ";position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:11px;pointer-events:none}
+.sw::before{content:"🔍";position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:11px;pointer-events:none}
 #sg{position:absolute;top:calc(100% + 3px);left:0;right:0;z-index:500;background:var(--sf);border:1px solid var(--bd2);border-radius:9px;overflow:hidden;display:none;box-shadow:0 8px 28px rgba(0,0,0,.5);max-height:220px;overflow-y:auto}
 #sg.open{display:block}
 #sg::-webkit-scrollbar{width:3px}
@@ -232,110 +232,130 @@ html,body{height:100%;font-family:var(--fn);background:var(--bg);color:var(--tx)
 
 <!-- ══ GATE ══════════════════════════════════ -->
 <div id="gate">
- <div class="g-logo"> </div>
- <div class="g-title">Grid<span>Pulse</span> Lagos</div>
- <div class="g-sub">Real-time light tracking across Lagos.<br>Tell us your situation before you enter.</div>
- <div class="g-prompt">What's your power status right now?</div>
- <div class="g-cards">
- <div class="g-card" id="gc-on" onclick="selGate('on')">
- <div class="g-icon"> </div>
- <div><h4>NEPA Dey!</h4><p>Power is currently on at my location</p></div>
- <div class="g-chk" id="gck-on"></div>
- </div>
- <div class="g-card" id="gc-off" onclick="selGate('off')">
- <div class="g-icon"> </div>
- <div><h4>No Light</h4><p>Currently experiencing a blackout</p></div>
- <div class="g-chk" id="gck-off"></div>
- </div>
- <div class="g-card" id="gc-unk" onclick="selGate('unk')">
- <div class="g-icon"> </div>
- <div><h4>I'm Not Home</h4><p>Can't confirm my area's power status</p></div>
- <div class="g-chk" id="gck-unk"></div>
- </div>
- </div>
- <div id="g-loc">
- <label>Which area are you reporting from?</label>
- <div class="g-loc-wrap">
- <input type="text" id="g-loc-input" placeholder="Type your estate or area…" autocomplete="off"/>
- <div id="g-loc-sugg"></div>
- </div>
- </div>
- <button id="g-btn" onclick="enterApp()">Open GridPulse →</button>
- <div class="g-note">Your report helps thousands of Lagosians plan their day </div>
+  <div class="g-logo">
+    <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
+      <circle cx="26" cy="26" r="25" fill="rgba(34,197,94,0.12)" stroke="#22c55e" stroke-width="1.5"/>
+      <path d="M29 8L14 28h13L24 44 42 22H29L32 8z" fill="#22c55e" filter="drop-shadow(0 0 8px #22c55e)"/>
+    </svg>
+  </div>
+  <div class="g-title">Grid<span>Pulse</span> Lagos</div>
+  <div class="g-sub">Real-time light tracking across Lagos.<br>Tell us your situation before you enter.</div>
+  <div class="g-prompt">What's your power status right now?</div>
+  <div class="g-cards">
+    <div class="g-card" id="gc-on" onclick="selGate('on')">
+      <div class="g-icon">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="16" r="15" fill="rgba(34,197,94,0.15)" stroke="#22c55e" stroke-width="1.5"/>
+          <path d="M18 4L8 18h8l-2 10 12-16h-8l2-12z" fill="#22c55e"/>
+        </svg>
+      </div>
+      <div><h4>NEPA Dey!</h4><p>Power is currently on at my location</p></div>
+      <div class="g-chk" id="gck-on"></div>
+    </div>
+    <div class="g-card" id="gc-off" onclick="selGate('off')">
+      <div class="g-icon">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="16" r="15" fill="rgba(239,68,68,0.15)" stroke="#ef4444" stroke-width="1.5"/>
+          <path d="M16 8v10M16 22v2" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div><h4>No Light</h4><p>Currently experiencing a blackout</p></div>
+      <div class="g-chk" id="gck-off"></div>
+    </div>
+    <div class="g-card" id="gc-unk" onclick="selGate('unk')">
+      <div class="g-icon">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="16" r="15" fill="rgba(245,158,11,0.15)" stroke="#f59e0b" stroke-width="1.5"/>
+          <path d="M16 9a4 4 0 011 7.9V19M16 22v2" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div><h4>I'm Not Home</h4><p>Can't confirm my area's power status</p></div>
+      <div class="g-chk" id="gck-unk"></div>
+    </div>
+  </div>
+  <div id="g-loc" style="display:none">
+    <label>Which area are you reporting from?</label>
+    <div class="g-loc-wrap">
+      <input type="text" id="g-loc-input" placeholder="Type your estate or area…" autocomplete="off"/>
+      <div id="g-loc-sugg"></div>
+    </div>
+  </div>
+  <button id="g-btn" onclick="enterApp()" disabled>Open GridPulse &rarr;</button>
+  <div class="g-note">Your report helps thousands of Lagosians plan their day ✊</div>
 </div>
 
 <!-- ══ APP ════════════════════════════════════ -->
 <div id="app">
- <div id="sb">
- <div id="sb-hdr">
- <div class="brand"><span style="font-size:17px"> </span><span class="brand-name">Grid<em>Pulse</em> Lagos</span></div>
- <div id="my-zone-bar"><div class="mzb-dot"></div><span class="mzb-lbl">Reporting from:</span><span id="mzb-name" class="mzb-name"></span></div>
- <div class="sp-row">
- <div class="sp" id="sp-on" onclick="filt('on')" title="Show areas with light"><span class="sv" id="st-on" style="color:var(--onl)">—</span><div class="sl">With Light</div></div>
- <div class="sp" id="sp-off" onclick="filt('off')" title="Show blackout areas"><span class="sv" id="st-off" style="color:var(--ofl)">—</span><div class="sl">Blackout</div></div>
- <div class="sp" id="sp-unk" onclick="filt('unk')" title="Show unknown areas"><span class="sv" id="st-unk" style="color:var(--ukl)">—</span><div class="sl">Unknown</div></div>
- </div>
- <div class="sw" style="position:relative">
- <input type="text" id="srch" placeholder="Search estate, area, bus stop…" autocomplete="off"/>
- <div id="sg"></div>
- </div>
- </div>
- <div id="zl"></div>
- <div id="rp">
- <h3> Report Your Area</h3>
- <div id="rp-locked"><span> </span><span id="rp-zone-name">Select your area at gate</span><span class="rl-badge">YOUR ZONE</span></div>
- <div class="rbtns">
- <button class="rbtn btn-on" id="rbtn-on" onclick="submitR('light_on')" disabled> NEPA Dey!</button>
- <button class="rbtn btn-off" id="rbtn-off" onclick="submitR('light_off')" disabled> No Light</button>
- </div>
- <div class="tr">
- <button class="tb tok" id="btn-wifi" onclick="togT('wifi')"><span>Wi-Fi</span><span class="tv" id="wv">ON</span></button>
- <button class="tb tok" id="btn-chg" onclick="togT('charge')"><span>Charging</span><span class="tv" id="cv">ON</span></button>
- </div>
- <div class="kb"><span>Contribution score</span><span class="kv" id="karma">140 XP</span></div>
- </div>
- </div>
+  <div id="sb">
+    <div id="sb-hdr">
+      <div class="brand"><span style="font-size:17px">⚡</span><span class="brand-name">Grid<em>Pulse</em> Lagos</span></div>
+      <div id="my-zone-bar"><div class="mzb-dot"></div><span class="mzb-lbl">Reporting from:</span><span id="mzb-name" class="mzb-name"></span></div>
+      <div class="sp-row">
+        <div class="sp" id="sp-on"  onclick="filt('on')"  title="Show areas with light"><span class="sv" id="st-on"  style="color:var(--onl)">—</span><div class="sl">With Light</div></div>
+        <div class="sp" id="sp-off" onclick="filt('off')" title="Show blackout areas"><span class="sv" id="st-off" style="color:var(--ofl)">—</span><div class="sl">Blackout</div></div>
+        <div class="sp" id="sp-unk" onclick="filt('unk')" title="Show unknown areas"><span class="sv" id="st-unk" style="color:var(--ukl)">—</span><div class="sl">Unknown</div></div>
+      </div>
+      <div class="sw" style="position:relative">
+        <input type="text" id="srch" placeholder="Search estate, area, bus stop…" autocomplete="off"/>
+        <div id="sg"></div>
+      </div>
+    </div>
+    <div id="zl"></div>
+    <div id="rp">
+      <h3>📣 Report Your Area</h3>
+      <div id="rp-locked"><span>📍</span><span id="rp-zone-name">Select your area at gate</span><span class="rl-badge">YOUR ZONE</span></div>
+      <div class="rbtns">
+        <button class="rbtn btn-on"  id="rbtn-on"  onclick="submitR('light_on')"  disabled>💡 NEPA Dey!</button>
+        <button class="rbtn btn-off" id="rbtn-off" onclick="submitR('light_off')" disabled>🛑 No Light</button>
+      </div>
+      <div class="tr">
+        <button class="tb tok" id="btn-wifi"   onclick="togT('wifi')"><span>Wi-Fi</span><span class="tv" id="wv">ON</span></button>
+        <button class="tb tok" id="btn-chg"    onclick="togT('charge')"><span>Charging</span><span class="tv" id="cv">ON</span></button>
+      </div>
+      <div class="kb"><span>Contribution score</span><span class="kv" id="karma">140 XP</span></div>
+    </div>
+  </div>
 
- <div id="mw">
- <div id="map"></div>
- <div id="sro">
- <button class="sro-close" onclick="closeSro()">×</button>
- <span id="sro-icon" class="sro-icon"></span>
- <div id="sro-nm" class="sro-nm"></div>
- <div id="sro-st" class="sro-st"></div>
- <div id="sro-mt" class="sro-mt"></div>
- <button class="watch-btn" id="sro-watch" onclick="toggleWatch()"> Notify me when light returns</button>
- </div>
- <button id="pb" onclick="togProf()"> Reporters</button>
- <button id="wbtn" onclick="togWatch()"> Watchlist <span class="wbtn-cnt" id="wl-cnt">0</span></button>
- <div id="pp"><h4>Community Reporters</h4><div id="pp-list"></div></div>
- <div id="wp">
- <h4>My Light Watchlist <span>Get notified when light returns</span></h4>
- <div id="wl-body"><div class="wl-empty">No areas watched yet.<br>Search an area and tap </div></div>
- </div>
- <div id="fd">
- <div id="fd-hdr"><span>Live Reports</span><div class="ldot"></div></div>
- <div id="fd-body"><div class="fi">Waiting for first report…</div></div>
- </div>
- </div>
+  <div id="mw">
+    <div id="map"></div>
+    <div id="sro">
+      <button class="sro-close" onclick="closeSro()">×</button>
+      <span id="sro-icon" class="sro-icon"></span>
+      <div id="sro-nm" class="sro-nm"></div>
+      <div id="sro-st" class="sro-st"></div>
+      <div id="sro-mt" class="sro-mt"></div>
+      <button class="watch-btn" id="sro-watch" onclick="toggleWatch()">🔔 Notify me when light returns</button>
+    </div>
+    <button id="pb" onclick="togProf()">👥 Reporters</button>
+    <button id="wbtn" onclick="togWatch()">🔔 Watchlist <span class="wbtn-cnt" id="wl-cnt">0</span></button>
+    <div id="pp"><h4>Community Reporters</h4><div id="pp-list"></div></div>
+    <div id="wp">
+      <h4>My Light Watchlist <span>Get notified when light returns</span></h4>
+      <div id="wl-body"><div class="wl-empty">No areas watched yet.<br>Search an area and tap 🔔</div></div>
+    </div>
+    <div id="fd">
+      <div id="fd-hdr"><span>Live Reports</span><div class="ldot"></div></div>
+      <div id="fd-body"><div class="fi">Waiting for first report…</div></div>
+    </div>
+  </div>
 </div>
 <div id="toast"></div>
 <div id="notif">
- <button class="nc" onclick="closeNotif()">×</button>
- <div class="nt"> Light Alert</div>
- <div id="notif-nm" class="nm"></div>
- <div id="notif-st" class="ns"></div>
+  <button class="nc" onclick="closeNotif()">×</button>
+  <div class="nt">🔔 Light Alert</div>
+  <div id="notif-nm" class="nm"></div>
+  <div id="notif-st" class="ns"></div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-// ══════════════════════════════════════════════════════════
+// -
 // 300+ LOCATION DATABASE
 // Covers: Estates · Streets · Bus Stops · Landmarks · Areas
 // All 20 LGAs of Lagos State
-// ══════════════════════════════════════════════════════════
+// -
 const ZONES=[
-// ─── LEKKI PHASE 1 & IMMEDIATE SURROUNDINGS ───────────────
+// - LEKKI PHASE 1 & IMMEDIATE SURROUNDINGS -
 {id:"lekki1",name:"Lekki Phase 1",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4446,lng:3.4736,r:900,type:"area"},
 {id:"admiralty",name:"Admiralty Way (Lekki Ph1)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.446,lng:3.476,r:450,type:"street"},
 {id:"fola_osibo",name:"Fola Osibo Street",lga:"Eti-Osa",area:"Island / Lekki",lat:6.448,lng:3.4748,r:400,type:"street"},
@@ -360,7 +380,7 @@ const ZONES=[
 {id:"lekki_toll",name:"Lekki Toll Gate / 1st Roundabout",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4388,lng:3.466,r:400,type:"landmark"},
 {id:"lekki_3rd_rbt",name:"3rd Roundabout (Lekki)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.445,lng:3.481,r:400,type:"landmark"},
 {id:"lekki_LCC",name:"Lekki Conservation Centre Area",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4333,lng:3.4736,r:500,type:"landmark"},
-// ─── CHEVRON / AGUNGI / OSAPA / OLOGOLO ───────────────────
+// - CHEVRON / AGUNGI / OSAPA / OLOGOLO -
 {id:"chevron",name:"Chevron Drive",lga:"Eti-Osa",area:"Island / Lekki",lat:6.438,lng:3.528,r:900,type:"street"},
 {id:"chevyview",name:"Chevy View Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.437,lng:3.53,r:700,type:"estate"},
 {id:"northforeshore",name:"Northern Foreshore Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4355,lng:3.526,r:600,type:"estate"},
@@ -375,7 +395,7 @@ const ZONES=[
 {id:"carltongate",name:"Carlton Gate Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4345,lng:3.529,r:500,type:"estate"},
 {id:"chevron_rbt",name:"Chevron Roundabout (7th)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.436,lng:3.528,r:380,type:"landmark"},
 {id:"arcadia",name:"Arcadia Grove Estate (Osapa)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.436,lng:3.521,r:500,type:"estate"},
-// ─── IKOTA / VGC / AJAH ───────────────────────────────────
+// - IKOTA / VGC / AJAH -
 {id:"ikota",name:"Ikota",lga:"Eti-Osa",area:"Island / Lekki",lat:6.437,lng:3.545,r:850,type:"area"},
 {id:"ikotavilla",name:"Ikota Villa Estate",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4365,lng:3.547,r:600,type:"estate"},
 {id:"lekki2",name:"Lekki Phase 2",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4339,lng:3.5388,r:900,type:"area"},
@@ -393,7 +413,7 @@ const ZONES=[
 {id:"palmsres",name:"Palms Residences (Ajah)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.47,lng:3.559,r:500,type:"estate"},
 {id:"lekki_gardens",name:"Lekki Gardens Estate (Ajah)",lga:"Eti-Osa",area:"Island / Lekki",lat:6.469,lng:3.564,r:600,type:"estate"},
 {id:"abraham",name:"Abraham Adesanya Roundabout",lga:"Eti-Osa",area:"Island / Lekki",lat:6.4690,lng:3.5588,r:350,type:"landmark"},
-// ─── SANGOTEDO / AWOYAYA / ABIJO / IBEJU-LEKKI ───────────
+// - SANGOTEDO / AWOYAYA / ABIJO / IBEJU-LEKKI -
 {id:"sangotedo",name:"Sangotedo",lga:"Eti-Osa",area:"Island / Ibeju-Lekki",lat:6.4419,lng:3.602,r:1000,type:"area"},
 {id:"shoprite_sang",name:"Novare Mall / Sangotedo",lga:"Eti-Osa",area:"Island / Ibeju-Lekki",lat:6.443,lng:3.608,r:400,type:"landmark"},
 {id:"awoyaya",name:"Awoyaya",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.444,lng:3.625,r:1000,type:"area"},
@@ -408,7 +428,7 @@ const ZONES=[
 {id:"adivaplain",name:"Adiva Plainfield Estate",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.447,lng:3.631,r:500,type:"estate"},
 {id:"eleko",name:"Eleko Junction",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.422,lng:3.72,r:750,type:"landmark"},
 {id:"akodo",name:"Akodo",lga:"Ibeju-Lekki",area:"Island / Ibeju-Lekki",lat:6.433,lng:3.74,r:900,type:"area"},
-// ─── VICTORIA ISLAND ──────────────────────────────────────
+// - VICTORIA ISLAND -
 {id:"vi",name:"Victoria Island (VI)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.4281,lng:3.4219,r:1100,type:"area"},
 {id:"vi_adeola",name:"Adeola Odeku Street (VI)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.4292,lng:3.4227,r:380,type:"street"},
 {id:"vi_akin",name:"Akin Adesola Street (VI)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.43,lng:3.424,r:380,type:"street"},
@@ -418,7 +438,7 @@ const ZONES=[
 {id:"vi_ozumba",name:"Ozumba Mbadiwe Avenue (VI)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.431,lng:3.43,r:450,type:"street"},
 {id:"vi_walter",name:"Walter Carrington Crescent (VI)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.432,lng:3.419,r:380,type:"street"},
 {id:"eko_atlantic",name:"Eko Atlantic City",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.415,lng:3.408,r:900,type:"landmark"},
-// ─── IKOYI & BANANA ISLAND ────────────────────────────────
+// - IKOYI & BANANA ISLAND -
 {id:"ikoyi",name:"Ikoyi",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.453,lng:3.4317,r:1000,type:"area"},
 {id:"parkview",name:"Parkview Estate (Ikoyi)",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.456,lng:3.438,r:700,type:"estate"},
 {id:"banana",name:"Banana Island",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.4598,lng:3.4411,r:600,type:"estate"},
@@ -430,7 +450,7 @@ const ZONES=[
 {id:"ikoyi_club",name:"Ikoyi Club Area",lga:"Eti-Osa",area:"Island / VI & Ikoyi",lat:6.454,lng:3.435,r:400,type:"landmark"},
 {id:"obalende",name:"Obalende",lga:"Lagos Island",area:"Island / VI & Ikoyi",lat:6.451,lng:3.411,r:800,type:"area"},
 {id:"obalende_bus",name:"Obalende Bus Stop / Terminal",lga:"Lagos Island",area:"Island / VI & Ikoyi",lat:6.4508,lng:3.411,r:350,type:"busstop"},
-// ─── LAGOS ISLAND ─────────────────────────────────────────
+// - LAGOS ISLAND -
 {id:"lagosisland",name:"Lagos Island",lga:"Lagos Island",area:"Island / Lagos Island",lat:6.4541,lng:3.3947,r:1000,type:"area"},
 {id:"marina",name:"Marina",lga:"Lagos Island",area:"Island / Lagos Island",lat:6.4531,lng:3.3924,r:500,type:"street"},
 {id:"cms",name:"CMS (Marina Bus Stop)",lga:"Lagos Island",area:"Island / Lagos Island",lat:6.4519,lng:3.393,r:350,type:"busstop"},
@@ -439,7 +459,7 @@ const ZONES=[
 {id:"idumota",name:"Idumota",lga:"Lagos Island",area:"Island / Lagos Island",lat:6.458,lng:3.385,r:600,type:"area"},
 {id:"broad_street",name:"Broad Street (Lagos Island)",lga:"Lagos Island",area:"Island / Lagos Island",lat:6.455,lng:3.391,r:400,type:"street"},
 {id:"carter_bridge",name:"Carter Bridge Area",lga:"Lagos Island",area:"Island / Lagos Island",lat:6.458,lng:3.376,r:500,type:"landmark"},
-// ─── APAPA / AJEGUNLE ─────────────────────────────────────
+// - APAPA / AJEGUNLE -
 {id:"apapa",name:"Apapa",lga:"Apapa",area:"Mainland / South",lat:6.4474,lng:3.3607,r:1200,type:"area"},
 {id:"tincan",name:"Tin Can Island",lga:"Apapa",area:"Mainland / South",lat:6.435,lng:3.34,r:900,type:"area"},
 {id:"wharf_apapa",name:"Apapa Wharf / Port Area",lga:"Apapa",area:"Mainland / South",lat:6.44,lng:3.355,r:700,type:"landmark"},
@@ -447,7 +467,7 @@ const ZONES=[
 {id:"orile",name:"Orile Iganmu",lga:"Surulere",area:"Mainland / South",lat:6.48,lng:3.35,r:900,type:"area"},
 {id:"mile2",name:"Mile 2",lga:"Amuwo-Odofin",area:"Mainland / South",lat:6.478,lng:3.32,r:1000,type:"area"},
 {id:"mile2_bus",name:"Mile 2 Bus Stop",lga:"Amuwo-Odofin",area:"Mainland / South",lat:6.477,lng:3.321,r:350,type:"busstop"},
-// ─── IKEJA ────────────────────────────────────────────────
+// - IKEJA -
 {id:"ikeja",name:"Ikeja (Allen / Computer Village)",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.5962,lng:3.3551,r:1000,type:"area"},
 {id:"allen",name:"Allen Avenue",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.589,lng:3.357,r:600,type:"street"},
 {id:"computervillage",name:"Computer Village (Ikeja)",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.597,lng:3.349,r:450,type:"landmark"},
@@ -468,7 +488,7 @@ const ZONES=[
 {id:"ilupeju",name:"Ilupeju",lga:"Mushin",area:"Mainland / Ikeja",lat:6.558,lng:3.359,r:900,type:"area"},
 {id:"palmgrove",name:"Palm Grove",lga:"Mushin",area:"Mainland / Ikeja",lat:6.536,lng:3.358,r:900,type:"area"},
 {id:"airport",name:"Murtala Muhammed Airport Road",lga:"Ikeja",area:"Mainland / Ikeja",lat:6.5774,lng:3.3227,r:1000,type:"landmark"},
-// ─── MAGODO / OMOLE / OJODU ───────────────────────────────
+// - MAGODO / OMOLE / OJODU -
 {id:"magodo1",name:"Magodo Phase 1",lga:"Kosofe",area:"Mainland / Magodo",lat:6.61,lng:3.375,r:900,type:"estate"},
 {id:"magodo2",name:"Magodo Phase 2",lga:"Kosofe",area:"Mainland / Magodo",lat:6.615,lng:3.38,r:900,type:"estate"},
 {id:"omole1",name:"Omole Phase 1",lga:"Ojodu",area:"Mainland / Magodo",lat:6.625,lng:3.342,r:1000,type:"estate"},
@@ -484,7 +504,7 @@ const ZONES=[
 {id:"river_valley",name:"River Valley Estate (Ojodu)",lga:"Ojodu",area:"Mainland / Magodo",lat:6.629,lng:3.345,r:500,type:"estate"},
 {id:"morgan_est",name:"Morgan Estate (Ojodu)",lga:"Ojodu",area:"Mainland / Magodo",lat:6.627,lng:3.348,r:450,type:"estate"},
 {id:"unity_est",name:"Unity Estate (Ojodu)",lga:"Ojodu",area:"Mainland / Magodo",lat:6.633,lng:3.352,r:450,type:"estate"},
-// ─── OGBA / AGEGE / IFAKO ─────────────────────────────────
+// - OGBA / AGEGE / IFAKO -
 {id:"ogba",name:"Ogba",lga:"Ifako-Ijaiye",area:"Mainland / Ogba",lat:6.5979,lng:3.3283,r:1100,type:"area"},
 {id:"agege",name:"Agege",lga:"Agege",area:"Mainland / Agege",lat:6.6184,lng:3.3197,r:1200,type:"area"},
 {id:"agege_bus",name:"Agege Bus Stop / Pen Cinema",lga:"Agege",area:"Mainland / Agege",lat:6.617,lng:3.318,r:380,type:"busstop"},
@@ -494,7 +514,7 @@ const ZONES=[
 {id:"iyana_ipaja",name:"Iyana Ipaja",lga:"Alimosho",area:"Mainland / Agege",lat:6.594,lng:3.274,r:1000,type:"area"},
 {id:"iyana_ipaja_bus",name:"Iyana Ipaja Bus Stop",lga:"Alimosho",area:"Mainland / Agege",lat:6.5935,lng:3.274,r:350,type:"busstop"},
 {id:"abule_egba",name:"Abule Egba",lga:"Ifako-Ijaiye",area:"Mainland / Ogba",lat:6.64,lng:3.289,r:1000,type:"area"},
-// ─── KOSOFE / OGUDU / KETU ────────────────────────────────
+// - KOSOFE / OGUDU / KETU -
 {id:"kosofe",name:"Kosofe",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.564,lng:3.41,r:1000,type:"area"},
 {id:"ketu",name:"Ketu",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.582,lng:3.393,r:900,type:"area"},
 {id:"ketu_bus",name:"Ketu Bus Stop",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.581,lng:3.392,r:350,type:"busstop"},
@@ -509,7 +529,7 @@ const ZONES=[
 {id:"apollo",name:"Apollo Estate (Mile 12)",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.601,lng:3.382,r:450,type:"estate"},
 {id:"akerele_oworo",name:"Akerele Estate (Oworonshoki)",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.551,lng:3.398,r:450,type:"estate"},
 {id:"ramatcres",name:"Ramat Crescent (Ogudu)",lga:"Kosofe",area:"Mainland / Kosofe",lat:6.576,lng:3.405,r:450,type:"estate"},
-// ─── GBAGADA / YABA / SHOMOLU ─────────────────────────────
+// - GBAGADA / YABA / SHOMOLU -
 {id:"gbagada",name:"Gbagada",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.5498,lng:3.3799,r:1000,type:"area"},
 {id:"gbagada2",name:"Gbagada Phase 2",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.554,lng:3.384,r:700,type:"estate"},
 {id:"atunrase",name:"Atunrase Medina Estate",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.552,lng:3.377,r:550,type:"estate"},
@@ -526,7 +546,7 @@ const ZONES=[
 {id:"ebute",name:"Ebute-Metta",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.487,lng:3.367,r:1000,type:"area"},
 {id:"makoko",name:"Makoko",lga:"Lagos Mainland",area:"Mainland / Central",lat:6.497,lng:3.389,r:700,type:"area"},
 {id:"akoka",name:"Akoka (Yaba)",lga:"Shomolu",area:"Mainland / Central",lat:6.522,lng:3.388,r:600,type:"area"},
-// ─── SURULERE ─────────────────────────────────────────────
+// - SURULERE -
 {id:"surulere",name:"Surulere",lga:"Surulere",area:"Mainland / Surulere",lat:6.4994,lng:3.3644,r:1200,type:"area"},
 {id:"aguda",name:"Aguda (Surulere)",lga:"Surulere",area:"Mainland / Surulere",lat:6.501,lng:3.36,r:600,type:"area"},
 {id:"bode_thomas",name:"Bode Thomas Street",lga:"Surulere",area:"Mainland / Surulere",lat:6.502,lng:3.363,r:450,type:"street"},
@@ -540,13 +560,13 @@ const ZONES=[
 {id:"surulere_bus",name:"Surulere Bus Stop",lga:"Surulere",area:"Mainland / Surulere",lat:6.499,lng:3.364,r:350,type:"busstop"},
 {id:"stadium",name:"National Stadium Area",lga:"Surulere",area:"Mainland / Surulere",lat:6.497,lng:3.373,r:600,type:"landmark"},
 {id:"mushin",name:"Mushin",lga:"Mushin",area:"Mainland / Surulere",lat:6.5218,lng:3.352,r:1100,type:"area"},
-// ─── OSHODI / ISOLO ───────────────────────────────────────
+// - OSHODI / ISOLO -
 {id:"oshodi",name:"Oshodi",lga:"Oshodi-Isolo",area:"Mainland / Oshodi",lat:6.5558,lng:3.3286,r:1100,type:"area"},
 {id:"oshodi_bus",name:"Oshodi Bus Stop / Terminal",lga:"Oshodi-Isolo",area:"Mainland / Oshodi",lat:6.555,lng:3.328,r:380,type:"busstop"},
 {id:"isolo",name:"Isolo",lga:"Oshodi-Isolo",area:"Mainland / Oshodi",lat:6.512,lng:3.32,r:1100,type:"area"},
 {id:"ejigbo",name:"Ejigbo",lga:"Oshodi-Isolo",area:"Mainland / Oshodi",lat:6.5054,lng:3.298,r:1000,type:"area"},
 {id:"powerline",name:"Powerline (Oshodi)",lga:"Oshodi-Isolo",area:"Mainland / Oshodi",lat:6.562,lng:3.327,r:600,type:"area"},
-// ─── ALIMOSHO ─────────────────────────────────────────────
+// - ALIMOSHO -
 {id:"ikotun",name:"Ikotun",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.511,lng:3.271,r:1200,type:"area"},
 {id:"idimu",name:"Idimu",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.529,lng:3.281,r:1100,type:"area"},
 {id:"isheri",name:"Isheri-Oshun",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.574,lng:3.28,r:1000,type:"area"},
@@ -555,27 +575,27 @@ const ZONES=[
 {id:"igando",name:"Igando",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.524,lng:3.265,r:1000,type:"area"},
 {id:"ikotun_egbe_bus",name:"Ikotun / Egbe Bus Stop",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.512,lng:3.272,r:380,type:"busstop"},
 {id:"alimosho",name:"Alimosho",lga:"Alimosho",area:"Mainland / Alimosho",lat:6.588,lng:3.27,r:1400,type:"area"},
-// ─── AMUWO-ODOFIN / FESTAC ────────────────────────────────
+// - AMUWO-ODOFIN / FESTAC -
 {id:"amuwo",name:"Amuwo Odofin",lga:"Amuwo-Odofin",area:"Mainland / South",lat:6.468,lng:3.306,r:1300,type:"area"},
 {id:"festac",name:"FESTAC Town",lga:"Amuwo-Odofin",area:"Mainland / South",lat:6.467,lng:3.293,r:1100,type:"estate"},
 {id:"satellite",name:"Satellite Town",lga:"Ojo",area:"Mainland / South",lat:6.45,lng:3.28,r:1000,type:"area"},
 {id:"ojo",name:"Ojo",lga:"Ojo",area:"Mainland / South",lat:6.464,lng:3.229,r:1300,type:"area"},
 {id:"ajangbadi",name:"Ajangbadi",lga:"Ojo",area:"Mainland / South",lat:6.44,lng:3.175,r:1200,type:"area"},
-// ─── IKORODU ──────────────────────────────────────────────
+// - IKORODU -
 {id:"ikorodu",name:"Ikorodu Town",lga:"Ikorodu",area:"Mainland / Ikorodu",lat:6.619,lng:3.5052,r:1800,type:"area"},
 {id:"ikorodu_bus",name:"Ikorodu Bus Terminus",lga:"Ikorodu",area:"Mainland / Ikorodu",lat:6.617,lng:3.504,r:380,type:"busstop"},
 {id:"benson",name:"Benson / Odogunyan (Ikorodu)",lga:"Ikorodu",area:"Mainland / Ikorodu",lat:6.605,lng:3.51,r:1200,type:"area"},
 {id:"majidun",name:"Majidun",lga:"Ikorodu",area:"Mainland / Ikorodu",lat:6.638,lng:3.528,r:1100,type:"area"},
 {id:"ijede",name:"Ijede",lga:"Ikorodu",area:"Mainland / Ikorodu",lat:6.66,lng:3.55,r:1200,type:"area"},
 {id:"imota",name:"Imota",lga:"Ikorodu",area:"Mainland / Ikorodu",lat:6.64,lng:3.57,r:1000,type:"area"},
-// ─── EPE / BADAGRY ────────────────────────────────────────
+// - EPE / BADAGRY -
 {id:"epe",name:"Epe",lga:"Epe",area:"Outskirts",lat:6.5872,lng:3.98,r:2000,type:"area"},
 {id:"badagry",name:"Badagry",lga:"Badagry",area:"Outskirts",lat:6.414,lng:2.882,r:2000,type:"area"},
 ];
 
-// ══════════════════════════════════════════════════════════
+// -
 // APP STATE
-// ══════════════════════════════════════════════════════════
+// -
 const S={};
 ZONES.forEach(z=>{S[z.id]={score:0,status:"unk",circle:null,lastReport:null}});
 const THR=2.0;
@@ -585,364 +605,364 @@ let watchlist=new Set(); // watched zone ids
 let currentSroId=null; // zone shown in overlay
 
 const REPORTERS=[
- {name:"Chidi_Lekki",loc:"Lekki Phase 1",score:96,tier:"g",reports:412,av:"C"},
- {name:"AbiodunVI",loc:"Victoria Island",score:88,tier:"g",reports:310,av:"A"},
- {name:"SurulereKing",loc:"Surulere",score:74,tier:"y",reports:198,av:"S"},
- {name:"IkejaGuy01",loc:"Ikeja Allen",score:71,tier:"y",reports:155,av:"I"},
- {name:"VGC_Reporter",loc:"VGC",score:61,tier:"y",reports:89,av:"V"},
- {name:"MarylandBoy",loc:"Maryland",score:38,tier:"r",reports:42,av:"M"},
+  {name:"Chidi_Lekki",loc:"Lekki Phase 1",score:96,tier:"g",reports:412,av:"C"},
+  {name:"AbiodunVI",loc:"Victoria Island",score:88,tier:"g",reports:310,av:"A"},
+  {name:"SurulereKing",loc:"Surulere",score:74,tier:"y",reports:198,av:"S"},
+  {name:"IkejaGuy01",loc:"Ikeja Allen",score:71,tier:"y",reports:155,av:"I"},
+  {name:"VGC_Reporter",loc:"VGC",score:61,tier:"y",reports:89,av:"V"},
+  {name:"MarylandBoy",loc:"Maryland",score:38,tier:"r",reports:42,av:"M"},
 ];
 const CM={on:{s:"#22c55e",f:"#22c55e"},off:{s:"#ef4444",f:"#ef4444"},unk:{s:"#475569",f:"#334155"}};
 
-// ══════════════════════════════════════════════════════════
-// GATE — SEARCHABLE LOCATION INPUT
-// ══════════════════════════════════════════════════════════
+// -
+// GATE -- SEARCHABLE LOCATION INPUT
+// -
 let gateChoice=null,gateZoneId=null;
 const gLocInput=document.getElementById('g-loc-input');
 const gLocSugg=document.getElementById('g-loc-sugg');
 
 gLocInput.addEventListener('input',()=>{
- const q=gLocInput.value.trim().toLowerCase();
- gateZoneId=null;
- document.getElementById('g-btn').classList.remove('ready');
- if(!q){gLocSugg.className='';gLocSugg.innerHTML='';return;}
- const hits=ZONES.filter(z=>z.name.toLowerCase().includes(q)||z.lga.toLowerCase().includes(q)).slice(0,8);
- if(!hits.length){gLocSugg.innerHTML='<div class="g-sugg-item" style="color:#5a6380;cursor:default"><strong>No results</strong><span>Try a different name</span></div>';gLocSugg.className='open';return;}
- gLocSugg.innerHTML='';
- hits.forEach(z=>{
- const item=document.createElement('div');item.className='g-sugg-item';
- item.innerHTML=`<strong>${z.name}</strong><span>${z.lga} · ${z.area}</span>`;
- item.addEventListener('click',()=>{gLocInput.value=z.name;gateZoneId=z.id;gLocSugg.className='';gLocSugg.innerHTML='';if(gateChoice&&gateChoice!=='unk')document.getElementById('g-btn').classList.add('ready')});
- gLocSugg.appendChild(item);
- });
- gLocSugg.className='open';
+  const q=gLocInput.value.trim().toLowerCase();
+  gateZoneId=null;
+  document.getElementById('g-btn').classList.remove('ready');
+  if(!q){gLocSugg.className='';gLocSugg.innerHTML='';return;}
+  const hits=ZONES.filter(z=>z.name.toLowerCase().includes(q)||z.lga.toLowerCase().includes(q)).slice(0,8);
+  if(!hits.length){gLocSugg.innerHTML='<div class="g-sugg-item" style="color:#5a6380;cursor:default"><strong>No results</strong><span>Try a different name</span></div>';gLocSugg.className='open';return;}
+  gLocSugg.innerHTML='';
+  hits.forEach(z=>{
+    const item=document.createElement('div');item.className='g-sugg-item';
+    item.innerHTML=`<strong>${z.name}</strong><span>${z.lga} · ${z.area}</span>`;
+    item.addEventListener('click',()=>{gLocInput.value=z.name;gateZoneId=z.id;gLocSugg.className='';gLocSugg.innerHTML='';if(gateChoice&&gateChoice!=='unk')document.getElementById('g-btn').classList.add('ready')});
+    gLocSugg.appendChild(item);
+  });
+  gLocSugg.className='open';
 });
 document.addEventListener('click',e=>{if(!e.target.closest('#g-loc'))gLocSugg.className=''});
 
 function selGate(c){
- gateChoice=c;
- ['on','off','unk'].forEach(x=>{
- document.getElementById('gc-'+x).className='g-card'+(x===c?' s'+x:'');
- document.getElementById('gck-'+x).textContent=x===c?'✓':'';
- });
- const locDiv=document.getElementById('g-loc');
- locDiv.style.display=c!=='unk'?'block':'none';
- if(c==='unk'){gateZoneId='__skip';document.getElementById('g-btn').classList.add('ready');}
- else if(gateZoneId&&gateZoneId!=='__skip') document.getElementById('g-btn').classList.add('ready');
+  gateChoice=c;
+  ['on','off','unk'].forEach(x=>{
+    document.getElementById('gc-'+x).className='g-card'+(x===c?' s'+x:'');
+    document.getElementById('gck-'+x).textContent=x===c?'✓':'';
+  });
+  const locDiv=document.getElementById('g-loc');
+  locDiv.style.display=c!=='unk'?'block':'none';
+  if(c==='unk'){gateZoneId='__skip';const gb=document.getElementById('g-btn');gb.classList.add('ready');gb.removeAttribute('disabled');}
+  else if(gateZoneId&&gateZoneId!=='__skip') const gb=document.getElementById('g-btn');gb.classList.add('ready');gb.removeAttribute('disabled');
 }
 
 function enterApp(){
- if(!gateChoice)return;
- if(gateChoice!=='unk'&&gateZoneId&&gateZoneId!=='__skip'){
- myZoneId=gateZoneId;
- processVote(gateZoneId,gateChoice==='on'?'light_on':'light_off',0.9,true);
- // lock the report panel
- const z=ZONES.find(x=>x.id===gateZoneId);
- document.getElementById('rp-zone-name').textContent=z.name;
- document.getElementById('rbtn-on').disabled=false;
- document.getElementById('rbtn-off').disabled=false;
- document.getElementById('mzb-name').textContent=z.name;
- document.getElementById('my-zone-bar').style.display='flex';
- }
- document.getElementById('gate').style.display='none';
- document.getElementById('app').classList.add('vis');
- setTimeout(()=>map.invalidateSize(),300);
+  if(!gateChoice)return;
+  if(gateChoice!=='unk'&&gateZoneId&&gateZoneId!=='__skip'){
+    myZoneId=gateZoneId;
+    processVote(gateZoneId,gateChoice==='on'?'light_on':'light_off',0.9,true);
+    // lock the report panel
+    const z=ZONES.find(x=>x.id===gateZoneId);
+    document.getElementById('rp-zone-name').textContent=z.name;
+    document.getElementById('rbtn-on').disabled=false;
+    document.getElementById('rbtn-off').disabled=false;
+    document.getElementById('mzb-name').textContent=z.name;
+    document.getElementById('my-zone-bar').style.display='flex';
+  }
+  document.getElementById('gate').style.display='none';
+  document.getElementById('app').classList.add('vis');
+  setTimeout(()=>map.invalidateSize(),300);
 }
 
-// ══════════════════════════════════════════════════════════
+// -
 // MAP
-// ══════════════════════════════════════════════════════════
+// -
 const map=L.map('map').setView([6.52,3.40],12);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'&copy; OpenStreetMap &copy; CARTO',maxZoom:19}).addTo(map);
 ZONES.forEach(z=>{
- const c=CM.unk;
- const circle=L.circle([z.lat,z.lng],{color:c.s,fillColor:c.f,fillOpacity:0.22,radius:z.r,weight:1.5}).addTo(map);
- circle.bindPopup('');
- circle.on('click',()=>openPopup(z.id));
- S[z.id].circle=circle;
+  const c=CM.unk;
+  const circle=L.circle([z.lat,z.lng],{color:c.s,fillColor:c.f,fillOpacity:0.22,radius:z.r,weight:1.5}).addTo(map);
+  circle.bindPopup('');
+  circle.on('click',()=>openPopup(z.id));
+  S[z.id].circle=circle;
 });
 function openPopup(id){
- const z=ZONES.find(x=>x.id===id),s=S[id];
- const lbl=s.status==='on'?' Light is ON':s.status==='off'?' Blackout':' Unknown';
- const ago=s.lastReport?timeAgo(s.lastReport):'No reports yet';
- s.circle.setPopupContent(`<div style="font-family:-apple-system,sans-serif;font-size:13px;min-width:175px"><b style="font-size:14px">${z.name}</b><span style="display:block;font-size:10px;color:#888;margin:2px 0 5px">${z.lga} · ${z.type}</span><span style="display:block;margin-bottom:3px">${lbl}</span><span style="color:#888;font-size:11px">Score: ${s.score.toFixed(1)} · ${ago}</span></div>`).openPopup();
- showSro(id);
+  const z=ZONES.find(x=>x.id===id),s=S[id];
+  const lbl=s.status==='on'?'💡 Light is ON':s.status==='off'?'🛑 Blackout':'❓ Unknown';
+  const ago=s.lastReport?timeAgo(s.lastReport):'No reports yet';
+  s.circle.setPopupContent(`<div style="font-family:-apple-system,sans-serif;font-size:13px;min-width:175px"><b style="font-size:14px">${z.name}</b><span style="display:block;font-size:10px;color:#888;margin:2px 0 5px">${z.lga} · ${z.type}</span><span style="display:block;margin-bottom:3px">${lbl}</span><span style="color:#888;font-size:11px">Score: ${s.score.toFixed(1)} · ${ago}</span></div>`).openPopup();
+  showSro(id);
 }
 
-// ══════════════════════════════════════════════════════════
+// -
 // SIDEBAR BUILD
-// ══════════════════════════════════════════════════════════
+// -
 function buildSidebar(q='',sf=null){
- const wrap=document.getElementById('zl');
- wrap.innerHTML='';
- const areas=[...new Set(ZONES.map(z=>z.area))];
- let total=0;
- areas.forEach(area=>{
- let list=ZONES.filter(z=>z.area===area&&(
- z.name.toLowerCase().includes(q.toLowerCase())||
- z.lga.toLowerCase().includes(q.toLowerCase())||
- z.type.toLowerCase().includes(q.toLowerCase())
- ));
- if(sf)list=list.filter(z=>S[z.id].status===sf);
- if(!list.length)return;
- const lbl=document.createElement('div');lbl.className='zsec';lbl.textContent=area;wrap.appendChild(lbl);
- list.forEach(z=>{
- const s=S[z.id],dot=s.status==='on'?'on':s.status==='off'?'off':'unk';
- const badge=s.status==='on'?'<span class="zb on">Light On</span>':s.status==='off'?'<span class="zb off">Blackout</span>':'<span class="zb unk">?</span>';
- const ago=s.lastReport?timeAgo(s.lastReport):'—';
- const card=document.createElement('div');card.className='zc';card.id='zc-'+z.id;
- const typeIcon=z.type==='estate'?' ':z.type==='busstop'?' ':z.type==='street'?' ':z.type==='landmark'?' ':' ';
- card.innerHTML=`<div class="zd ${dot}"></div><div class="zi"><div class="zn">${typeIcon} ${z.name}</div><div class="zm">${z.lga} · ${ago}</div></div>${badge}`;
- card.addEventListener('click',()=>{map.setView([z.lat,z.lng],15);openPopup(z.id)});
- wrap.appendChild(card);total++;
- });
- });
- if(!total)wrap.innerHTML=`<div class="empty"><div class="ei"> </div>No results for "<b>${q}</b>"<br><small>Try area, estate, bus stop name</small></div>`;
- // Also repopulate the report zone select (just for internal use, UI is locked)
+  const wrap=document.getElementById('zl');
+  wrap.innerHTML='';
+  const areas=[...new Set(ZONES.map(z=>z.area))];
+  let total=0;
+  areas.forEach(area=>{
+    let list=ZONES.filter(z=>z.area===area&&(
+      z.name.toLowerCase().includes(q.toLowerCase())||
+      z.lga.toLowerCase().includes(q.toLowerCase())||
+      z.type.toLowerCase().includes(q.toLowerCase())
+    ));
+    if(sf)list=list.filter(z=>S[z.id].status===sf);
+    if(!list.length)return;
+    const lbl=document.createElement('div');lbl.className='zsec';lbl.textContent=area;wrap.appendChild(lbl);
+    list.forEach(z=>{
+      const s=S[z.id],dot=s.status==='on'?'on':s.status==='off'?'off':'unk';
+      const badge=s.status==='on'?'<span class="zb on">Light On</span>':s.status==='off'?'<span class="zb off">Blackout</span>':'<span class="zb unk">?</span>';
+      const ago=s.lastReport?timeAgo(s.lastReport):'--';
+      const card=document.createElement('div');card.className='zc';card.id='zc-'+z.id;
+      const typeIcon=z.type==='estate'?'🏘':z.type==='busstop'?'🚏':z.type==='street'?'🛣':z.type==='landmark'?'📍':'📌';
+      card.innerHTML=`<div class="zd ${dot}"></div><div class="zi"><div class="zn">${typeIcon} ${z.name}</div><div class="zm">${z.lga} · ${ago}</div></div>${badge}`;
+      card.addEventListener('click',()=>{map.setView([z.lat,z.lng],15);openPopup(z.id)});
+      wrap.appendChild(card);total++;
+    });
+  });
+  if(!total)wrap.innerHTML=`<div class="empty"><div class="ei">🔍</div>No results for "<b>${q}</b>"<br><small>Try area, estate, bus stop name</small></div>`;
+  // Also repopulate the report zone select (just for internal use, UI is locked)
 }
 function refreshCard(id){
- const card=document.getElementById('zc-'+id);if(!card)return;
- const z=ZONES.find(x=>x.id===id),s=S[id];
- const dot=s.status==='on'?'on':s.status==='off'?'off':'unk';
- const badge=s.status==='on'?'<span class="zb on">Light On</span>':s.status==='off'?'<span class="zb off">Blackout</span>':'<span class="zb unk">?</span>';
- const ago=s.lastReport?timeAgo(s.lastReport):'—';
- const typeIcon=z.type==='estate'?' ':z.type==='busstop'?' ':z.type==='street'?' ':z.type==='landmark'?' ':' ';
- card.innerHTML=`<div class="zd ${dot}"></div><div class="zi"><div class="zn">${typeIcon} ${z.name}</div><div class="zm">${z.lga} · ${ago}</div></div>${badge}`;
- card.addEventListener('click',()=>{map.setView([z.lat,z.lng],15);openPopup(z.id)});
+  const card=document.getElementById('zc-'+id);if(!card)return;
+  const z=ZONES.find(x=>x.id===id),s=S[id];
+  const dot=s.status==='on'?'on':s.status==='off'?'off':'unk';
+  const badge=s.status==='on'?'<span class="zb on">Light On</span>':s.status==='off'?'<span class="zb off">Blackout</span>':'<span class="zb unk">?</span>';
+  const ago=s.lastReport?timeAgo(s.lastReport):'--';
+  const typeIcon=z.type==='estate'?'🏘':z.type==='busstop'?'🚏':z.type==='street'?'🛣':z.type==='landmark'?'📍':'📌';
+  card.innerHTML=`<div class="zd ${dot}"></div><div class="zi"><div class="zn">${typeIcon} ${z.name}</div><div class="zm">${z.lga} · ${ago}</div></div>${badge}`;
+  card.addEventListener('click',()=>{map.setView([z.lat,z.lng],15);openPopup(z.id)});
 }
 
-// ══════════════════════════════════════════════════════════
+// -
 // FILTER PILLS
-// ══════════════════════════════════════════════════════════
+// -
 function filt(st){
- if(activeFilter===st){activeFilter=null;['on','off','unk'].forEach(s=>document.getElementById('sp-'+s).className='sp');buildSidebar('');}
- else{activeFilter=st;['on','off','unk'].forEach(s=>document.getElementById('sp-'+s).className='sp'+(s===st?' f'+s:''));buildSidebar('',st);}
- document.getElementById('srch').value='';
+  if(activeFilter===st){activeFilter=null;['on','off','unk'].forEach(s=>document.getElementById('sp-'+s).className='sp');buildSidebar('');}
+  else{activeFilter=st;['on','off','unk'].forEach(s=>document.getElementById('sp-'+s).className='sp'+(s===st?' f'+s:''));buildSidebar('',st);}
+  document.getElementById('srch').value='';
 }
 
-// ══════════════════════════════════════════════════════════
+// -
 // STATS
-// ══════════════════════════════════════════════════════════
+// -
 function updateStats(){
- const v=Object.values(S);
- document.getElementById('st-on').textContent=v.filter(s=>s.status==='on').length;
- document.getElementById('st-off').textContent=v.filter(s=>s.status==='off').length;
- document.getElementById('st-unk').textContent=v.filter(s=>s.status==='unk').length;
+  const v=Object.values(S);
+  document.getElementById('st-on').textContent=v.filter(s=>s.status==='on').length;
+  document.getElementById('st-off').textContent=v.filter(s=>s.status==='off').length;
+  document.getElementById('st-unk').textContent=v.filter(s=>s.status==='unk').length;
 }
 
-// ══════════════════════════════════════════════════════════
+// -
 // SEARCH + SUGGESTIONS
-// ══════════════════════════════════════════════════════════
+// -
 const srch=document.getElementById('srch'),sg=document.getElementById('sg');
 srch.addEventListener('input',e=>{
- const q=e.target.value.trim();
- activeFilter=null;['on','off','unk'].forEach(s=>document.getElementById('sp-'+s).className='sp');
- if(!q){sg.className='';sg.innerHTML='';buildSidebar('');closeSro();return;}
- const hits=ZONES.filter(z=>z.name.toLowerCase().includes(q.toLowerCase())||z.lga.toLowerCase().includes(q.toLowerCase())||z.type.toLowerCase().includes(q.toLowerCase())).slice(0,10);
- sg.innerHTML='';
- if(hits.length){
- hits.forEach(z=>{
- const s=S[z.id],dot=s.status==='on'?'on':s.status==='off'?'off':'unk';
- const stxt=s.status==='on'?'Light On':s.status==='off'?'Blackout':'Unknown';
- const item=document.createElement('div');item.className='si';
- item.innerHTML=`<div class="si-dot ${dot}"></div><span class="si-name">${z.name}</span><span class="si-lga">${z.lga} · ${stxt}</span>`;
- item.addEventListener('click',()=>{srch.value=z.name;sg.className='';sg.innerHTML='';map.setView([z.lat,z.lng],15);openPopup(z.id);buildSidebar(z.name)});
- sg.appendChild(item);
- });
- }else{sg.innerHTML=`<div class="si" style="color:var(--mu2);cursor:default"><span class="si-name">No results for "${q}"</span></div>`;}
- sg.className='open';
- buildSidebar(q);
+  const q=e.target.value.trim();
+  activeFilter=null;['on','off','unk'].forEach(s=>document.getElementById('sp-'+s).className='sp');
+  if(!q){sg.className='';sg.innerHTML='';buildSidebar('');closeSro();return;}
+  const hits=ZONES.filter(z=>z.name.toLowerCase().includes(q.toLowerCase())||z.lga.toLowerCase().includes(q.toLowerCase())||z.type.toLowerCase().includes(q.toLowerCase())).slice(0,10);
+  sg.innerHTML='';
+  if(hits.length){
+    hits.forEach(z=>{
+      const s=S[z.id],dot=s.status==='on'?'on':s.status==='off'?'off':'unk';
+      const stxt=s.status==='on'?'Light On':s.status==='off'?'Blackout':'Unknown';
+      const item=document.createElement('div');item.className='si';
+      item.innerHTML=`<div class="si-dot ${dot}"></div><span class="si-name">${z.name}</span><span class="si-lga">${z.lga} · ${stxt}</span>`;
+      item.addEventListener('click',()=>{srch.value=z.name;sg.className='';sg.innerHTML='';map.setView([z.lat,z.lng],15);openPopup(z.id);buildSidebar(z.name)});
+      sg.appendChild(item);
+    });
+  }else{sg.innerHTML=`<div class="si" style="color:var(--mu2);cursor:default"><span class="si-name">No results for "${q}"</span></div>`;}
+  sg.className='open';
+  buildSidebar(q);
 });
 document.addEventListener('click',e=>{if(!e.target.closest('.sw'))sg.className=''});
 
-// ══════════════════════════════════════════════════════════
+// -
 // SEARCH RESULT OVERLAY
-// ══════════════════════════════════════════════════════════
+// -
 function showSro(id){
- currentSroId=id;
- const z=ZONES.find(x=>x.id===id),s=S[id],el=document.getElementById('sro');
- document.getElementById('sro-nm').textContent=z.name;
- if(s.status==='on'){
- document.getElementById('sro-icon').innerHTML='<svg width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="30" r="29" fill="rgba(34,197,94,.12)" stroke="#22c55e" stroke-width="1.5"/><text x="30" y="42" text-anchor="middle" font-size="28"> </text></svg>';
- document.getElementById('sro-st').innerHTML='<span style="color:#22c55e;font-size:19px;font-weight:900">UpNEPA! </span>';
- document.getElementById('sro-mt').textContent='Light is currently ON in '+z.name;
- el.style.borderColor='#22c55e';
- } else if(s.status==='off'){
- document.getElementById('sro-icon').innerHTML='<svg width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="30" r="29" fill="rgba(239,68,68,.12)" stroke="#ef4444" stroke-width="1.5"/><text x="30" y="28" text-anchor="middle" font-size="18"> </text><text x="30" y="48" text-anchor="middle" font-size="20"> </text></svg>';
- document.getElementById('sro-st').innerHTML='<span style="color:#ef4444;font-size:18px;font-weight:900">No Light </span>';
- document.getElementById('sro-mt').textContent='Blackout in '+z.name+'. Generator on!';
- el.style.borderColor='#ef4444';
- } else {
- document.getElementById('sro-icon').innerHTML='<svg width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="30" r="29" fill="rgba(100,116,139,.12)" stroke="#64748b" stroke-width="1.5"/><text x="30" y="42" text-anchor="middle" font-size="28"> </text></svg>';
- document.getElementById('sro-st').innerHTML='<span style="color:#64748b;font-size:17px;font-weight:700">Status Unknown</span>';
- document.getElementById('sro-mt').textContent='No recent reports for '+z.name;
- el.style.borderColor='#334155';
- }
- const wb=document.getElementById('sro-watch');
- if(watchlist.has(id)){wb.className='watch-btn watching';wb.textContent=' Watching — tap to remove';}
- else{wb.className='watch-btn';wb.textContent=' Notify me when light returns';}
- el.className='vis';
+  currentSroId=id;
+  const z=ZONES.find(x=>x.id===id),s=S[id],el=document.getElementById('sro');
+  document.getElementById('sro-nm').textContent=z.name;
+  if(s.status==='on'){
+    document.getElementById('sro-icon').innerHTML='<svg width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="30" r="29" fill="rgba(34,197,94,.12)" stroke="#22c55e" stroke-width="1.5"/><text x="30" y="42" text-anchor="middle" font-size="28">💡</text></svg>';
+    document.getElementById('sro-st').innerHTML='<span style="color:#22c55e;font-size:19px;font-weight:900">UpNEPA! 🎉</span>';
+    document.getElementById('sro-mt').textContent='Light is currently ON in '+z.name;
+    el.style.borderColor='#22c55e';
+  } else if(s.status==='off'){
+    document.getElementById('sro-icon').innerHTML='<svg width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="30" r="29" fill="rgba(239,68,68,.12)" stroke="#ef4444" stroke-width="1.5"/><text x="30" y="28" text-anchor="middle" font-size="18">🔌</text><text x="30" y="48" text-anchor="middle" font-size="20">🦟</text></svg>';
+    document.getElementById('sro-st').innerHTML='<span style="color:#ef4444;font-size:18px;font-weight:900">No Light 😩</span>';
+    document.getElementById('sro-mt').textContent='Blackout in '+z.name+'. Generator on!';
+    el.style.borderColor='#ef4444';
+  } else {
+    document.getElementById('sro-icon').innerHTML='<svg width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="30" r="29" fill="rgba(100,116,139,.12)" stroke="#64748b" stroke-width="1.5"/><text x="30" y="42" text-anchor="middle" font-size="28">❓</text></svg>';
+    document.getElementById('sro-st').innerHTML='<span style="color:#64748b;font-size:17px;font-weight:700">Status Unknown</span>';
+    document.getElementById('sro-mt').textContent='No recent reports for '+z.name;
+    el.style.borderColor='#334155';
+  }
+  const wb=document.getElementById('sro-watch');
+  if(watchlist.has(id)){wb.className='watch-btn watching';wb.textContent='🔔 Watching -- tap to remove';}
+  else{wb.className='watch-btn';wb.textContent='🔔 Notify me when light returns';}
+  el.className='vis';
 }
 function closeSro(){document.getElementById('sro').className='';currentSroId=null;}
 
-// ══════════════════════════════════════════════════════════
+// -
 // CONSENSUS ENGINE
-// ══════════════════════════════════════════════════════════
+// -
 function processVote(zId,vote,weight,silent=false){
- const s=S[zId],z=ZONES.find(x=>x.id===zId),dir=vote==='light_on'?1:-1;
- s.score+=dir*weight;s.lastReport=new Date();
- const prev=s.status;
- s.status=s.score>=THR?'on':s.score<=-THR?'off':'unk';
- const c=CM[s.status];
- s.circle.setStyle({color:c.s,fillColor:c.f,fillOpacity:0.3});
- refreshCard(zId);updateStats();
- if(!silent){
- if(s.status!==prev&&s.status!=='unk'){
- showToast(s.status==='on'?` Light confirmed in ${z.name}!`:` Blackout in ${z.name}`,s.status==='on'?'ton':'toff');
- // Check watchlist
- if(s.status==='on'&&watchlist.has(zId)) triggerNotif(z.name);
- }
- addFeed(z.name,vote,weight);
- if(currentSroId===zId) showSro(zId);
- }
- setTimeout(()=>{
- s.score-=dir*weight*.5;
- const pr=s.status;
- s.status=s.score>=THR?'on':s.score<=-THR?'off':'unk';
- if(s.status!==pr){const c2=CM[s.status];s.circle.setStyle({color:c2.s,fillColor:c2.f,fillOpacity:0.22});refreshCard(zId);updateStats();}
- },30000);
+  const s=S[zId],z=ZONES.find(x=>x.id===zId),dir=vote==='light_on'?1:-1;
+  s.score+=dir*weight;s.lastReport=new Date();
+  const prev=s.status;
+  s.status=s.score>=THR?'on':s.score<=-THR?'off':'unk';
+  const c=CM[s.status];
+  s.circle.setStyle({color:c.s,fillColor:c.f,fillOpacity:0.3});
+  refreshCard(zId);updateStats();
+  if(!silent){
+    if(s.status!==prev&&s.status!=='unk'){
+      showToast(s.status==='on'?`💡 Light confirmed in ${z.name}!`:`🛑 Blackout in ${z.name}`,s.status==='on'?'ton':'toff');
+      // Check watchlist
+      if(s.status==='on'&&watchlist.has(zId)) triggerNotif(z.name);
+    }
+    addFeed(z.name,vote,weight);
+    if(currentSroId===zId) showSro(zId);
+  }
+  setTimeout(()=>{
+    s.score-=dir*weight*.5;
+    const pr=s.status;
+    s.status=s.score>=THR?'on':s.score<=-THR?'off':'unk';
+    if(s.status!==pr){const c2=CM[s.status];s.circle.setStyle({color:c2.s,fillColor:c2.f,fillOpacity:0.22});refreshCard(zId);updateStats();}
+  },30000);
 }
 
-// ══════════════════════════════════════════════════════════
-// REPORT — LOCKED TO USER'S ZONE
-// ══════════════════════════════════════════════════════════
+// -
+// REPORT -- LOCKED TO USER'S ZONE
+// -
 function submitR(vote){
- if(!myZoneId){showToast('Set your zone at the gate first','twa');return;}
- processVote(myZoneId,vote,1.0);
- karma+=10;document.getElementById('karma').textContent=Math.round(karma)+' XP';
+  if(!myZoneId){showToast('Set your zone at the gate first','twa');return;}
+  processVote(myZoneId,vote,1.0);
+  karma+=10;document.getElementById('karma').textContent=Math.round(karma)+' XP';
 }
 
 function togT(type){
- tele[type]=!tele[type];
- const btn=document.getElementById('btn-'+type),v=document.getElementById(type==='wifi'?'wv':'cv');
- v.textContent=tele[type]?'ON':'OFF';
- btn.className='tb '+(tele[type]?'tok':'tbad');
- if(!tele.wifi&&!tele.charge&&myZoneId) processVote(myZoneId,'light_off',0.35);
+  tele[type]=!tele[type];
+  const btn=document.getElementById('btn-'+type),v=document.getElementById(type==='wifi'?'wv':'cv');
+  v.textContent=tele[type]?'ON':'OFF';
+  btn.className='tb '+(tele[type]?'tok':'tbad');
+  if(!tele.wifi&&!tele.charge&&myZoneId) processVote(myZoneId,'light_off',0.35);
 }
 
-// ══════════════════════════════════════════════════════════
+// -
 // WATCHLIST
-// ══════════════════════════════════════════════════════════
+// -
 function toggleWatch(){
- if(!currentSroId)return;
- if(watchlist.has(currentSroId)){
- watchlist.delete(currentSroId);
- showToast('Removed from watchlist','twa');
- } else {
- watchlist.add(currentSroId);
- showToast('Added to watchlist — we'll alert you when light returns ','ton');
- }
- updateWatchlistUI();
- showSro(currentSroId);
+  if(!currentSroId)return;
+  if(watchlist.has(currentSroId)){
+    watchlist.delete(currentSroId);
+    showToast('Removed from watchlist','twa');
+  } else {
+    watchlist.add(currentSroId);
+    showToast('Added to watchlist -- we\'ll alert you when light returns 🔔','ton');
+  }
+  updateWatchlistUI();
+  showSro(currentSroId);
 }
 function updateWatchlistUI(){
- document.getElementById('wl-cnt').textContent=watchlist.size;
- const body=document.getElementById('wl-body');
- if(!watchlist.size){body.innerHTML='<div class="wl-empty">No areas watched yet.<br>Search an area and tap </div>';return;}
- body.innerHTML='';
- watchlist.forEach(id=>{
- const z=ZONES.find(x=>x.id===id),s=S[id];
- const dot=s.status==='on'?' ':s.status==='off'?' ':' ';
- const item=document.createElement('div');item.className='wl-item';
- item.innerHTML=`<span>${dot}</span><span class="wl-nm">${z.name}</span><button class="wl-rm" onclick="removeWatch('${id}')">×</button>`;
- body.appendChild(item);
- });
+  document.getElementById('wl-cnt').textContent=watchlist.size;
+  const body=document.getElementById('wl-body');
+  if(!watchlist.size){body.innerHTML='<div class="wl-empty">No areas watched yet.<br>Search an area and tap 🔔</div>';return;}
+  body.innerHTML='';
+  watchlist.forEach(id=>{
+    const z=ZONES.find(x=>x.id===id),s=S[id];
+    const dot=s.status==='on'?'🟢':s.status==='off'?'🔴':'⚪';
+    const item=document.createElement('div');item.className='wl-item';
+    item.innerHTML=`<span>${dot}</span><span class="wl-nm">${z.name}</span><button class="wl-rm" onclick="removeWatch('${id}')">_</button>`;
+    body.appendChild(item);
+  });
 }
 function removeWatch(id){watchlist.delete(id);updateWatchlistUI();if(currentSroId===id)showSro(id);}
 function togWatch(){const wp=document.getElementById('wp');wp.className=wp.classList.contains('open')?'':'open';document.getElementById('pp').className='';}
 
-// ══════════════════════════════════════════════════════════
+// -
 // NOTIFICATION POPUP (simulated push)
-// ══════════════════════════════════════════════════════════
+// -
 function triggerNotif(zoneName){
- document.getElementById('notif-nm').textContent=zoneName;
- document.getElementById('notif-st').textContent='Light just came on — reported by multiple users.';
- document.getElementById('notif').className='show';
- clearTimeout(notifTmr);notifTmr=setTimeout(closeNotif,6000);
+  document.getElementById('notif-nm').textContent=zoneName;
+  document.getElementById('notif-st').textContent='Light just came on -- reported by multiple users.';
+  document.getElementById('notif').className='show';
+  clearTimeout(notifTmr);notifTmr=setTimeout(closeNotif,6000);
 }
 function closeNotif(){document.getElementById('notif').className=''}
 
-// ══════════════════════════════════════════════════════════
+// -
 // PROFILES
-// ══════════════════════════════════════════════════════════
+// -
 (function(){
- const list=document.getElementById('pp-list');
- REPORTERS.forEach(r=>{
- const tc={g:'pg',y:'py',r:'pr'}[r.tier],bc={g:'sbg',y:'sby',r:'sbr'}[r.tier],tl={g:' ',y:' ',r:' '}[r.tier];
- const item=document.createElement('div');item.className='pi';
- item.innerHTML=`<div class="pav ${tc}">${r.av}</div><div class="pinf"><div class="pnm">${r.name}</div><div class="plc"> ${r.loc} · ${r.reports} reports</div></div><span class="psb ${bc}">${tl} ${r.score}%</span>`;
- list.appendChild(item);
- });
+  const list=document.getElementById('pp-list');
+  REPORTERS.forEach(r=>{
+    const tc={g:'pg',y:'py',r:'pr'}[r.tier],bc={g:'sbg',y:'sby',r:'sbr'}[r.tier],tl={g:'🟢',y:'🟡',r:'🔴'}[r.tier];
+    const item=document.createElement('div');item.className='pi';
+    item.innerHTML=`<div class="pav ${tc}">${r.av}</div><div class="pinf"><div class="pnm">${r.name}</div><div class="plc">📍 ${r.loc} · ${r.reports} reports</div></div><span class="psb ${bc}">${tl} ${r.score}%</span>`;
+    list.appendChild(item);
+  });
 })();
 function togProf(){const p=document.getElementById('pp');p.className=p.classList.contains('open')?'':'open';document.getElementById('wp').className='';}
 document.addEventListener('click',e=>{
- if(!e.target.closest('#pp')&&!e.target.closest('#pb'))document.getElementById('pp').className='';
- if(!e.target.closest('#wp')&&!e.target.closest('#wbtn'))document.getElementById('wp').className='';
+  if(!e.target.closest('#pp')&&!e.target.closest('#pb'))document.getElementById('pp').className='';
+  if(!e.target.closest('#wp')&&!e.target.closest('#wbtn'))document.getElementById('wp').className='';
 });
 
-// ══════════════════════════════════════════════════════════
+// -
 // FEED
-// ══════════════════════════════════════════════════════════
+// -
 function addFeed(zone,vote,w){
- const body=document.getElementById('fd-body'),isOn=vote==='light_on',now=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
- const ph=body.querySelector('.fi');if(ph&&ph.textContent.includes('Waiting'))ph.remove();
- const item=document.createElement('div');item.className='fi';
- item.innerHTML=`${isOn?' ':' '} <span class="${isOn?'fon':'foff'}">${isOn?'Light On':'Blackout'}</span> · ${zone} <span style="color:var(--mu);float:right">${now}</span>`;
- body.insertBefore(item,body.firstChild);
- while(body.children.length>20)body.removeChild(body.lastChild);
+  const body=document.getElementById('fd-body'),isOn=vote==='light_on',now=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  const ph=body.querySelector('.fi');if(ph&&ph.textContent.includes('Waiting'))ph.remove();
+  const item=document.createElement('div');item.className='fi';
+  item.innerHTML=`${isOn?'💡':'🛑'} <span class="${isOn?'fon':'foff'}">${isOn?'Light On':'Blackout'}</span> · ${zone} <span style="color:var(--mu);float:right">${now}</span>`;
+  body.insertBefore(item,body.firstChild);
+  while(body.children.length>20)body.removeChild(body.lastChild);
 }
 
-// ══════════════════════════════════════════════════════════
+// -
 // TOAST
-// ══════════════════════════════════════════════════════════
+// -
 function showToast(msg,cls=''){
- const t=document.getElementById('toast');t.textContent=msg;t.className='show '+cls;
- clearTimeout(toastTmr);toastTmr=setTimeout(()=>t.className='',4500);
+  const t=document.getElementById('toast');t.textContent=msg;t.className='show '+cls;
+  clearTimeout(toastTmr);toastTmr=setTimeout(()=>t.className='',4500);
 }
 function timeAgo(d){const s=Math.floor((Date.now()-d)/1000);return s<60?s+'s ago':s<3600?Math.floor(s/60)+'m ago':Math.floor(s/3600)+'h ago'}
 setInterval(()=>ZONES.forEach(z=>{if(S[z.id].lastReport)refreshCard(z.id)}),30000);
 
-// ══════════════════════════════════════════════════════════
+// -
 // SEED DEMO DATA
-// ══════════════════════════════════════════════════════════
+// -
 const seeds=[
- {id:'lekki1',v:'light_on',w:1},{id:'lekki1',v:'light_on',w:1},
- {id:'vi',v:'light_on',w:1},{id:'vi',v:'light_on',w:1},
- {id:'ikoyi',v:'light_on',w:1},{id:'ikoyi',v:'light_on',w:1},
- {id:'banana',v:'light_on',w:1},{id:'banana',v:'light_on',w:1},
- {id:'vgc',v:'light_on',w:1},{id:'vgc',v:'light_on',w:1},
- {id:'osapa',v:'light_on',w:1},{id:'osapa',v:'light_on',w:1},
- {id:'chevron',v:'light_on',w:1},{id:'chevron',v:'light_on',w:1},
- {id:'ikeja',v:'light_on',w:1},{id:'ikeja',v:'light_on',w:1},
- {id:'ikejaGRA',v:'light_on',w:1},{id:'ikejaGRA',v:'light_on',w:1},
- {id:'parkview',v:'light_on',w:1},{id:'parkview',v:'light_on',w:1},
- {id:'festac',v:'light_on',w:1},{id:'festac',v:'light_on',w:.4},
- {id:'nicon',v:'light_on',w:1},{id:'nicon',v:'light_on',w:1},
- {id:'chevyview',v:'light_on',w:1},{id:'chevyview',v:'light_on',w:1},
- {id:'vi_1004',v:'light_on',w:1},{id:'vi_1004',v:'light_on',w:1},
- {id:'omole1',v:'light_on',w:1},{id:'omole1',v:'light_on',w:1},
- {id:'magodo1',v:'light_on',w:1},{id:'magodo1',v:'light_on',w:1},
- {id:'maryland',v:'light_on',w:1},{id:'maryland',v:'light_on',w:1},
- {id:'gbagada',v:'light_on',w:.4},{id:'gbagada',v:'light_on',w:.4},
- {id:'surulere',v:'light_off',w:1},{id:'surulere',v:'light_off',w:1},
- {id:'yaba',v:'light_off',w:1},{id:'yaba',v:'light_off',w:1},
- {id:'agege',v:'light_off',w:1},{id:'agege',v:'light_off',w:1},
- {id:'mushin',v:'light_off',w:1},{id:'mushin',v:'light_off',w:1},
- {id:'oshodi',v:'light_off',w:1},{id:'oshodi',v:'light_off',w:1},
- {id:'isolo',v:'light_off',w:1},{id:'isolo',v:'light_off',w:1},
- {id:'mile12',v:'light_off',w:1},{id:'mile12',v:'light_off',w:.4},
- {id:'ajah',v:'light_on',w:.4},{id:'awoyaya',v:'light_on',w:.4},
- {id:'amuwo',v:'light_on',w:.4},{id:'ikotun',v:'light_off',w:.4},
+  {id:'lekki1',v:'light_on',w:1},{id:'lekki1',v:'light_on',w:1},
+  {id:'vi',v:'light_on',w:1},{id:'vi',v:'light_on',w:1},
+  {id:'ikoyi',v:'light_on',w:1},{id:'ikoyi',v:'light_on',w:1},
+  {id:'banana',v:'light_on',w:1},{id:'banana',v:'light_on',w:1},
+  {id:'vgc',v:'light_on',w:1},{id:'vgc',v:'light_on',w:1},
+  {id:'osapa',v:'light_on',w:1},{id:'osapa',v:'light_on',w:1},
+  {id:'chevron',v:'light_on',w:1},{id:'chevron',v:'light_on',w:1},
+  {id:'ikeja',v:'light_on',w:1},{id:'ikeja',v:'light_on',w:1},
+  {id:'ikejaGRA',v:'light_on',w:1},{id:'ikejaGRA',v:'light_on',w:1},
+  {id:'parkview',v:'light_on',w:1},{id:'parkview',v:'light_on',w:1},
+  {id:'festac',v:'light_on',w:1},{id:'festac',v:'light_on',w:.4},
+  {id:'nicon',v:'light_on',w:1},{id:'nicon',v:'light_on',w:1},
+  {id:'chevyview',v:'light_on',w:1},{id:'chevyview',v:'light_on',w:1},
+  {id:'vi_1004',v:'light_on',w:1},{id:'vi_1004',v:'light_on',w:1},
+  {id:'omole1',v:'light_on',w:1},{id:'omole1',v:'light_on',w:1},
+  {id:'magodo1',v:'light_on',w:1},{id:'magodo1',v:'light_on',w:1},
+  {id:'maryland',v:'light_on',w:1},{id:'maryland',v:'light_on',w:1},
+  {id:'gbagada',v:'light_on',w:.4},{id:'gbagada',v:'light_on',w:.4},
+  {id:'surulere',v:'light_off',w:1},{id:'surulere',v:'light_off',w:1},
+  {id:'yaba',v:'light_off',w:1},{id:'yaba',v:'light_off',w:1},
+  {id:'agege',v:'light_off',w:1},{id:'agege',v:'light_off',w:1},
+  {id:'mushin',v:'light_off',w:1},{id:'mushin',v:'light_off',w:1},
+  {id:'oshodi',v:'light_off',w:1},{id:'oshodi',v:'light_off',w:1},
+  {id:'isolo',v:'light_off',w:1},{id:'isolo',v:'light_off',w:1},
+  {id:'mile12',v:'light_off',w:1},{id:'mile12',v:'light_off',w:.4},
+  {id:'ajah',v:'light_on',w:.4},{id:'awoyaya',v:'light_on',w:.4},
+  {id:'amuwo',v:'light_on',w:.4},{id:'ikotun',v:'light_off',w:.4},
 ];
 seeds.forEach((s,i)=>setTimeout(()=>processVote(s.id,s.v,s.w,true),i*35));
 setTimeout(()=>{buildSidebar();updateStats()},seeds.length*35+200);
